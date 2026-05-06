@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Click Derecho | Marketing para Estudios Jurídicos</title>
-  <meta name="description" content="Duplicamos tus clientes en 90 días. Sin publicidad paga."/>
+  <meta name="description" content="Duplicá tus clientes en 90 días. Sin publicidad paga."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -30,12 +30,12 @@
       overflow-x: hidden;
     }
 
-    /* ── NAV ── */
+    /* NAV */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 1.25rem 5%;
-      background: rgba(245,242,236,0.88);
+      background: rgba(245,242,236,0.92);
       backdrop-filter: blur(10px);
       border-bottom: 1px solid var(--line);
     }
@@ -50,16 +50,15 @@
       font-size: .8rem; font-weight: 500; letter-spacing: .1em;
       text-transform: uppercase; color: var(--gold);
       text-decoration: none; border-bottom: 1px solid var(--gold);
-      padding-bottom: 2px;
-      transition: opacity .2s;
+      padding-bottom: 2px; transition: opacity .2s;
     }
     nav a.cta-nav:hover { opacity: .65; }
 
-    /* ── HERO ── */
+    /* HERO */
     .hero {
       min-height: 100vh;
       display: grid; place-items: center;
-      padding: 8rem 5% 5rem;
+      padding: 8rem 5% 4rem;
       position: relative; overflow: hidden;
     }
     .hero::before {
@@ -104,18 +103,15 @@
       transition: background .25s, transform .2s;
     }
     .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
-    .btn-primary svg { width: 18px; height: 18px; flex-shrink: 0; }
-
     .disclaimer {
       margin-top: 1.2rem;
       font-size: .75rem; color: var(--muted); letter-spacing: .04em;
     }
 
-    /* ── VIDEO ── */
+    /* VIDEO */
     .video-wrap {
       max-width: 780px; margin: 0 auto;
-      padding: 0 5% 6rem;
-      opacity: 0; animation: fadeUp .9s .35s ease forwards;
+      padding: 0 5% 5rem;
     }
     .video-frame {
       position: relative; padding-bottom: 56.25%;
@@ -127,17 +123,15 @@
       position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
     }
 
-    /* ── DIVIDER ── */
+    /* DIVIDER */
     .divider {
       width: 48px; height: 1px;
       background: var(--gold); margin: 0 auto 1rem;
     }
 
-    /* ── SECTION BASE ── */
-    section { padding: 6rem 5%; }
-    .section-label {
-      text-align: center; margin-bottom: 3.5rem;
-    }
+    /* SECTION BASE */
+    section { padding: 5rem 5%; }
+    .section-label { text-align: center; margin-bottom: 3rem; }
     .section-label .eyebrow { margin-bottom: 1rem; }
     .section-label h2 {
       font-family: 'Cormorant Garamond', serif;
@@ -145,11 +139,10 @@
       font-weight: 700; line-height: 1.15;
     }
 
-    /* ── CASES ── */
+    /* CASOS */
     .cases { background: var(--ink); color: var(--paper); }
     .cases .eyebrow { color: var(--gold-lt); border-color: rgba(212,180,74,.25); }
     .cases h2 { color: var(--paper); }
-
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -174,15 +167,19 @@
     .card h3 {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.6rem; font-weight: 700;
-      margin-bottom: 1rem; line-height: 1.2;
+      margin-bottom: .75rem; line-height: 1.2;
     }
-    .card p {
-      font-size: .9rem; line-height: 1.7;
-      color: rgba(245,242,236,.65);
+    .card p { font-size: .9rem; line-height: 1.7; color: rgba(245,242,236,.65); }
+    .card blockquote {
+      margin-top: 1.25rem; padding: 1rem 1.25rem;
+      border-left: 2px solid var(--gold);
+      font-style: italic; font-size: .88rem;
+      color: rgba(245,242,236,.55); line-height: 1.6;
     }
     .stat-row {
       display: flex; gap: 1.5rem; margin-top: 1.5rem;
       padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.08);
+      flex-wrap: wrap;
     }
     .stat { text-align: center; }
     .stat strong {
@@ -192,11 +189,44 @@
     }
     .stat span { font-size: .7rem; color: rgba(245,242,236,.5); letter-spacing: .05em; }
 
-    /* ── HOW ── */
-    .how { background: var(--paper); }
+    /* PARA QUIÉN */
+    .for-who { background: var(--paper); }
+    .for-who-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem; max-width: 860px; margin: 0 auto;
+    }
+    .for-who-box {
+      padding: 2rem; border-radius: 4px;
+      border: 1px solid var(--line);
+    }
+    .for-who-box.yes { border-color: rgba(184,151,42,.4); }
+    .for-who-box.no { border-color: rgba(180,80,80,.25); }
+    .for-who-box h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .for-who-box.yes h4 { color: var(--gold); }
+    .for-who-box.no h4 { color: #b45050; }
+    .for-who-box ul { list-style: none; }
+    .for-who-box ul li {
+      font-size: .88rem; color: var(--muted);
+      line-height: 1.6; padding: .3rem 0;
+      padding-left: 1.2rem; position: relative;
+    }
+    .for-who-box ul li::before {
+      content: ''; position: absolute; left: 0; top: .65rem;
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .for-who-box.yes ul li::before { background: var(--gold); }
+    .for-who-box.no ul li::before { background: #b45050; }
+
+    /* HOW */
+    .how { background: #f0ece3; }
     .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 2rem; max-width: 900px; margin: 0 auto;
     }
     .step { text-align: center; padding: 1.5rem; }
@@ -207,26 +237,56 @@
     }
     .step h4 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem; font-weight: 600;
-      margin-bottom: .5rem;
+      font-size: 1.2rem; font-weight: 600; margin-bottom: .5rem;
     }
     .step p { font-size: .875rem; color: var(--muted); line-height: 1.6; }
 
-    /* ── CTA FINAL ── */
+    /* GARANTÍA */
+    .guarantee {
+      background: var(--ink); color: var(--paper);
+      text-align: center; padding: 4rem 5%;
+    }
+    .guarantee-box {
+      max-width: 640px; margin: 0 auto;
+      border: 1px solid rgba(184,151,42,.3);
+      border-radius: 4px; padding: 3rem;
+    }
+    .guarantee-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .guarantee h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; font-weight: 700;
+      color: var(--gold-lt); margin-bottom: 1rem;
+    }
+    .guarantee p { font-size: .95rem; line-height: 1.7; color: rgba(245,242,236,.65); }
+
+    /* URGENCIA */
+    .urgency {
+      background: var(--paper);
+      text-align: center; padding: 3rem 5%;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .urgency p {
+      font-size: .9rem; color: var(--muted);
+      letter-spacing: .04em;
+    }
+    .urgency strong { color: var(--ink); }
+
+    /* CTA FINAL */
     .cta-section {
       background: var(--ink); color: var(--paper);
-      text-align: center; padding: 7rem 5%;
+      text-align: center; padding: 6rem 5%;
     }
     .cta-section h2 {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700; line-height: 1.1;
-      margin-bottom: 1.2rem;
+      font-weight: 700; line-height: 1.1; margin-bottom: 1.2rem;
     }
     .cta-section h2 em { font-style: italic; color: var(--gold-lt); }
     .cta-section p {
       color: rgba(245,242,236,.6); margin-bottom: 2.5rem;
-      font-size: 1rem; max-width: 480px; margin-left: auto; margin-right: auto;
+      font-size: 1rem; max-width: 480px;
+      margin-left: auto; margin-right: auto;
     }
     .btn-gold {
       display: inline-flex; align-items: center; gap: .6rem;
@@ -238,13 +298,10 @@
       transition: background .25s, transform .2s;
     }
     .btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); }
-    .btn-gold svg { width: 18px; height: 18px; }
 
-    /* ── CALENDLY ── */
+    /* CALENDLY */
     .calendly-section {
-      background: var(--paper);
-      padding: 6rem 5%;
-      text-align: center;
+      background: var(--paper); padding: 5rem 5%; text-align: center;
     }
     .calendly-section .section-label { margin-bottom: 2.5rem; }
     .calendly-embed {
@@ -254,21 +311,19 @@
       border: 1px solid var(--line);
     }
 
-    /* ── FOOTER ── */
+    /* FOOTER */
     footer {
       padding: 2rem 5%; text-align: center;
       border-top: 1px solid var(--line);
       font-size: .75rem; color: var(--muted); letter-spacing: .04em;
     }
 
-    /* ── ANIMATIONS ── */
     @keyframes fadeUp {
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
-      .stat-row { flex-wrap: wrap; justify-content: center; }
+      .for-who-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -286,9 +341,7 @@
       <span class="eyebrow">Marketing para estudios jurídicos</span>
       <h1>Duplicá tus clientes<br><em>en 90 días.</em></h1>
       <p class="sub">Digitalizamos y automatizamos la captación de clientes de tu estudio — para que dejes de depender del boca a boca y empieces a crecer de forma predecible.</p>
-      <a class="btn-primary" href="#agendar">
-        Agendá tu llamada ahora
-      </a>
+      <a class="btn-primary" href="#agendar">Agendá tu llamada ahora</a>
       <p class="disclaimer">Reunión gratuita de 30 minutos · Sin compromiso</p>
     </div>
   </section>
@@ -312,7 +365,8 @@
       <div class="card">
         <div class="card-tag">Texas, EE.UU.</div>
         <h3>The Lange Firm</h3>
-        <p>Estudio jurídico donde triplicamos los clientes nuevos por mes en menos de 6 meses, sin invertir un peso en publicidad.</p>
+        <p>Triplicamos los clientes nuevos por mes en menos de 6 meses, sin invertir un peso en publicidad.</p>
+        <blockquote>"Antes dependíamos del boca a boca. Hoy tenemos un flujo constante de consultas sin hacer nada extra."</blockquote>
         <div class="stat-row">
           <div class="stat"><strong>3×</strong><span>Clientes nuevos/mes</span></div>
           <div class="stat"><strong>9K+</strong><span>Visitas orgánicas/mes</span></div>
@@ -324,12 +378,41 @@
         <div class="card-tag">México</div>
         <h3>Moriarty Abogados</h3>
         <p>Estudio especializado en accidentes de tránsito. Diversificamos sus puntos de contacto y los posicionamos orgánicamente.</p>
+        <blockquote>"En 3 meses pasamos de no tener presencia online a cerrar clientes nuevos todos los meses de forma predecible."</blockquote>
         <div class="stat-row">
           <div class="stat"><strong>+3</strong><span>Clientes nuevos/mes</span></div>
           <div class="stat"><strong>0$</strong><span>Invertido en publicidad</span></div>
         </div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- PARA QUIÉN -->
+  <section class="for-who">
+    <div class="section-label">
+      <span class="eyebrow">¿Es para vos?</span>
+      <div class="divider"></div>
+      <h2>Esto es para tu estudio si...</h2>
+    </div>
+    <div class="for-who-grid">
+      <div class="for-who-box yes">
+        <h4>✓ Sí es para vos</h4>
+        <ul>
+          <li>Tenés un estudio activo pero crecés solo por recomendaciones</li>
+          <li>Querés más clientes sin depender de publicidad paga</li>
+          <li>No tenés tiempo para ocuparte del marketing vos mismo</li>
+          <li>Querés planificar a largo plazo con ingresos predecibles</li>
+        </ul>
+      </div>
+      <div class="for-who-box no">
+        <h4>✗ No es para vos si...</h4>
+        <ul>
+          <li>Recién estás empezando y no tenés clientes todavía</li>
+          <li>Buscás resultados instantáneos de un día para el otro</li>
+          <li>No estás dispuesto a dedicar 1 hora al mes al proceso</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -349,7 +432,7 @@
       <div class="step">
         <div class="step-num">02</div>
         <h4>Digitalización</h4>
-        <p>Optimizamos tu presencia web, Google Business y redes para atraer clientes de forma orgánica.</p>
+        <p>Optimizamos tu presencia web, Google Business y redes para atraer clientes orgánicamente.</p>
       </div>
       <div class="step">
         <div class="step-num">03</div>
@@ -364,13 +447,25 @@
     </div>
   </section>
 
+  <!-- GARANTÍA -->
+  <section class="guarantee">
+    <div class="guarantee-box">
+      <div class="guarantee-icon">🛡️</div>
+      <h3>Garantía de resultados</h3>
+      <p>Si en 90 días no ves un crecimiento real en la captación de clientes de tu estudio, te devolvemos el dinero. Sin preguntas. Así de seguros estamos de nuestro proceso.</p>
+    </div>
+  </section>
+
+  <!-- URGENCIA -->
+  <section class="urgency">
+    <p>⏳ <strong>Tomamos máximo 3 estudios nuevos por mes.</strong> Si estás leyendo esto, todavía hay lugares disponibles — pero se llenan rápido.</p>
+  </section>
+
   <!-- CTA FINAL -->
   <section class="cta-section" id="contacto">
     <h2>Tu estudio jurídico,<br><em>lleno de clientes</em><br>en 90 días.</h2>
     <p>Hablemos 30 minutos y te mostramos exactamente cómo lo haríamos con tu estudio.</p>
-    <a class="btn-gold" href="#agendar">
-      Agendá tu llamada ahora
-    </a>
+    <a class="btn-gold" href="#agendar">Agendá tu llamada ahora</a>
   </section>
 
   <!-- CALENDLY -->
