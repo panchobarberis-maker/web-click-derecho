@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Click Derecho | Marketing para Estudios Jurídicos</title>
+  <meta name="description" content="Duplicamos tus clientes en 90 días. Sin publicidad paga."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:     #0f0e0c;
+      --paper:   #f5f2ec;
+      --gold:    #b8972a;
+      --gold-lt: #d4b44a;
+      --muted:   #6b6455;
+      --line:    rgba(184,151,42,0.25);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 5%;
+      background: rgba(245,242,236,0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; font-weight: 700;
+      letter-spacing: .04em; color: var(--ink);
+      text-decoration: none;
+    }
+    .logo span { color: var(--gold); }
+    nav a.cta-nav {
+      font-size: .8rem; font-weight: 500; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--gold);
+      text-decoration: none; border-bottom: 1px solid var(--gold);
+      padding-bottom: 2px;
+      transition: opacity .2s;
+    }
+    nav a.cta-nav:hover { opacity: .65; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid; place-items: center;
+      padding: 8rem 5% 5rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(184,151,42,.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,151,42,.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 820px; text-align: center;
+      opacity: 0; transform: translateY(28px);
+      animation: fadeUp .9s .1s ease forwards;
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: .7rem; font-weight: 500; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--gold);
+      border: 1px solid var(--line); border-radius: 2px;
+      padding: .35rem .9rem; margin-bottom: 2rem;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.8rem, 7vw, 5.2rem);
+      line-height: 1.08; font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+    h1 em { font-style: italic; color: var(--gold); }
+    .sub {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--muted); line-height: 1.7;
+      max-width: 580px; margin: 0 auto 2.5rem;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--ink); color: var(--paper);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem; font-weight: 500; letter-spacing: .08em;
+      text-transform: uppercase; text-decoration: none;
+      padding: 1rem 2.2rem; border-radius: 2px;
+      transition: background .25s, transform .2s;
+    }
+    .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
+    .btn-primary svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .disclaimer {
+      margin-top: 1.2rem;
+      font-size: .75rem; color: var(--muted); letter-spacing: .04em;
+    }
+
+    /* ── VIDEO ── */
+    .video-wrap {
+      max-width: 780px; margin: 0 auto;
+      padding: 0 5% 6rem;
+      opacity: 0; animation: fadeUp .9s .35s ease forwards;
+    }
+    .video-frame {
+      position: relative; padding-bottom: 56.25%;
+      border-radius: 4px; overflow: hidden;
+      box-shadow: 0 24px 64px rgba(15,14,12,.18);
+      border: 1px solid var(--line);
+    }
+    .video-frame iframe {
+      position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 48px; height: 1px;
+      background: var(--gold); margin: 0 auto 1rem;
+    }
+
+    /* ── SECTION BASE ── */
+    section { padding: 6rem 5%; }
+    .section-label {
+      text-align: center; margin-bottom: 3.5rem;
+    }
+    .section-label .eyebrow { margin-bottom: 1rem; }
+    .section-label h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700; line-height: 1.15;
+    }
+
+    /* ── CASES ── */
+    .cases { background: var(--ink); color: var(--paper); }
+    .cases .eyebrow { color: var(--gold-lt); border-color: rgba(212,180,74,.25); }
+    .cases h2 { color: var(--paper); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem; max-width: 960px; margin: 0 auto;
+    }
+    .card {
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 4px; padding: 2.5rem;
+      position: relative; overflow: hidden;
+      transition: transform .3s, border-color .3s;
+    }
+    .card:hover { transform: translateY(-4px); border-color: rgba(184,151,42,.4); }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--gold), transparent);
+    }
+    .card-tag {
+      font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+      color: var(--gold-lt); margin-bottom: 1rem;
+    }
+    .card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem; font-weight: 700;
+      margin-bottom: 1rem; line-height: 1.2;
+    }
+    .card p {
+      font-size: .9rem; line-height: 1.7;
+      color: rgba(245,242,236,.65);
+    }
+    .stat-row {
+      display: flex; gap: 1.5rem; margin-top: 1.5rem;
+      padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .stat { text-align: center; }
+    .stat strong {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem; color: var(--gold-lt); font-weight: 700;
+    }
+    .stat span { font-size: .7rem; color: rgba(245,242,236,.5); letter-spacing: .05em; }
+
+    /* ── HOW ── */
+    .how { background: var(--paper); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem; max-width: 900px; margin: 0 auto;
+    }
+    .step { text-align: center; padding: 1.5rem; }
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem; font-weight: 700; color: var(--line);
+      line-height: 1; margin-bottom: .5rem;
+    }
+    .step h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem; font-weight: 600;
+      margin-bottom: .5rem;
+    }
+    .step p { font-size: .875rem; color: var(--muted); line-height: 1.6; }
+
+    /* ── CTA FINAL ── */
+    .cta-section {
+      background: var(--ink); color: var(--paper);
+      text-align: center; padding: 7rem 5%;
+    }
+    .cta-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700; line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+    .cta-section h2 em { font-style: italic; color: var(--gold-lt); }
+    .cta-section p {
+      color: rgba(245,242,236,.6); margin-bottom: 2.5rem;
+      font-size: 1rem; max-width: 480px; margin-left: auto; margin-right: auto;
+    }
+    .btn-gold {
+      display: inline-flex; align-items: center; gap: .6rem;
+      background: var(--gold); color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .85rem; font-weight: 500; letter-spacing: .08em;
+      text-transform: uppercase; text-decoration: none;
+      padding: 1rem 2.4rem; border-radius: 2px;
+      transition: background .25s, transform .2s;
+    }
+    .btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .btn-gold svg { width: 18px; height: 18px; }
+
+    /* ── CALENDLY ── */
+    .calendly-section {
+      background: var(--paper);
+      padding: 6rem 5%;
+      text-align: center;
+    }
+    .calendly-section .section-label { margin-bottom: 2.5rem; }
+    .calendly-embed {
+      max-width: 900px; margin: 0 auto;
+      border-radius: 4px; overflow: hidden;
+      box-shadow: 0 12px 48px rgba(15,14,12,.1);
+      border: 1px solid var(--line);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem 5%; text-align: center;
+      border-top: 1px solid var(--line);
+      font-size: .75rem; color: var(--muted); letter-spacing: .04em;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .stat-row { flex-wrap: wrap; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a class="logo" href="#">Click <span>Derecho</span></a>
+    <a class="cta-nav" href="#agendar">Agendá tu llamada</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow">Marketing para estudios jurídicos</span>
+      <h1>Más clientes.<br><em>En 90 días.</em><br>Sin publicidad paga.</h1>
+      <p class="sub">Digitalizamos y automatizamos la captación de clientes de tu estudio — para que dejes de depender del boca a boca y empieces a crecer de forma predecible.</p>
+      <a class="btn-primary" href="#agendar">
+        Agendá tu llamada ahora
+      </a>
+      <p class="disclaimer">Reunión gratuita de 30 minutos · Sin compromiso</p>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <div class="video-wrap">
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/5cYkhIFOzwU" allowfullscreen loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- CASOS -->
+  <section class="cases" id="casos">
+    <div class="section-label">
+      <span class="eyebrow">Resultados reales</span>
+      <div class="divider"></div>
+      <h2>Estudios que ya<br>crecen con nosotros</h2>
+    </div>
+    <div class="cards">
+
+      <div class="card">
+        <div class="card-tag">Texas, EE.UU.</div>
+        <h3>The Lange Firm</h3>
+        <p>Estudio jurídico donde triplicamos los clientes nuevos por mes en menos de 6 meses, sin invertir un peso en publicidad.</p>
+        <div class="stat-row">
+          <div class="stat"><strong>3×</strong><span>Clientes nuevos/mes</span></div>
+          <div class="stat"><strong>9K+</strong><span>Visitas orgánicas/mes</span></div>
+          <div class="stat"><strong>116</strong><span>Reseñas 5 estrellas</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-tag">México</div>
+        <h3>Moriarty Abogados</h3>
+        <p>Estudio especializado en accidentes de tránsito. Diversificamos sus puntos de contacto y los posicionamos orgánicamente.</p>
+        <div class="stat-row">
+          <div class="stat"><strong>+3</strong><span>Clientes nuevos/mes</span></div>
+          <div class="stat"><strong>0$</strong><span>Invertido en publicidad</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section class="how">
+    <div class="section-label">
+      <span class="eyebrow">El proceso</span>
+      <div class="divider"></div>
+      <h2>Cómo lo hacemos</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h4>Diagnóstico</h4>
+        <p>Analizamos tu estudio, tu competencia y las oportunidades de crecimiento online.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h4>Digitalización</h4>
+        <p>Optimizamos tu presencia web, Google Business y redes para atraer clientes de forma orgánica.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h4>Automatización</h4>
+        <p>Implementamos sistemas que generan consultas de forma constante y predecible.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h4>Resultados en 90 días</h4>
+        <p>Te acompañamos durante 3 meses hasta que el crecimiento sea visible y sostenible.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-section" id="contacto">
+    <h2>Tu estudio jurídico,<br><em>lleno de clientes</em><br>en 90 días.</h2>
+    <p>Hablemos 30 minutos y te mostramos exactamente cómo lo haríamos con tu estudio.</p>
+    <a class="btn-gold" href="#agendar">
+      Agendá tu llamada ahora
+    </a>
+  </section>
+
+  <!-- CALENDLY -->
+  <section class="calendly-section" id="agendar">
+    <div class="section-label">
+      <span class="eyebrow">Reservá tu lugar</span>
+      <div class="divider"></div>
+      <h2>Agendá tu llamada gratuita</h2>
+      <p style="color:var(--muted);margin-top:.75rem;font-size:.95rem;">30 minutos · Sin compromiso · Te mostramos exactamente cómo lo haríamos con tu estudio</p>
+    </div>
+    <div class="calendly-embed">
+      <iframe
+        src="https://calendly.com/franciscobarberiss/30min?embed_domain=clickderecho.vercel.app&embed_type=Inline&hide_landing_page_details=1&hide_gdpr_banner=1"
+        width="100%"
+        height="700"
+        frameborder="0"
+        scrolling="no"
+        style="display:block;"
+      ></iframe>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 Click Derecho · Marketing para estudios jurídicos</p>
+  </footer>
+
+</body>
+</html>
