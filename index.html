@@ -28,6 +28,7 @@
       background: var(--paper);
       color: var(--ink);
       overflow-x: hidden;
+      font-size: 18px;
     }
 
     /* NAV */
@@ -41,77 +42,91 @@
     }
     .logo {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.4rem; font-weight: 700;
+      font-size: 1.5rem; font-weight: 700;
       letter-spacing: .04em; color: var(--ink);
       text-decoration: none;
     }
     .logo span { color: var(--gold); }
     nav a.cta-nav {
-      font-size: .8rem; font-weight: 500; letter-spacing: .1em;
+      font-size: .85rem; font-weight: 500; letter-spacing: .1em;
       text-transform: uppercase; color: var(--gold);
       text-decoration: none; border-bottom: 1px solid var(--gold);
       padding-bottom: 2px; transition: opacity .2s;
     }
     nav a.cta-nav:hover { opacity: .65; }
 
+    /* URGENCY BANNER */
+    .urgency-banner {
+      background: var(--ink);
+      color: var(--paper);
+      text-align: center;
+      padding: .65rem 5%;
+      font-size: .85rem;
+      letter-spacing: .03em;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 101;
+    }
+    .urgency-banner strong { color: var(--gold-lt); }
+    nav { top: 38px; }
+
     /* HERO */
     .hero {
       min-height: 100vh;
       display: grid; place-items: center;
-      padding: 8rem 5% 4rem;
+      padding: 10rem 5% 5rem;
       position: relative; overflow: hidden;
     }
     .hero::before {
       content: '';
       position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(184,151,42,.08) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,151,42,.05) 0%, transparent 70%);
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(184,151,42,.09) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 10% 80%, rgba(184,151,42,.06) 0%, transparent 70%);
       pointer-events: none;
     }
     .hero-inner {
-      max-width: 820px; text-align: center;
+      max-width: 860px; text-align: center;
       opacity: 0; transform: translateY(28px);
       animation: fadeUp .9s .1s ease forwards;
     }
     .eyebrow {
       display: inline-block;
-      font-size: .7rem; font-weight: 500; letter-spacing: .18em;
+      font-size: .75rem; font-weight: 500; letter-spacing: .18em;
       text-transform: uppercase; color: var(--gold);
       border: 1px solid var(--line); border-radius: 2px;
-      padding: .35rem .9rem; margin-bottom: 2rem;
+      padding: .38rem .95rem; margin-bottom: 2rem;
     }
     h1 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2.8rem, 7vw, 5.2rem);
-      line-height: 1.08; font-weight: 700;
+      font-size: clamp(3.2rem, 8vw, 6rem);
+      line-height: 1.05; font-weight: 700;
       margin-bottom: 1.5rem;
     }
     h1 em { font-style: italic; color: var(--gold); }
     .sub {
-      font-size: clamp(1rem, 2vw, 1.15rem);
+      font-size: clamp(1.1rem, 2vw, 1.3rem);
       color: var(--muted); line-height: 1.7;
-      max-width: 580px; margin: 0 auto 2.5rem;
+      max-width: 600px; margin: 0 auto 2.5rem;
     }
     .btn-primary {
       display: inline-flex; align-items: center; gap: .6rem;
       background: var(--ink); color: var(--paper);
       font-family: 'DM Sans', sans-serif;
-      font-size: .85rem; font-weight: 500; letter-spacing: .08em;
+      font-size: 1rem; font-weight: 500; letter-spacing: .08em;
       text-transform: uppercase; text-decoration: none;
-      padding: 1rem 2.2rem; border-radius: 2px;
+      padding: 1.1rem 2.5rem; border-radius: 2px;
       transition: background .25s, transform .2s;
     }
     .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
     .disclaimer {
       margin-top: 1.2rem;
-      font-size: .75rem; color: var(--muted); letter-spacing: .04em;
+      font-size: .82rem; color: var(--muted); letter-spacing: .04em;
     }
 
     /* VIDEO */
     .video-wrap {
-      max-width: 780px; margin: 0 auto;
-      padding: 0 5% 5rem;
+      max-width: 820px; margin: 0 auto;
+      padding: 0 5% 3rem;
+      opacity: 0; animation: fadeUp .9s .35s ease forwards;
     }
     .video-frame {
       position: relative; padding-bottom: 56.25%;
@@ -123,6 +138,34 @@
       position: absolute; inset: 0; width: 100%; height: 100%; border: 0;
     }
 
+    /* VIDEO DESCRIPTION */
+    .video-desc {
+      max-width: 820px; margin: 0 auto;
+      padding: 0 5% 5rem;
+    }
+    .video-desc h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 700;
+      margin-bottom: 1.4rem; color: var(--ink);
+    }
+    .video-bullets {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .9rem;
+    }
+    .video-bullet {
+      display: flex; align-items: flex-start; gap: .85rem;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 4px; padding: 1rem 1.2rem;
+    }
+    .video-bullet .check {
+      color: var(--gold); font-size: 1rem; flex-shrink: 0; margin-top: .1rem;
+    }
+    .video-bullet p {
+      font-size: 1rem; color: var(--ink); line-height: 1.55;
+    }
+
     /* DIVIDER */
     .divider {
       width: 48px; height: 1px;
@@ -130,23 +173,23 @@
     }
 
     /* SECTION BASE */
-    section { padding: 5rem 5%; }
-    .section-label { text-align: center; margin-bottom: 3rem; }
+    section { padding: 6rem 5%; }
+    .section-label { text-align: center; margin-bottom: 3.5rem; }
     .section-label .eyebrow { margin-bottom: 1rem; }
     .section-label h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 4vw, 3rem);
+      font-size: clamp(2.2rem, 4vw, 3.2rem);
       font-weight: 700; line-height: 1.15;
     }
 
-    /* CASOS */
+    /* CASES */
     .cases { background: var(--ink); color: var(--paper); }
     .cases .eyebrow { color: var(--gold-lt); border-color: rgba(212,180,74,.25); }
     .cases h2 { color: var(--paper); }
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem; max-width: 960px; margin: 0 auto;
+      gap: 1.5rem; max-width: 980px; margin: 0 auto;
     }
     .card {
       border: 1px solid rgba(255,255,255,.1);
@@ -161,20 +204,23 @@
       background: linear-gradient(90deg, var(--gold), transparent);
     }
     .card-tag {
-      font-size: .65rem; letter-spacing: .15em; text-transform: uppercase;
+      font-size: .75rem; letter-spacing: .15em; text-transform: uppercase;
       color: var(--gold-lt); margin-bottom: 1rem;
     }
     .card h3 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.6rem; font-weight: 700;
-      margin-bottom: .75rem; line-height: 1.2;
+      font-size: 1.9rem; font-weight: 700;
+      margin-bottom: 1rem; line-height: 1.2;
     }
-    .card p { font-size: .9rem; line-height: 1.7; color: rgba(245,242,236,.65); }
+    .card p {
+      font-size: 1rem; line-height: 1.7;
+      color: rgba(245,242,236,.7);
+    }
     .card blockquote {
-      margin-top: 1.25rem; padding: 1rem 1.25rem;
+      margin-top: 1.2rem; padding: 1rem 1.25rem;
       border-left: 2px solid var(--gold);
-      font-style: italic; font-size: .88rem;
-      color: rgba(245,242,236,.55); line-height: 1.6;
+      font-style: italic; font-size: .95rem;
+      color: rgba(245,242,236,.55); line-height: 1.65;
     }
     .stat-row {
       display: flex; gap: 1.5rem; margin-top: 1.5rem;
@@ -185,38 +231,32 @@
     .stat strong {
       display: block;
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem; color: var(--gold-lt); font-weight: 700;
+      font-size: 2.2rem; color: var(--gold-lt); font-weight: 700;
     }
-    .stat span { font-size: .7rem; color: rgba(245,242,236,.5); letter-spacing: .05em; }
+    .stat span { font-size: .82rem; color: rgba(245,242,236,.55); letter-spacing: .05em; }
 
-    /* PARA QUIÉN */
+    /* FOR WHO */
     .for-who { background: var(--paper); }
     .for-who-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem; max-width: 860px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2rem; max-width: 880px; margin: 0 auto;
     }
-    .for-who-box {
-      padding: 2rem; border-radius: 4px;
-      border: 1px solid var(--line);
-    }
+    .for-who-box { padding: 2rem; border-radius: 4px; border: 1px solid var(--line); }
     .for-who-box.yes { border-color: rgba(184,151,42,.4); }
     .for-who-box.no { border-color: rgba(180,80,80,.25); }
     .for-who-box h4 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem; font-weight: 700;
-      margin-bottom: 1rem;
+      font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem;
     }
     .for-who-box.yes h4 { color: var(--gold); }
     .for-who-box.no h4 { color: #b45050; }
     .for-who-box ul { list-style: none; }
     .for-who-box ul li {
-      font-size: .88rem; color: var(--muted);
-      line-height: 1.6; padding: .3rem 0;
-      padding-left: 1.2rem; position: relative;
+      font-size: 1rem; color: var(--muted);
+      line-height: 1.65; padding: .35rem 0 .35rem 1.3rem; position: relative;
     }
     .for-who-box ul li::before {
-      content: ''; position: absolute; left: 0; top: .65rem;
+      content: ''; position: absolute; left: 0; top: .72rem;
       width: 6px; height: 6px; border-radius: 50%;
     }
     .for-who-box.yes ul li::before { background: var(--gold); }
@@ -226,8 +266,8 @@
     .how { background: #f0ece3; }
     .steps {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem; max-width: 900px; margin: 0 auto;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem; max-width: 920px; margin: 0 auto;
     }
     .step { text-align: center; padding: 1.5rem; }
     .step-num {
@@ -237,71 +277,93 @@
     }
     .step h4 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.2rem; font-weight: 600; margin-bottom: .5rem;
+      font-size: 1.35rem; font-weight: 600; margin-bottom: .5rem;
     }
-    .step p { font-size: .875rem; color: var(--muted); line-height: 1.6; }
+    .step p { font-size: 1rem; color: var(--muted); line-height: 1.65; }
 
-    /* GARANTÍA */
+    /* GUARANTEE */
     .guarantee {
       background: var(--ink); color: var(--paper);
       text-align: center; padding: 4rem 5%;
     }
     .guarantee-box {
-      max-width: 640px; margin: 0 auto;
+      max-width: 660px; margin: 0 auto;
       border: 1px solid rgba(184,151,42,.3);
       border-radius: 4px; padding: 3rem;
     }
     .guarantee-icon { font-size: 2.5rem; margin-bottom: 1rem; }
     .guarantee h3 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 1.8rem; font-weight: 700;
+      font-size: 2rem; font-weight: 700;
       color: var(--gold-lt); margin-bottom: 1rem;
     }
-    .guarantee p { font-size: .95rem; line-height: 1.7; color: rgba(245,242,236,.65); }
+    .guarantee p { font-size: 1.05rem; line-height: 1.75; color: rgba(245,242,236,.68); }
 
-    /* URGENCIA */
-    .urgency {
+    /* URGENCY SECTION */
+    .urgency-section {
       background: var(--paper);
-      text-align: center; padding: 3rem 5%;
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
+      padding: 2.5rem 5%;
     }
-    .urgency p {
-      font-size: .9rem; color: var(--muted);
-      letter-spacing: .04em;
+    .urgency-inner {
+      max-width: 860px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 2rem; flex-wrap: wrap;
     }
-    .urgency strong { color: var(--ink); }
+    .urgency-text { flex: 1; min-width: 280px; }
+    .urgency-text .tag {
+      font-size: .72rem; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--gold); display: block; margin-bottom: .6rem;
+    }
+    .urgency-text p { font-size: 1.1rem; color: var(--ink); line-height: 1.65; }
+    .urgency-text strong { color: var(--gold); }
+    .urgency-slots { display: flex; gap: .6rem; flex-shrink: 0; }
+    .slot {
+      width: 38px; height: 38px; border-radius: 4px;
+      border: 1.5px solid var(--line);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; letter-spacing: .06em; color: var(--muted);
+    }
+    .slot.taken {
+      background: var(--gold); border-color: var(--gold);
+      color: var(--paper); font-weight: 500;
+    }
 
     /* CTA FINAL */
     .cta-section {
       background: var(--ink); color: var(--paper);
-      text-align: center; padding: 6rem 5%;
+      text-align: center; padding: 7rem 5%;
     }
     .cta-section h2 {
       font-family: 'Cormorant Garamond', serif;
-      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-size: clamp(2.2rem, 5vw, 4rem);
       font-weight: 700; line-height: 1.1; margin-bottom: 1.2rem;
     }
     .cta-section h2 em { font-style: italic; color: var(--gold-lt); }
     .cta-section p {
-      color: rgba(245,242,236,.6); margin-bottom: 2.5rem;
-      font-size: 1rem; max-width: 480px;
+      color: rgba(245,242,236,.62); margin-bottom: 2.5rem;
+      font-size: 1.1rem; max-width: 500px;
       margin-left: auto; margin-right: auto;
     }
     .btn-gold {
       display: inline-flex; align-items: center; gap: .6rem;
       background: var(--gold); color: var(--ink);
       font-family: 'DM Sans', sans-serif;
-      font-size: .85rem; font-weight: 500; letter-spacing: .08em;
+      font-size: 1rem; font-weight: 500; letter-spacing: .08em;
       text-transform: uppercase; text-decoration: none;
-      padding: 1rem 2.4rem; border-radius: 2px;
+      padding: 1.1rem 2.6rem; border-radius: 2px;
       transition: background .25s, transform .2s;
     }
     .btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); }
+    .cta-note {
+      margin-top: 1.2rem; font-size: .85rem;
+      color: rgba(245,242,236,.38); letter-spacing: .04em;
+    }
 
     /* CALENDLY */
     .calendly-section {
-      background: var(--paper); padding: 5rem 5%; text-align: center;
+      background: var(--paper); padding: 6rem 5%; text-align: center;
     }
     .calendly-section .section-label { margin-bottom: 2.5rem; }
     .calendly-embed {
@@ -315,19 +377,25 @@
     footer {
       padding: 2rem 5%; text-align: center;
       border-top: 1px solid var(--line);
-      font-size: .75rem; color: var(--muted); letter-spacing: .04em;
+      font-size: .82rem; color: var(--muted); letter-spacing: .04em;
     }
 
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
+      .stat-row { flex-wrap: wrap; justify-content: center; }
       .for-who-grid { grid-template-columns: 1fr; }
+      .video-bullets { grid-template-columns: 1fr; }
+      .urgency-inner { flex-direction: column; }
     }
   </style>
 </head>
 <body>
+
+  <!-- URGENCY BANNER -->
+  <div class="urgency-banner">
+    ⏳ <strong>Quedan 2 lugares disponibles este mes.</strong> Tomamos máximo 3 estudios nuevos por mes.
+  </div>
 
   <!-- NAV -->
   <nav>
@@ -340,16 +408,41 @@
     <div class="hero-inner">
       <span class="eyebrow">Marketing para estudios jurídicos</span>
       <h1>Duplicá tus clientes<br><em>en 90 días.</em></h1>
-
-     <div style="position:relative;padding-bottom:56.25%;border-radius:4px;overflow:hidden;box-shadow:0 24px 64px rgba(15,14,12,.18);border:1px solid var(--line);margin-bottom:2.5rem;">
-        <iframe src="https://www.youtube.com/embed/5cYkhIFOzwU?autoplay=1&mute=1&loop=1&playlist=5cYkhIFOzwU" allowfullscreen allow="autoplay" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
-      </div>
-      
       <p class="sub">Digitalizamos y automatizamos la captación de clientes de tu estudio — para que dejes de depender del boca a boca y empieces a crecer de forma predecible.</p>
       <a class="btn-primary" href="#agendar">Agendá tu llamada ahora</a>
       <p class="disclaimer">Reunión gratuita de 30 minutos · Sin compromiso</p>
     </div>
   </section>
+
+  <!-- VIDEO -->
+  <div class="video-wrap">
+    <div class="video-frame">
+      <iframe src="https://www.youtube.com/embed/5cYkhIFOzwU?autoplay=1&mute=1&loop=1&playlist=5cYkhIFOzwU" allowfullscreen allow="autoplay" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <!-- VIDEO DESCRIPTION -->
+  <div class="video-desc">
+    <h3>Lo que vas a descubrir en este video:</h3>
+    <div class="video-bullets">
+      <div class="video-bullet">
+        <span class="check">✓</span>
+        <p>Por qué el boca a boca ya no es suficiente para crecer en el mercado legal de hoy</p>
+      </div>
+      <div class="video-bullet">
+        <span class="check">✓</span>
+        <p>El sistema que usamos para duplicar clientes en 90 días sin invertir en publicidad</p>
+      </div>
+      <div class="video-bullet">
+        <span class="check">✓</span>
+        <p>Casos reales de estudios en LATAM y EE.UU. que ya lo están aplicando</p>
+      </div>
+      <div class="video-bullet">
+        <span class="check">✓</span>
+        <p>Qué podés hacer esta semana para empezar a captar clientes de forma predecible</p>
+      </div>
+    </div>
+  </div>
 
   <!-- CASOS -->
   <section class="cases" id="casos">
@@ -359,7 +452,6 @@
       <h2>Estudios que ya<br>crecen con nosotros</h2>
     </div>
     <div class="cards">
-
       <div class="card">
         <div class="card-tag">Texas, EE.UU.</div>
         <h3>The Lange Firm</h3>
@@ -371,7 +463,6 @@
           <div class="stat"><strong>116</strong><span>Reseñas 5 estrellas</span></div>
         </div>
       </div>
-
       <div class="card">
         <div class="card-tag">México</div>
         <h3>Moriarty Abogados</h3>
@@ -382,7 +473,6 @@
           <div class="stat"><strong>0$</strong><span>Invertido en publicidad</span></div>
         </div>
       </div>
-
     </div>
   </section>
 
@@ -455,15 +545,26 @@
   </section>
 
   <!-- URGENCIA -->
-  <section class="urgency">
-    <p>⏳ <strong>Tomamos máximo 3 estudios nuevos por mes.</strong> Si estás leyendo esto, todavía hay lugares disponibles — pero se llenan rápido.</p>
-  </section>
+  <div class="urgency-section">
+    <div class="urgency-inner">
+      <div class="urgency-text">
+        <span class="tag">⏳ Lugares disponibles este mes</span>
+        <p>Tomamos <strong>máximo 3 estudios nuevos por mes</strong> para garantizar resultados. Quedan 2 lugares. Si estás leyendo esto, todavía podés entrar.</p>
+      </div>
+      <div class="urgency-slots">
+        <div class="slot taken">✓</div>
+        <div class="slot">2</div>
+        <div class="slot">3</div>
+      </div>
+    </div>
+  </div>
 
   <!-- CTA FINAL -->
   <section class="cta-section" id="contacto">
     <h2>Tu estudio jurídico,<br><em>lleno de clientes</em><br>en 90 días.</h2>
     <p>Hablemos 30 minutos y te mostramos exactamente cómo lo haríamos con tu estudio.</p>
     <a class="btn-gold" href="#agendar">Agendá tu llamada ahora</a>
+    <p class="cta-note">Reunión gratuita · Sin compromiso · Quedan 2 lugares este mes</p>
   </section>
 
   <!-- CALENDLY -->
@@ -472,7 +573,7 @@
       <span class="eyebrow">Reservá tu lugar</span>
       <div class="divider"></div>
       <h2>Agendá tu llamada gratuita</h2>
-      <p style="color:var(--muted);margin-top:.75rem;font-size:.95rem;">30 minutos · Sin compromiso · Te mostramos exactamente cómo lo haríamos con tu estudio</p>
+      <p style="color:var(--muted);margin-top:.75rem;font-size:1rem;">30 minutos · Sin compromiso · Te mostramos exactamente cómo lo haríamos con tu estudio</p>
     </div>
     <div class="calendly-embed">
       <div class="calendly-inline-widget" data-url="https://calendly.com/d/cvwj-jyp-smb" style="min-width:320px;height:700px;"></div>
