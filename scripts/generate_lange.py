@@ -117,7 +117,7 @@ def slide_cover(c, bg):
     <span class="pill">Employment Law · Houston, TX</span>
     <h1 class="title">{title}</h1>
     <p class="sub">{c['subtitle']}</p>
-    <div class="sep"><div class="sep-line"></div><span class="sep-text">Free Consultation Available</span><div class="sep-line"></div></div>
+    <div class="sep"><div class="sep-line"></div><span class="sep-text">Employment Law · Texas</span><div class="sep-line"></div></div>
     <div class="logo-wrap">{LOGO_HTML}</div>
   </div>
 </div></body></html>"""
@@ -196,7 +196,7 @@ def slide_cta(evan):
     <p class="name">Evan Lange</p>
     <p class="role">Employment Attorney · Houston, TX</p>
     <h2 class="cta-title">WE FIGHT<br>FOR <em>YOU.</em></h2>
-    <div class="btn">Free Consultation</div>
+    <div class="btn">Talk to Evan Now</div>
     <div class="sub">No fee unless we win</div>
     {LOGO_HTML}
   </div>

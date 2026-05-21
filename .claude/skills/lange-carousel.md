@@ -29,9 +29,11 @@ Use this skill when the user sends an employment law topic for The Lange Firm. E
 
 - English only
 - Short and punchy — no paragraph walls
-- Texas employment law context
+- Always Texas law context — never say "federal"
 - Tone: authoritative, protective, direct
-- Always end CTA with: "Free Consultation" / "No fee unless we win"
+- NEVER use the words "Free Consultation" anywhere
+- NEVER use the word "federal" — reference specific laws by name only
+- CTA button: "Talk to Evan Now" / tagline: "No fee unless we win"
 - Logo on every slide: THE LANGE FIRM
 
 ## Assets (fetched from GitHub on each run)
