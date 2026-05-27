@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Lange Firm - Static Post</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .post {
+      width: 600px;
+      height: 600px;
+      background-color: #0a1628;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+    }
+
+    /* Gold corner accent top left */
+    .post::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 6px;
+      height: 100%;
+      background: #c9a84c;
+    }
+
+    /* Subtle background texture */
+    .post::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; right: -80px;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.06) 0%, transparent 70%);
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .tag {
+      background: #c9a84c;
+      color: #0a1628;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 2px;
+    }
+
+    .logo {
+      text-align: right;
+    }
+
+    .logo-name {
+      font-family: 'Playfair Display', serif;
+      color: #ffffff;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .logo-sub {
+      color: #c9a84c;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .middle {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+      padding: 20px 0;
+    }
+
+    .block {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .label-line {
+      height: 1px;
+      width: 28px;
+      background: #c9a84c;
+    }
+
+    .label-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+
+    .myth .label-text { color: #8899bb; }
+    .reality .label-text { color: #c9a84c; }
+
+    .myth .label-line { background: #8899bb; }
+
+    .block-text {
+      font-size: 19px;
+      line-height: 1.5;
+      padding-left: 38px;
+    }
+
+    .myth .block-text {
+      color: #8899bb;
+      text-decoration: line-through;
+      text-decoration-color: #445577;
+    }
+
+    .reality .block-text {
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(201,168,76,0.2);
+      margin: 0 0 0 38px;
+    }
+
+    .bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .cta {
+      font-size: 13px;
+      color: #c9a84c;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .website {
+      font-size: 11px;
+      color: #445577;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="post">
+
+    <div class="top">
+      <div class="tag">Myth vs Reality</div>
+      <div class="logo">
+        <div class="logo-name">The Lange Firm</div>
+        <div class="logo-sub">Employment Law · Texas</div>
+      </div>
+    </div>
+
+    <div class="middle">
+      <div class="block myth">
+        <div class="label">
+          <div class="label-line"></div>
+          <div class="label-text">Myth</div>
+        </div>
+        <div class="block-text">"HR is there to protect me."</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="block reality">
+        <div class="label">
+          <div class="label-line"></div>
+          <div class="label-text">Reality</div>
+        </div>
+        <div class="block-text">HR is there to protect the company. If they failed you, you still have options.</div>
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="cta">Know your rights. Talk to The Lange Firm.</div>
+      <div class="website">langefirm.com</div>
+    </div>
+
+  </div>
+</body>
+</html>
