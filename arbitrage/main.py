@@ -101,6 +101,10 @@ def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dic
                 ml_price, commission, blue_rate, ship_usd, cfg["min_margin"] / 100,
             )
 
+            # Skip if even the best-case Amazon price exceeds the budget cap
+            if max_amz > cfg["max_amazon_usd"]:
+                continue
+
             # Catalog seller count (only if it's a catalog product)
             catalog_id = item.get("catalog_product_id")
             if catalog_id:
@@ -216,6 +220,8 @@ def main() -> None:
     parser.add_argument("--min-sold", type=int, default=int(os.getenv("MIN_SOLD_QUANTITY", "10")))
     parser.add_argument("--min-margin", type=float, default=float(os.getenv("MIN_MARGIN_PERCENT", "20")))
     parser.add_argument("--shipping-rate", type=float, default=float(os.getenv("SHIPPING_RATE_PER_KG", "40")))
+    parser.add_argument("--max-amazon-usd", type=float, default=float(os.getenv("MAX_AMAZON_PRICE_USD", "100")),
+                        help="Precio máximo de compra en Amazon (USD)")
     parser.add_argument("--search-limit", type=int, default=50)
     parser.add_argument("--blue-rate", type=float, help="Tipo de cambio manual (ARS/USD)")
     parser.add_argument("--catalog-only", action="store_true", default=False,
@@ -240,6 +246,7 @@ def main() -> None:
         "min_sold": args.min_sold,
         "min_margin": args.min_margin,
         "shipping_rate": args.shipping_rate,
+        "max_amazon_usd": args.max_amazon_usd,
         "search_limit": args.search_limit,
         "catalog_only": args.catalog_only,
     }
@@ -256,7 +263,8 @@ def main() -> None:
 
     logger.info(
         f"Configuración: min_sold={cfg['min_sold']} | min_margin={cfg['min_margin']}% | "
-        f"envío=${cfg['shipping_rate']}/kg | catalog_only={cfg['catalog_only']}\n"
+        f"max_amazon=${cfg['max_amazon_usd']} | envío=${cfg['shipping_rate']}/kg | "
+        f"catalog_only={cfg['catalog_only']}\n"
     )
 
     all_ops: list[dict] = []
