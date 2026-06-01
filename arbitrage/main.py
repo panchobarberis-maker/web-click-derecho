@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from .rates import get_blue_dollar_rate
+from .notify import send_whatsapp, build_message
 from .ml_products import (
     search_category,
     get_items_bulk,
@@ -144,6 +145,15 @@ def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dic
     return opportunities
 
 
+def _filter_profitable(ops: list[dict], min_margin: float) -> list[dict]:
+    """Keep only items with confirmed Amazon price AND margin ≥ min_margin."""
+    return [
+        op for op in ops
+        if isinstance(op.get("margen_neto_pct"), (int, float))
+        and op["margen_neto_pct"] >= min_margin
+    ]
+
+
 def _print_table(ops: list[dict], blue_rate: float, shipping_rate: float) -> None:
     sorted_ops = sorted(ops, key=lambda x: x["ventas"], reverse=True)
     has_amz = any(op["precio_amazon_usd"] != "" for op in ops)
@@ -260,11 +270,28 @@ def main() -> None:
         logger.info("No se encontraron productos. Probá reducir --min-sold.")
         return
 
-    _print_table(all_ops, blue_rate, cfg["shipping_rate"])
+    profitable = _filter_profitable(all_ops, cfg["min_margin"])
+    display_ops = profitable if profitable else all_ops
+
+    print(f"\n{'═'*60}")
+    if profitable:
+        print(f"  {len(profitable)} productos con ≥{cfg['min_margin']:.0f}% margen confirmado")
+    else:
+        print(f"  Mostrando todos ({len(all_ops)}) — sin precios Amazon cargados aún")
+    print(f"{'═'*60}")
+
+    _print_table(display_ops, blue_rate, cfg["shipping_rate"])
 
     ts = datetime.now().strftime("%Y%m%d_%H%M")
     _save_csv(all_ops, f"arbitrage_{ts}.csv")
-    logger.info(f"Total analizado: {len(all_ops)} productos")
+    logger.info(f"Total analizado: {len(all_ops)} | Rentables ≥{cfg['min_margin']:.0f}%: {len(profitable)}")
+
+    # WhatsApp notification
+    msg = build_message(all_ops, blue_rate, cfg["min_margin"])
+    if send_whatsapp(msg):
+        logger.info("✓ Notificación WhatsApp enviada")
+    elif os.getenv("WPP_PHONE"):
+        logger.warning("Error enviando WhatsApp — revisá WPP_PHONE y WPP_APIKEY en .env")
 
     if not os.getenv("AMAZON_ACCESS_KEY"):
         print(
