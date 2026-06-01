@@ -25,7 +25,7 @@ _COMMISSION: dict[str, float] = {
 
 def _headers() -> dict:
     token = os.getenv("ML_ACCESS_TOKEN", "")
-    return {"Authorization": f"Bearer {token}"}
+    return {"Authorization": f"Bearer {token}"} if token else {}
 
 
 def commission_for(category_id: str) -> float:
