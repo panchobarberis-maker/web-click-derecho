@@ -4,8 +4,7 @@ Amazon → MercadoLibre Arbitrage Finder
 Uso:
   python -m arbitrage                           # analiza categorías del .env
   python -m arbitrage --categories MLA1051,MLA1071
-  python -m arbitrage --min-sold 20 --min-margin 25
-  python -m arbitrage --blue-rate 1250          # tipo de cambio manual
+  python -m arbitrage --min-sold 20 --min-margin 30
   python -m arbitrage --catalog-only            # solo productos en catálogo ML
   python -m arbitrage --shipping-rate 40        # USD por kg (default: 40)
 """
@@ -22,7 +21,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from .rates import get_blue_dollar_rate
 from .notify import send_whatsapp, build_message
 from .ml_products import (
     search_category,
@@ -31,7 +29,6 @@ from .ml_products import (
     extract_weight_kg,
     get_catalog_seller_count,
     build_search_query,
-    commission_for,
 )
 from .amazon import search_amazon_price, amazon_search_url
 from .calculator import shipping_cost_usd, max_amazon_price_usd, net_margin_pct
@@ -59,10 +56,10 @@ KNOWN_CATEGORIES = {
     "MLA1574": "Bebés",
 }
 
-_DEFAULT_WEIGHT_KG = 0.5  # fallback when ML doesn't have weight data
+_DEFAULT_WEIGHT_KG = 0.5
 
 
-def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dict]:
+def _analyze_category(category_id: str, ml_to_usd: float, cfg: dict) -> list[dict]:
     cat_name = KNOWN_CATEGORIES.get(category_id, category_id)
     logger.info(f"▸ Analizando '{cat_name}' ({category_id})...")
 
@@ -84,28 +81,22 @@ def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dic
             if ml_price <= 0:
                 continue
 
-            cat = item.get("category_id", category_id)
-            commission = commission_for(cat)
             ean = extract_ean(item)
             query = build_search_query(item)
 
-            # Weight & shipping
             weight_kg = extract_weight_kg(item)
             weight_known = weight_kg is not None
             if not weight_known:
                 weight_kg = _DEFAULT_WEIGHT_KG
             ship_usd = shipping_cost_usd(weight_kg, cfg["shipping_rate"])
 
-            # Max Amazon price to reach target margin
             max_amz = max_amazon_price_usd(
-                ml_price, commission, blue_rate, ship_usd, cfg["min_margin"] / 100,
+                ml_price, ml_to_usd, ship_usd, cfg["min_margin"] / 100,
             )
 
-            # Skip if even the best-case Amazon price exceeds the budget cap
             if max_amz > cfg["max_amazon_usd"]:
                 continue
 
-            # Catalog seller count (only if it's a catalog product)
             catalog_id = item.get("catalog_product_id")
             if catalog_id:
                 sellers = get_catalog_seller_count(catalog_id)
@@ -113,25 +104,26 @@ def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dic
             else:
                 sellers = 0
 
-            # Optional: auto Amazon price via PA API
             amz_price = search_amazon_price(query, ean)
             margin = (
-                net_margin_pct(ml_price, amz_price, commission, blue_rate, ship_usd)
+                net_margin_pct(ml_price, amz_price, ml_to_usd, ship_usd)
                 if amz_price is not None
                 else None
             )
+
+            # Earnings in USD = what you pocket after selling on ML
+            earnings_usd = round(ml_price * ml_to_usd, 2)
 
             opportunities.append({
                 "categoria": cat_name,
                 "id_ml": item["id"],
                 "titulo": item.get("title", "")[:70],
                 "precio_ml_ars": round(ml_price),
+                "ganancias_usd": earnings_usd,
                 "ventas": item.get("sold_quantity", 0),
                 "vendedores_catalogo": sellers,
-                "comision_pct": round(commission * 100, 1),
                 "peso_kg": round(weight_kg, 3) if weight_known else f"~{_DEFAULT_WEIGHT_KG}",
                 "envio_usd": round(ship_usd, 2),
-                "tipo_cambio_blue": round(blue_rate),
                 "max_precio_amazon_usd": round(max_amz, 2),
                 "precio_amazon_usd": round(amz_price, 2) if amz_price else "",
                 "margen_neto_pct": round(margin, 1) if margin is not None else "",
@@ -150,7 +142,6 @@ def _analyze_category(category_id: str, blue_rate: float, cfg: dict) -> list[dic
 
 
 def _filter_profitable(ops: list[dict], min_margin: float) -> list[dict]:
-    """Keep only items with confirmed Amazon price AND margin ≥ min_margin."""
     return [
         op for op in ops
         if isinstance(op.get("margen_neto_pct"), (int, float))
@@ -158,18 +149,18 @@ def _filter_profitable(ops: list[dict], min_margin: float) -> list[dict]:
     ]
 
 
-def _print_table(ops: list[dict], blue_rate: float, shipping_rate: float) -> None:
+def _print_table(ops: list[dict], ml_to_usd: float, shipping_rate: float) -> None:
     sorted_ops = sorted(ops, key=lambda x: x["ventas"], reverse=True)
     has_amz = any(op["precio_amazon_usd"] != "" for op in ops)
 
     w = 130 if has_amz else 112
     print(f"\n{'─' * w}")
     header = (
-        f"{'Producto':<44} {'ARS':>11} {'Vtas':>6} {'Vend':>5} "
-        f"{'Peso':>6} {'Envío$':>7} {'Max Amz$':>9}"
+        f"{'Producto':<44} {'ARS':>11} {'Cobro$':>7} {'Vtas':>6} {'Vend':>5} "
+        f"{'Peso':>6} {'Envio$':>6} {'MaxAmz$':>8}"
     )
     if has_amz:
-        header += f"  {'Amz$':>8}  {'Margen':>7}"
+        header += f"  {'Amz$':>7}  {'Margen':>7}"
     print(header)
     print(f"{'─' * w}")
 
@@ -178,26 +169,23 @@ def _print_table(ops: list[dict], blue_rate: float, shipping_rate: float) -> Non
         line = (
             f"{op['titulo'][:44]:<44} "
             f"${op['precio_ml_ars']:>10,}  "
+            f"${op['ganancias_usd']:>5.2f}  "
             f"{op['ventas']:>5}  "
             f"{op['vendedores_catalogo']:>4}  "
             f"{peso_str:>6}  "
-            f"${op['envio_usd']:>5.2f}  "
-            f"${op['max_precio_amazon_usd']:>8,.2f}"
+            f"${op['envio_usd']:>4.2f}  "
+            f"${op['max_precio_amazon_usd']:>7,.2f}"
         )
         if has_amz:
-            amz = f"${op['precio_amazon_usd']:>7,.2f}" if op["precio_amazon_usd"] != "" else "  ver →"
+            amz = f"${op['precio_amazon_usd']:>6,.2f}" if op["precio_amazon_usd"] != "" else "  ver→"
             mgn = f"{op['margen_neto_pct']:>6.1f}%" if op["margen_neto_pct"] != "" else "      —"
             line += f"  {amz}  {mgn}"
         print(line)
 
     print(f"{'─' * w}")
-    print(
-        f"\nDólar blue: ${blue_rate:,.0f} ARS/USD  |  "
-        f"Envío: ${shipping_rate}/kg  |  "
-        f"Peso '~0.5kg' = estimado (ML no informó)"
-    )
+    print(f"Tasa ARS→USD: ×{ml_to_usd} | Envío: ${shipping_rate}/kg | Peso '~0.5kg' = estimado")
     if not has_amz:
-        print("Precio Amazon vacío → revisá la columna 'link_amazon' del CSV manualmente.")
+        print("Precio Amazon vacío → revisá 'link_amazon' en el CSV.")
 
 
 def _save_csv(ops: list[dict], path: str) -> None:
@@ -218,29 +206,17 @@ def main() -> None:
     )
     parser.add_argument("--categories", help="IDs ML separados por coma (ej: MLA1051,MLA1071)")
     parser.add_argument("--min-sold", type=int, default=int(os.getenv("MIN_SOLD_QUANTITY", "10")))
-    parser.add_argument("--min-margin", type=float, default=float(os.getenv("MIN_MARGIN_PERCENT", "20")))
+    parser.add_argument("--min-margin", type=float, default=float(os.getenv("MIN_MARGIN_PERCENT", "30")))
     parser.add_argument("--shipping-rate", type=float, default=float(os.getenv("SHIPPING_RATE_PER_KG", "40")))
-    parser.add_argument("--max-amazon-usd", type=float, default=float(os.getenv("MAX_AMAZON_PRICE_USD", "100")),
-                        help="Precio máximo de compra en Amazon (USD)")
+    parser.add_argument("--max-amazon-usd", type=float, default=float(os.getenv("MAX_AMAZON_PRICE_USD", "100")))
+    parser.add_argument("--ml-to-usd", type=float, default=float(os.getenv("ML_TO_USD_RATE", "0.00056")),
+                        help="Multiplicador ARS→USD (default: 0.00056)")
     parser.add_argument("--search-limit", type=int, default=50)
-    parser.add_argument("--blue-rate", type=float, help="Tipo de cambio manual (ARS/USD)")
-    parser.add_argument("--catalog-only", action="store_true", default=False,
-                        help="Analizar solo productos en catálogo ML")
+    parser.add_argument("--catalog-only", action="store_true", default=False)
     args = parser.parse_args()
 
-    # ── Dollar rate ──────────────────────────────────────────────────────────
-    if args.blue_rate:
-        blue_rate = args.blue_rate
-        logger.info(f"Tipo de cambio manual: ${blue_rate:,.0f} ARS/USD")
-    else:
-        logger.info("Obteniendo dólar blue (dolarapi.com)...")
-        try:
-            blue_rate = get_blue_dollar_rate()
-            logger.info(f"Dólar blue: ${blue_rate:,.0f} ARS/USD")
-        except Exception as exc:
-            logger.error(f"No se pudo obtener el dólar blue: {exc}")
-            logger.info("Usá --blue-rate VALOR para ingresarlo manualmente.")
-            sys.exit(1)
+    ml_to_usd = args.ml_to_usd
+    logger.info(f"Tasa ARS→USD: ×{ml_to_usd}  (precio ARS × {ml_to_usd} = USD que cobrás)")
 
     cfg = {
         "min_sold": args.min_sold,
@@ -262,54 +238,43 @@ def main() -> None:
         )
 
     logger.info(
-        f"Configuración: min_sold={cfg['min_sold']} | min_margin={cfg['min_margin']}% | "
+        f"Config: min_sold={cfg['min_sold']} | min_margin={cfg['min_margin']}% | "
         f"max_amazon=${cfg['max_amazon_usd']} | envío=${cfg['shipping_rate']}/kg | "
         f"catalog_only={cfg['catalog_only']}\n"
     )
 
     all_ops: list[dict] = []
     for cat_id in category_ids:
-        ops = _analyze_category(cat_id, blue_rate, cfg)
+        ops = _analyze_category(cat_id, ml_to_usd, cfg)
         all_ops.extend(ops)
-        logger.info(f"  → {len(ops)} oportunidades encontradas\n")
+        logger.info(f"  → {len(ops)} candidatos\n")
         time.sleep(1)
 
     if not all_ops:
-        logger.info("No se encontraron productos. Probá reducir --min-sold.")
+        logger.info("Sin productos. Probá reducir --min-sold.")
         return
 
     profitable = _filter_profitable(all_ops, cfg["min_margin"])
     display_ops = profitable if profitable else all_ops
 
-    print(f"\n{'═'*60}")
+    print(f"\n{'═' * 60}")
     if profitable:
-        print(f"  {len(profitable)} productos con ≥{cfg['min_margin']:.0f}% margen confirmado")
+        print(f"  {len(profitable)} productos con >= {cfg['min_margin']:.0f}% margen")
     else:
-        print(f"  Mostrando todos ({len(all_ops)}) — sin precios Amazon cargados aún")
-    print(f"{'═'*60}")
+        print(f"  {len(all_ops)} candidatos (sin precios Amazon aun)")
+    print(f"{'═' * 60}")
 
-    _print_table(display_ops, blue_rate, cfg["shipping_rate"])
+    _print_table(display_ops, ml_to_usd, cfg["shipping_rate"])
 
     ts = datetime.now().strftime("%Y%m%d_%H%M")
     _save_csv(all_ops, f"arbitrage_{ts}.csv")
-    logger.info(f"Total analizado: {len(all_ops)} | Rentables ≥{cfg['min_margin']:.0f}%: {len(profitable)}")
 
-    # WhatsApp notification
-    msg = build_message(all_ops, blue_rate, cfg["min_margin"])
+    msg = build_message(all_ops, ml_to_usd, cfg["min_margin"])
     if send_whatsapp(msg):
-        logger.info("✓ Notificación WhatsApp enviada")
-    elif os.getenv("WPP_PHONE"):
-        logger.warning("Error enviando WhatsApp — revisá WPP_PHONE y WPP_APIKEY en .env")
+        logger.info("✓ WhatsApp enviado")
 
     if not os.getenv("AMAZON_ACCESS_KEY"):
-        print(
-            "\n── Amazon PA API (opcional, gratis) ─────────────────────────────────\n"
-            "Para obtener precios de Amazon automáticamente:\n"
-            "  1. Creá cuenta en affiliate-program.amazon.com\n"
-            "  2. Pedí acceso a PA API en tu panel Associates\n"
-            "  3. Agregá AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG al .env\n"
-            "─────────────────────────────────────────────────────────────────────"
-        )
+        print("\nTIP: sin PA API de Amazon el scraper funciona igual, pero mas lento.")
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ def send_whatsapp(message: str) -> bool:
         return False
 
 
-def build_message(ops: list[dict], blue_rate: float, min_margin: float) -> str:
+def build_message(ops: list[dict], ml_to_usd: float, min_margin: float) -> str:
     profitable = [
         op for op in ops
         if isinstance(op.get("margen_neto_pct"), (int, float))
@@ -41,8 +41,8 @@ def build_message(ops: list[dict], blue_rate: float, min_margin: float) -> str:
         top = sorted(ops, key=lambda x: x["max_precio_amazon_usd"], reverse=True)[:3]
         lines = [
             f"🔍 Arbitrage ML — {len(ops)} productos analizados",
-            f"💵 Blue: ${blue_rate:,.0f} ARS/USD",
-            f"⚠️ Sin precios Amazon cargados aún. Top 3 potencial:\n",
+            f"📐 Tasa x{ml_to_usd}",
+            f"⚠️ Sin precios Amazon aún. Top 3 potencial:\n",
         ]
         for op in top:
             lines.append(
@@ -54,8 +54,8 @@ def build_message(ops: list[dict], blue_rate: float, min_margin: float) -> str:
 
     best = sorted(profitable, key=lambda x: x["margen_neto_pct"], reverse=True)
     lines = [
-        f"🚀 {len(profitable)} oportunidades ≥{min_margin:.0f}% margen",
-        f"💵 Blue: ${blue_rate:,.0f} ARS/USD\n",
+        f"🚀 {len(profitable)} oportunidades >= {min_margin:.0f}% margen",
+        f"📐 Tasa x{ml_to_usd}\n",
     ]
     for op in best[:5]:
         lines.append(

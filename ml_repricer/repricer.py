@@ -75,28 +75,20 @@ class Repricer:
 
     def _min_viable_price(self, item: dict) -> float:
         """
-        Minimum sale price to cover real Amazon cost + desired margin.
-        Falls back to global MIN_PRICE if item has no cost record.
+        Minimum ARS price to cover real Amazon cost + desired margin.
 
-        formula: P_min = (amazon_usd + shipping_usd) × blue_rate
-                         / ((1 - commission) × (1 - min_margin))
+        formula: P_min = (amazon_usd + shipping_usd) / (ml_to_usd × (1 - min_margin))
         """
         cost = cost_db.get(item["id"])
         if not cost:
             return self.rule.min_price
 
-        blue_rate = self._get_blue_rate()
-        if not blue_rate:
-            logger.warning("Sin tipo de cambio disponible — usando MIN_PRICE global")
-            return self.rule.min_price
-
+        ml_to_usd = float(os.getenv("ML_TO_USD_RATE", "0.00056"))
         shipping_rate = float(os.getenv("SHIPPING_RATE_PER_KG", "40"))
         min_margin = float(os.getenv("MIN_MARGIN_PERCENT", "30")) / 100
-        commission = _commission_for(item.get("category_id", ""))
 
         total_cost_usd = cost["amazon_usd"] + cost["weight_kg"] * shipping_rate
-        total_cost_ars = total_cost_usd * blue_rate
-        viable = total_cost_ars / ((1 - commission) * (1 - min_margin))
+        viable = total_cost_usd / (ml_to_usd * (1 - min_margin))
         return max(viable, self.rule.min_price)
 
     def _competitor_prices(self, item: dict) -> list[float]:
