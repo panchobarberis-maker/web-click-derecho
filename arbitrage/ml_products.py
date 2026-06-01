@@ -1,5 +1,4 @@
 import os
-import time
 
 import requests
 from dotenv import load_dotenv
@@ -89,3 +88,44 @@ def build_search_query(item: dict) -> str:
     _noise = {"usado", "refabricado", "nuevo", "original", "sellado", "unidad", "pack"}
     words = [w for w in item.get("title", "").split() if w.lower() not in _noise]
     return " ".join(words[:8])
+
+
+def extract_weight_kg(item: dict) -> float | None:
+    """Extract item weight in kg from ML attributes. Returns None if not found."""
+    for attr in item.get("attributes", []):
+        if attr.get("id") != "WEIGHT":
+            continue
+        vs = attr.get("value_struct")
+        if vs:
+            number = float(vs.get("number", 0) or 0)
+            unit = (vs.get("unit") or "g").lower()
+            if unit in ("kg", "kilogram", "kilogramo", "kilogramos"):
+                return number
+            if unit in ("g", "gram", "gramo", "gramos"):
+                return number / 1000
+            if unit in ("lb", "lbs", "pound", "libra"):
+                return number * 0.453592
+        # fallback: parse value_name like "500 g" or "1.2 kg"
+        value_name = attr.get("value_name", "") or ""
+        for suffix, factor in (("kg", 1), ("g", 0.001), ("lb", 0.453592)):
+            if suffix in value_name.lower():
+                try:
+                    return float(value_name.lower().replace(suffix, "").strip()) * factor
+                except ValueError:
+                    pass
+    return None
+
+
+def get_catalog_seller_count(catalog_product_id: str) -> int:
+    """Count active sellers competing in a catalog listing."""
+    resp = requests.get(
+        f"{_BASE}/sites/MLA/search",
+        headers=_headers(),
+        params={"catalog_product_id": catalog_product_id, "limit": 50},
+        timeout=15,
+    )
+    if resp.status_code != 200:
+        return 0
+    results = resp.json().get("results", [])
+    seller_ids = {r.get("seller", {}).get("id") for r in results if r.get("seller")}
+    return len(seller_ids)

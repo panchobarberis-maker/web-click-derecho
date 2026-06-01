@@ -1,20 +1,24 @@
+def shipping_cost_usd(weight_kg: float, rate_per_kg: float) -> float:
+    return weight_kg * rate_per_kg
+
+
 def max_amazon_price_usd(
     ml_price_ars: float,
     commission_rate: float,
     blue_rate: float,
-    import_factor: float,
+    shipping_usd: float,
     min_margin: float,
 ) -> float:
     """
-    Maximum Amazon price (USD) that allows at least `min_margin` net margin.
+    Maximum Amazon product price (USD) that allows at least `min_margin` net margin.
 
-    revenue   = ml_price × (1 - commission)
-    max_cost  = revenue × (1 - min_margin)          [ARS]
-    max_amz   = max_cost / (blue_rate × import_factor) [USD]
+    revenue_ars       = ml_price × (1 - commission)
+    max_total_cost_usd = revenue_ars × (1 - min_margin) / blue_rate
+    max_amazon_usd    = max_total_cost_usd - shipping_usd
     """
     revenue_ars = ml_price_ars * (1 - commission_rate)
-    max_cost_ars = revenue_ars * (1 - min_margin)
-    return max_cost_ars / (blue_rate * import_factor)
+    max_total_usd = revenue_ars * (1 - min_margin) / blue_rate
+    return max(0.0, max_total_usd - shipping_usd)
 
 
 def net_margin_pct(
@@ -22,11 +26,11 @@ def net_margin_pct(
     amazon_usd: float,
     commission_rate: float,
     blue_rate: float,
-    import_factor: float,
+    shipping_usd: float,
 ) -> float:
-    """Net margin % when buying at amazon_usd and selling at ml_price_ars."""
+    """Net margin % when buying amazon_usd + shipping and selling at ml_price_ars."""
     revenue_ars = ml_price_ars * (1 - commission_rate)
-    cost_ars = amazon_usd * blue_rate * import_factor
+    total_cost_ars = (amazon_usd + shipping_usd) * blue_rate
     if revenue_ars <= 0:
         return 0.0
-    return (revenue_ars - cost_ars) / revenue_ars * 100
+    return (revenue_ars - total_cost_ars) / revenue_ars * 100
