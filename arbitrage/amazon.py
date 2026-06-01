@@ -1,11 +1,8 @@
 """
-Amazon price lookup.
+Amazon price lookup — dos métodos en cascada:
 
-Primary:  Amazon Product Advertising API v5 (PA API) — free with an Associates account.
-          Set AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG in .env.
-
-Fallback: If PA API is not configured, returns None and the caller shows an Amazon
-          search URL so the user can check prices manually.
+1. PA API v5 (si AMAZON_ACCESS_KEY está configurada) — oficial y confiable.
+2. Scraper (fallback automático) — funciona para volumen bajo (~50 productos/sesión).
 """
 
 import hashlib
@@ -99,29 +96,29 @@ def _paapi_post(payload: dict) -> dict:
 def search_amazon_price(query: str, ean: str | None = None) -> float | None:
     """
     Return the lowest Amazon.com price (USD) for the given query/EAN.
-    Returns None if PA API is not configured or the product is not found.
+    Tries PA API first; falls back to scraper automatically.
     """
-    if not os.getenv("AMAZON_ACCESS_KEY"):
-        return None
+    # 1. PA API (if configured)
+    if os.getenv("AMAZON_ACCESS_KEY"):
+        associate_tag = os.getenv("AMAZON_ASSOCIATE_TAG", "")
+        payload = {
+            "Keywords": ean if ean else query,
+            "Marketplace": "www.amazon.com",
+            "PartnerTag": associate_tag,
+            "PartnerType": "Associates",
+            "Resources": ["Offers.Listings.Price"],
+            "SearchIndex": "All",
+        }
+        try:
+            data = _paapi_post(payload)
+            for item in data.get("SearchResult", {}).get("Items", []):
+                for listing in item.get("Offers", {}).get("Listings", []):
+                    price = listing.get("Price", {}).get("Amount")
+                    if price:
+                        return float(price)
+        except Exception:
+            pass  # fall through to scraper
 
-    associate_tag = os.getenv("AMAZON_ASSOCIATE_TAG", "")
-    payload = {
-        "Keywords": ean if ean else query,
-        "Marketplace": "www.amazon.com",
-        "PartnerTag": associate_tag,
-        "PartnerType": "Associates",
-        "Resources": ["Offers.Listings.Price"],
-        "SearchIndex": "All",
-    }
-
-    try:
-        data = _paapi_post(payload)
-        for item in data.get("SearchResult", {}).get("Items", []):
-            for listing in item.get("Offers", {}).get("Listings", []):
-                price = listing.get("Price", {}).get("Amount")
-                if price:
-                    return float(price)
-    except Exception:
-        return None
-
-    return None
+    # 2. Scraper fallback
+    from .amazon_scraper import get_scraper
+    return get_scraper().search_price(query, ean)
