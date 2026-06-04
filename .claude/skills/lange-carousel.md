@@ -23,17 +23,20 @@ Use this skill when the user sends an employment law topic for The Lange Firm. E
 - **Slide 3** — 1 impactful stat + 3 bullet points (box items)
 - **Slide 4** — 3 red flags / signs you have a claim (box items)
 - **Slide 5** — 3 action steps (box items)
-- **Slide 6** — CTA with Evan Lange photo, "Free Consultation", "No fee unless we win"
+- **Slide 6** — CTA with Evan Lange photo, "Talk to Evan Now", "Contact Us for a Consultation"
 
 ## Content rules
 
 - English only
-- Short and punchy — no paragraph walls
-- Always Texas law context — never say "federal"
-- Tone: authoritative, protective, direct
+- **LESS IS MORE** — one strong idea per box, no walls of text
+- Box titles: max 6 words, punchy and direct
+- Box descriptions: max 8 words, or omit entirely if the title is self-explanatory
+- Talk to the reader like a person — "Your hours got cut? That's a problem." Not legal jargon
+- Focus on: Does the reader have a problem? What can they get back?
+- Always Texas law context — never name specific laws, never say "federal"
+- Tone: direct, human, protective — not corporate
 - NEVER use the words "Free Consultation" anywhere
-- NEVER use the word "federal" — reference specific laws by name only
-- CTA button: "Talk to Evan Now" / tagline: "No fee unless we win"
+- CTA button: "Talk to Evan Now" / tagline: "Contact Us for a Consultation"
 - Logo on every slide: THE LANGE FIRM
 
 ## Assets (fetched from GitHub on each run)

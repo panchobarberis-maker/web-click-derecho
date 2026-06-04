@@ -49,8 +49,9 @@ FONTS = """
 BASE = """
 * { box-sizing:border-box; margin:0; padding:0; }
 :root {
-  --gold:#C9A84C; --gold-lt:#E2C97E;
-  --white:#F5F0E8; --muted:rgba(245,240,232,0.75); --line:rgba(201,168,76,0.35);
+  --navy:#1B2B4A; --navy-dk:#111E33;
+  --gold:#C9A84C; --gold-lt:#E2C97E; --bronze:#9B6820;
+  --white:#F0F4FF; --muted:rgba(220,228,255,0.78); --line:rgba(201,168,76,0.38);
 }
 html,body { width:1080px; height:1350px; overflow:hidden;
   color:var(--white); font-family:'DM Sans',sans-serif; }
@@ -61,7 +62,7 @@ html,body { width:1080px; height:1350px; overflow:hidden;
 
 LOGO_CSS = """
 .lange-logo { display:flex; flex-direction:column; align-items:center; }
-.logo-top { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:30px; letter-spacing:9px; color:#9B7020; line-height:1; }
+.logo-top { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:30px; letter-spacing:9px; color:#9B6820; line-height:1; }
 .logo-rule { width:200px; height:1px; background:linear-gradient(90deg,transparent,#C9A84C,transparent); margin:4px 0; }
 .logo-bottom { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:30px; letter-spacing:12px; color:#C9A84C; line-height:1; }
 """
@@ -73,13 +74,13 @@ LOGO_HTML = """<div class="lange-logo">
 </div>"""
 
 BOX_CSS = """
-.box { display:flex; gap:20px; align-items:flex-start;
+.box { display:flex; gap:24px; align-items:center;
   background:rgba(10,10,10,.55); border:1px solid rgba(201,168,76,.30);
-  border-radius:10px; padding:20px 28px; margin-bottom:18px; font-size:26px;
+  border-radius:10px; padding:26px 32px; margin-bottom:20px;
   backdrop-filter:blur(6px); }
-.arr { color:var(--gold); flex-shrink:0; font-size:22px; margin-top:3px; }
-.box strong { font-size:26px; font-weight:500; }
-.box .sub { font-size:22px; opacity:.82; font-weight:300; }
+.arr { color:var(--gold); flex-shrink:0; font-size:30px; }
+.box strong { font-size:36px; font-weight:500; line-height:1.3; }
+.box .sub { font-size:30px; opacity:.88; font-weight:300; display:block; margin-top:4px; }
 """
 
 def box(num, title, desc=""):
@@ -98,7 +99,7 @@ def slide_cover(c, bg):
     title = c["title"].replace("\n","<br>")
     return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">{FONTS}<style>{BASE}{LOGO_CSS}
 .bg {{ background-image:url("{bg}"); }}
-.ov {{ background:linear-gradient(170deg,rgba(8,6,2,.82) 0%,rgba(8,6,2,.55) 50%,rgba(12,8,2,.88) 100%); }}
+.ov {{ background:linear-gradient(170deg,rgba(17,30,51,.88) 0%,rgba(27,43,74,.62) 50%,rgba(17,30,51,.92) 100%); }}
 .content {{ position:relative;z-index:2;display:flex;flex-direction:column;
   align-items:center;justify-content:center;padding:220px 80px;height:100%;text-align:center; }}
 .pill {{ font-size:16px;letter-spacing:5px;text-transform:uppercase;color:var(--gold);
@@ -106,7 +107,7 @@ def slide_cover(c, bg):
 .title {{ font-family:'Cormorant Garamond',serif;font-weight:700;
   font-size:112px;line-height:.86;color:var(--white);margin-bottom:28px; }}
 .title em {{ color:var(--gold);font-style:italic; }}
-.sub {{ font-size:28px;color:var(--white);line-height:1.55;max-width:700px;margin-bottom:52px;opacity:.85; }}
+.sub {{ font-size:34px;color:var(--white);line-height:1.55;max-width:700px;margin-bottom:52px;opacity:.90; }}
 .sep {{ display:flex;align-items:center;gap:24px; }}
 .sep-line {{ width:64px;height:1px;background:var(--line); }}
 .sep-text {{ font-size:15px;letter-spacing:4px;text-transform:uppercase;color:var(--muted); }}
@@ -127,10 +128,10 @@ def slide_content(heading, label, items, bg, num, em_last=True):
     title_html = heading.replace("\n","<br>")
     return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">{FONTS}<style>{BASE}{LOGO_CSS}{BOX_CSS}
 .bg {{ background-image:url("{bg}"); }}
-.ov {{ background:linear-gradient(160deg,rgba(8,6,2,.78) 0%,rgba(8,6,2,.68) 100%); }}
+.ov {{ background:linear-gradient(160deg,rgba(17,30,51,.85) 0%,rgba(27,43,74,.75) 100%); }}
 .body {{ position:relative;z-index:2;display:flex;flex-direction:column;
   justify-content:center;height:100%;padding:148px 72px 80px; }}
-.lbl {{ font-size:15px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:block; }}
+.lbl {{ font-size:19px;letter-spacing:6px;text-transform:uppercase;color:var(--gold);margin-bottom:12px;display:block; }}
 .deco {{ width:52px;height:2px;background:var(--gold);margin-bottom:36px; }}
 .ttl {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:80px;line-height:.90;margin-bottom:44px; }}
 .ttl em {{ color:var(--gold);font-style:italic; }}
@@ -149,13 +150,13 @@ def slide_stat(s, bg):
     bullets = "".join(box("→", b) for b in s["bullets"])
     return f"""<!DOCTYPE html><html><head><meta charset="UTF-8">{FONTS}<style>{BASE}{LOGO_CSS}{BOX_CSS}
 .bg {{ background-image:url("{bg}"); }}
-.ov {{ background:linear-gradient(180deg,rgba(8,6,2,.72) 0%,rgba(8,6,2,.65) 50%,rgba(8,6,2,.78) 100%); }}
+.ov {{ background:linear-gradient(180deg,rgba(17,30,51,.78) 0%,rgba(27,43,74,.70) 50%,rgba(17,30,51,.82) 100%); }}
 .content {{ position:relative;z-index:2;display:flex;flex-direction:column;
   align-items:center;justify-content:center;height:100%;text-align:center;padding:80px; }}
 .big {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:260px;line-height:.78;color:var(--gold-lt); }}
 .unit {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:88px;color:var(--gold);line-height:1;display:block;margin-bottom:24px; }}
-.ttl {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:52px;line-height:1.1;margin-bottom:16px;max-width:740px; }}
-.desc {{ font-size:28px;color:var(--white);line-height:1.55;max-width:720px;margin-bottom:32px; }}
+.ttl {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:58px;line-height:1.1;margin-bottom:16px;max-width:740px; }}
+.desc {{ font-size:32px;color:var(--white);line-height:1.55;max-width:720px;margin-bottom:32px; }}
 .notes {{ width:100%;max-width:780px;text-align:left; }}
 </style></head><body><div class="slide">
   <div class="bg"></div><div class="ov"></div>
@@ -177,14 +178,14 @@ def slide_cta(evan):
 .photo-fade {{ position:absolute;top:0;left:0;right:0;height:60%;
   background:linear-gradient(180deg,rgba(8,6,2,.20) 0%,rgba(8,6,2,.10) 35%,rgba(8,6,2,1) 100%); }}
 .bottom {{ position:absolute;top:48%;bottom:0;left:0;right:0;
-  background:linear-gradient(175deg,#1c1508 0%,#0e0f14 100%); }}
+  background:linear-gradient(175deg,#1B2B4A 0%,#111E33 100%); }}
 .content {{ position:relative;z-index:3;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-end;height:100%;text-align:center;padding:0 80px 72px; }}
 .name {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:42px;color:var(--white);letter-spacing:3px; }}
 .role {{ font-size:18px;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-top:8px;margin-bottom:40px; }}
 .cta-title {{ font-family:'Cormorant Garamond',serif;font-weight:700;font-size:92px;line-height:.90;margin-bottom:32px; }}
 .cta-title em {{ color:var(--gold);font-style:italic; }}
-.btn {{ display:inline-block;background:var(--gold);color:#0e0f14;
+.btn {{ display:inline-block;background:var(--gold);color:#111E33;
   font-family:'DM Sans',sans-serif;font-weight:500;font-size:22px;letter-spacing:5px;
   text-transform:uppercase;padding:26px 68px;border-radius:4px;margin-bottom:24px; }}
 .sub {{ font-size:20px;letter-spacing:3px;text-transform:uppercase;
@@ -197,7 +198,7 @@ def slide_cta(evan):
     <p class="role">Employment Attorney · Houston, TX</p>
     <h2 class="cta-title">WE FIGHT<br>FOR <em>YOU.</em></h2>
     <div class="btn">Talk to Evan Now</div>
-    <div class="sub">No fee unless we win</div>
+    <div class="sub">Contact Us for a Consultation</div>
     {LOGO_HTML}
   </div>
 </div></body></html>"""
