@@ -37,6 +37,17 @@ export default async function Embed() {
         data-target="#consulta"></script>`,
     },
     {
+      title: "Clip de video",
+      desc: "Un video corto fijo en una esquina que abre el formulario al tocarlo. Subí el mp4 donde quieras y pasá la URL.",
+      code: `<script src="${base}/w.js"
+        data-firm="${firm.slug}"
+        data-mode="clip"
+        data-video="https://tu-cdn.com/clip.mp4"
+        data-poster="https://tu-cdn.com/clip.jpg"
+        data-cta="Empezar"
+        data-accent="${firm.accent}"></script>`,
+    },
+    {
       title: "Directo a un área",
       desc: "Para poner en la página de una práctica específica: saltea el menú y abre ese formulario.",
       code: `<script src="${base}/w.js"
@@ -67,6 +78,16 @@ export default async function Embed() {
             <pre className="snippet">{s.code}</pre>
           </div>
         ))}
+      </div>
+
+      <div className="card" style={{ marginTop: "1rem" }}>
+        <h3>Atribución del origen</h3>
+        <p className="muted" style={{ fontSize: ".88rem", lineHeight: 1.6 }}>
+          El widget lee los <code>utm_*</code> y el referrer <strong>de la página del estudio</strong> y se los pasa al
+          formulario. Desde adentro del iframe el referrer sería el sitio del estudio, así que sin esto todas las
+          consultas figurarían como &ldquo;referral&rdquo;. Se guarda en el primer aterrizaje: si alguien llega desde
+          Instagram, navega tres páginas y recién ahí abre el formulario, el origen sigue siendo Instagram.
+        </p>
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>

@@ -4,12 +4,9 @@
   --accent: #2d0a4e;
   min-height: 100vh;
   background: #f7f5f2;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 3rem 1.25rem;
 }
-.fwrap { width: 100%; max-width: 560px; }
+/* La landing va a sangre; los pasos del formulario van centrados en una caja. */
+.fwrap { width: 100%; max-width: 560px; margin: 0 auto; padding: 3rem 1.25rem; }
 
 .fcard {
   background: #fff;
@@ -17,7 +14,7 @@
   padding: 2.25rem 2.25rem 2rem;
   box-shadow: 0 1px 3px rgba(28, 18, 48, .06), 0 12px 32px rgba(28, 18, 48, .06);
 }
-@media (max-width: 560px) { .fcard { padding: 1.5rem 1.25rem; } .fbody { padding: 1.25rem .75rem; } }
+@media (max-width: 560px) { .fcard { padding: 1.5rem 1.25rem; } .fwrap { padding: 1.25rem .75rem; } }
 
 .fhead { margin-bottom: 1.75rem; }
 .fhead .eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: #8b8397; font-weight: 500; }
@@ -86,3 +83,59 @@
 .fopt .arrow { color: #b5adc4; }
 .fopt small { display: block; color: #8b8397; font-size: .82rem; margin-top: .2rem; }
 .fback { display: inline-block; font-size: .88rem; color: #8b8397; text-decoration: none; margin-bottom: 1.25rem; }
+
+
+/* ---------- landing: foto a la izquierda, estudio a la derecha ---------- */
+.land { display: grid; grid-template-columns: minmax(240px, 26%) 1fr; min-height: 100vh; background: #fff; }
+
+.land-hero {
+  background: var(--accent) center/cover no-repeat;
+  /* Sin foto cargada queda el color del estudio, no un hueco blanco. */
+}
+
+.land-body { position: relative; display: flex; align-items: flex-start; padding: clamp(4rem, 13vh, 9rem) 3.5rem 4rem; }
+.land-inner { width: 100%; max-width: 640px; }
+
+.land-logo { position: absolute; top: 2.5rem; right: 3.5rem; max-height: 46px; max-width: 190px; object-fit: contain; }
+
+.land-eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: #8b8397; font-weight: 500; margin-bottom: .5rem; }
+.land-title {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2rem, 4.4vw, 3.4rem);
+  line-height: 1.08; color: var(--accent); font-weight: 700;
+}
+.land-title.sm { font-size: clamp(1.7rem, 3vw, 2.4rem); }
+
+.land-intro { color: #5b5468; font-size: 1rem; line-height: 1.65; margin-top: 1.5rem; max-width: 56ch; }
+.land-ask { color: #2a2338; font-size: 1rem; margin-top: 1.75rem; }
+
+.land-pills { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.pill-btn {
+  display: inline-block; padding: .95rem 1.75rem; border-radius: 99px;
+  background: #fff; border: 1px solid #e2ddea; color: #1c1230;
+  font-size: 1rem; text-decoration: none; transition: all .15s;
+  box-shadow: 0 1px 2px rgba(28, 18, 48, .05);
+}
+.pill-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+  transform: translateY(-1px); box-shadow: 0 6px 18px rgba(28, 18, 48, .1);
+}
+
+/* Dentro del iframe del pop-up no entra la foto: queda solo el contenido. */
+@media (max-width: 900px) {
+  .land { grid-template-columns: 1fr; }
+  .land-hero { display: none; }
+  .land-body { padding: 3rem 2rem; align-items: flex-start; }
+  .land-logo { position: static; display: block; margin-bottom: 2rem; }
+}
+@media (max-width: 560px) {
+  .land-body { padding: 2rem 1.25rem; }
+  .pill-btn { padding: .85rem 1.4rem; font-size: .95rem; }
+}
+
+/* ---------- checkbox de consentimiento ---------- */
+.fcheck {
+  display: flex; gap: .7rem; align-items: flex-start; cursor: pointer;
+  font-size: .88rem; line-height: 1.5; color: #4a4358;
+}
+.fcheck input { accent-color: var(--accent); width: 17px; height: 17px; flex: none; margin-top: .1rem; }

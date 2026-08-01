@@ -9,6 +9,37 @@ export const dynamic = "force-dynamic";
 type Params = { path: string[] };
 type Search = { [k: string]: string | undefined };
 
+/**
+ * Landing partida: foto a la izquierda, contenido del estudio a la derecha.
+ * Dentro del iframe del pop-up la foto se oculta y queda solo la columna de
+ * contenido, sin necesidad de una plantilla aparte.
+ */
+function Landing({
+  firm,
+  children,
+  back,
+}: {
+  firm: Firm;
+  children: React.ReactNode;
+  back?: React.ReactNode;
+}) {
+  return (
+    <div className="land">
+      <div className="land-hero" style={firm.hero_url ? { backgroundImage: `url(${firm.hero_url})` } : undefined} />
+      <div className="land-body">
+        {firm.logo_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className="land-logo" src={firm.logo_url} alt={firm.name} />
+        ) : null}
+        <div className="land-inner">
+          {back}
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default async function PublicForm({
   params,
   searchParams,
@@ -27,31 +58,26 @@ export default async function PublicForm({
 
   // Nivel 1: elegir area de practica.
   if (!funnelSlug) {
-    const funnels = await sql<(Funnel & { n: number })[]>`
-      select f.*, count(w.id) as n
-      from funnels f left join workflows w on w.funnel_id = f.id and w.active
+    const funnels = await sql<Funnel[]>`
+      select f.* from funnels f
       where f.firm_id = ${firm.id} and f.active and f.on_storefront
-      group by f.id order by f.sort_order`;
+      order by f.sort_order`;
 
     return (
-      <div className="fwrap" style={accent}>
-        <ViewTracker firmSlug={firm.slug} surface={qs.surface} />
-        <div className="fhead">
-          <div className="eyebrow">{firm.name}</div>
-          <h1>¿En qué te podemos ayudar?</h1>
-          <p>Elegí el tema de tu consulta. Son unas pocas preguntas y un abogado del estudio la revisa.</p>
-        </div>
-        <div className="fgrid">
-          {funnels.map((f) => (
-            <Link key={f.id} className="fopt" href={`/f/${firm.slug}/${f.slug}`}>
-              <span>
+      <div style={accent}>
+        <ViewTracker firmSlug={firm.slug} search={qs} />
+        <Landing firm={firm}>
+          <h1 className="land-title">{firm.name}</h1>
+          {firm.intro && <p className="land-intro">{firm.intro}</p>}
+          <p className="land-ask">Tocá la opción que mejor describa tu caso:</p>
+          <div className="land-pills">
+            {funnels.map((f) => (
+              <Link key={f.id} className="pill-btn" href={`/f/${firm.slug}/${f.slug}`}>
                 {f.name}
-                <small>{Number(f.n)} {Number(f.n) === 1 ? "tipo de caso" : "tipos de caso"}</small>
-              </span>
-              <span className="arrow">→</span>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        </Landing>
       </div>
     );
   }
@@ -75,22 +101,27 @@ export default async function PublicForm({
     }
 
     return (
-      <div className="fwrap" style={accent}>
-        <ViewTracker firmSlug={firm.slug} funnelId={funnel.id} surface={qs.surface} />
-        <Link className="fback" href={`/f/${firm.slug}`}>← Volver</Link>
-        <div className="fhead">
-          <div className="eyebrow">{funnel.name}</div>
-          <h1>¿Cuál es tu situación?</h1>
-          <p>Elegí la opción más parecida a tu caso. Así te preguntamos solo lo que hace falta.</p>
-        </div>
-        <div className="fgrid">
-          {workflows.map((w) => (
-            <Link key={w.id} className="fopt" href={`/f/${firm.slug}/${funnel.slug}/${w.slug}`}>
-              <span>{w.name}</span>
-              <span className="arrow">→</span>
+      <div style={accent}>
+        <ViewTracker firmSlug={firm.slug} funnelId={funnel.id} search={qs} />
+        <Landing
+          firm={firm}
+          back={
+            <Link className="fback" href={`/f/${firm.slug}`}>
+              ← Volver
             </Link>
-          ))}
-        </div>
+          }
+        >
+          <p className="land-eyebrow">{funnel.name}</p>
+          <h1 className="land-title sm">¿Cuál es tu situación?</h1>
+          <p className="land-ask">Elegí la opción más parecida a tu caso. Así te preguntamos solo lo que hace falta.</p>
+          <div className="land-pills">
+            {workflows.map((w) => (
+              <Link key={w.id} className="pill-btn" href={`/f/${firm.slug}/${funnel.slug}/${w.slug}`}>
+                {w.name}
+              </Link>
+            ))}
+          </div>
+        </Landing>
       </div>
     );
   }

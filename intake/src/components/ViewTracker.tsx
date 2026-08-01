@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { sessionKey } from "@/lib/session-key";
+import { pickAttribution } from "@/lib/attribution";
 
 /**
  * Registra la visita en las pantallas previas al formulario (menu de areas y
@@ -14,11 +15,11 @@ import { sessionKey } from "@/lib/session-key";
 export function ViewTracker({
   firmSlug,
   funnelId,
-  surface,
+  search,
 }: {
   firmSlug: string;
   funnelId?: string;
-  surface?: string;
+  search: Record<string, string | undefined>;
 }) {
   useEffect(() => {
     const key = sessionKey(firmSlug);
@@ -30,14 +31,18 @@ export function ViewTracker({
         firmSlug,
         funnelId: funnelId ?? null,
         sessionId: localStorage.getItem(key),
-        surface: surface ?? "page",
-        referrer: document.referrer || null,
+        surface: search.surface ?? "page",
+        // `ref` y `lp` los reenvia el widget: son de la pagina madre, no del iframe.
+        referrer: search.ref || document.referrer || null,
+        landingPage: search.lp || location.href,
+        utm: pickAttribution(search),
       }),
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => j?.sessionId && localStorage.setItem(key, j.sessionId))
       .catch(() => {});
-  }, [firmSlug, funnelId, surface]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [firmSlug, funnelId]);
 
   return null;
 }

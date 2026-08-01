@@ -29,7 +29,9 @@ un cuestionario único para todos.
 | **Drop-off por paso** | Cuánta gente llega a cada paso. La caída más grande es el paso a rediseñar |
 | **Bandeja de consultas** | Enviadas / abandonadas, no leídas, detalle con todas las respuestas |
 | **Widget embebible** | Pop-up, botón flotante o formulario inline, en una línea de `<script>` |
-| **Aviso al estudio** | Mail con el caso formateado apenas entra una consulta |
+| **Aviso al estudio** | Mail con nombre, apellido, email, teléfono, opt-in, área, tipo de caso y **origen**, más todas las respuestas |
+| **Atribución de origen** | De dónde vino cada consulta, incluso embebida en un iframe en el sitio del estudio |
+| **Landing partida** | Foto del estudio + áreas de práctica como botones, con logo y texto de privacidad propios |
 
 ## Arranque local
 
@@ -56,14 +58,14 @@ curl -H "Authorization: Bearer dev-secret" localhost:3000/api/cron/recover
 ## Definir los formularios de un estudio
 
 Están en `db/seed-data.mjs` como JSON y se cargan con `npm run db:setup`.
-Tipos de campo: `text`, `email`, `tel`, `textarea`, `select`, `radio`, `date`.
+Tipos de campo: `text`, `email`, `tel`, `textarea`, `select`, `radio`, `date`, `checkbox`.
 
 ```js
 {
   name: "Despido sin causa",
   slug: "despido-sin-causa",
   steps: [
-    contacto,                        // paso 1: nombre + email + teléfono
+    contacto,                        // paso 1: nombre, apellido, email, teléfono, opt-in
     { title: "Sobre tu trabajo", fields: [
         { key: "empresa", label: "Empresa", type: "text", required: true },
         { key: "antiguedad", label: "Antigüedad", type: "select",
@@ -76,6 +78,34 @@ Tipos de campo: `text`, `email`, `tel`, `textarea`, `select`, `radio`, `date`.
 **El paso 1 tiene que pedir el email.** Es lo que habilita todo lo demás: si la
 persona se va en el paso 3, sin el mail no hay nada que recuperar.
 
+Las claves `first_name`, `last_name`, `email`, `phone` y `consent` son
+especiales: se promueven a columnas y arman el bloque de contacto del mail al
+estudio. El resto de las respuestas van abajo, con la etiqueta del formulario.
+
+La landing se configura por estudio: `logo_url`, `hero_url` (la foto de la
+columna izquierda), `accent` y `intro` (el texto de privacidad).
+
+## Atribución del origen
+
+Este es el punto donde es fácil equivocarse. El formulario corre dentro de un
+iframe en el sitio del estudio, así que `document.referrer` visto desde adentro
+es **el sitio del estudio** — sin hacer nada, todas las consultas figurarían
+como "referral" y la atribución no serviría para nada.
+
+Por eso el widget lee los `utm_*` y el referrer **de la página madre** y se los
+pasa al iframe. La prioridad es: `utm_source` declarado → click id de la
+plataforma (`gclid`, `fbclid`, `ttclid`, `msclkid`) → dominio del referrer →
+directo.
+
+Es **first-touch** y se guarda en `sessionStorage`: si alguien llega desde
+Instagram, navega tres páginas del sitio y recién ahí abre el formulario, el
+origen sigue siendo Instagram. Lo mismo aplica a la superficie (`page`,
+`popup`, `clip`): cuenta por dónde entró la primera vez, no por dónde terminó
+enviando.
+
+Cada consulta guarda `source`, el `utm` completo (campaña y medio incluidos),
+el referrer y la URL exacta del sitio del estudio donde se abrió.
+
 ## Instalación en el sitio del estudio
 
 ```html
@@ -85,10 +115,11 @@ persona se va en el paso 3, sin el mail no hay nada que recuperar.
         data-trigger="delay:12"></script>
 ```
 
-- `data-mode`: `popup` · `button` (botón flotante) · `inline` (embebido en un `data-target`)
+- `data-mode`: `popup` · `button` (botón flotante) · `inline` (embebido en un `data-target`) · `clip` (video en una esquina)
 - `data-trigger`: `delay:N` · `scroll:N` (% de la página) · `exit` (exit intent) · `now`
 - `data-funnel` / `data-workflow`: saltear el menú y abrir un formulario puntual
 - `data-once="false"`: mostrar el pop-up más de una vez por sesión
+- `data-video` / `data-poster`: para el modo `clip`. El mp4 lo hospedás donde quieras
 
 Todo va dentro de un iframe, así que el CSS del sitio del estudio no puede
 romper el formulario ni al revés.
@@ -117,8 +148,9 @@ Lo que quedó afuera del MVP, en orden de valor:
   sin autenticación. Es lo primero antes de ponerlo en manos de un cliente.
 - **Constructor visual de formularios.** Hoy se editan en `seed-data.mjs`. Es el
   80% del trabajo restante y el 10% del valor mientras la agencia arme los forms.
-- **Impresiones de pop-up.** Se cuenta el pop-up desde que se abre; no se registra
-  cuántas veces se mostró sin que lo abrieran.
+- **Impresiones de pop-up y clip.** Se cuentan desde que se abre el formulario;
+  no se registra cuántas veces se mostraron sin que los abrieran.
+- **Subida de videos para los clips.** Hoy se pasa una URL en `data-video`.
 - **Secuencia de recuperación.** Hoy es un solo mail. Lo normal son 2 o 3.
 - **Scoring del lead** y aviso por WhatsApp al estudio.
 

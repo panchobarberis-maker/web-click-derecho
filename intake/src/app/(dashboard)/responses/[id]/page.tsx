@@ -5,6 +5,12 @@ import { fmtLong, hace, sourceLabel } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
+const SUPERFICIES: Record<string, string> = {
+  page: "Página de consultas",
+  popup: "Pop-up",
+  clip: "Clip de video",
+};
+
 export default async function ResponseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const firm = await currentFirm();
@@ -13,11 +19,12 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
     {
       id: string; full_name: string | null; email: string | null; phone: string | null;
       data: Record<string, string>; max_step: number; submitted_at: Date | null; created_at: Date;
-      source: string | null; surface: string; funnel: string; workflow: string; steps: Workflow["steps"] | null;
+      source: string | null; surface: string; consent: boolean; landing_page: string | null;
+      utm: Record<string, string>; funnel: string; workflow: string; steps: Workflow["steps"] | null;
     }[]
   >`
     select s.id, s.full_name, s.email, s.phone, s.data, s.max_step, s.submitted_at, s.created_at,
-           s.source, s.surface,
+           s.source, s.surface, s.consent, s.landing_page, s.utm,
            coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow, w.steps
     from sessions s
     left join funnels f on f.id = s.funnel_id
@@ -33,7 +40,11 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
   const labels = new Map<string, string>();
   for (const step of s.steps?.steps ?? []) for (const f of step.fields) labels.set(f.key, f.label);
 
-  const entries = Object.entries(s.data).filter(([k]) => !k.startsWith("_"));
+  // El bloque de contacto ya los muestra aparte.
+  const CONTACTO = new Set(["first_name", "last_name", "email", "phone", "consent"]);
+  const entries = Object.entries(s.data).filter(([k]) => !k.startsWith("_") && !CONTACTO.has(k));
+
+  const campana = [s.utm?.utm_campaign, s.utm?.utm_medium].filter(Boolean).join(" · ");
 
   return (
     <>
@@ -76,8 +87,19 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
             <tbody>
               <tr><td className="muted">Email</td><td>{s.email ? <a href={`mailto:${s.email}`}>{s.email}</a> : "—"}</td></tr>
               <tr><td className="muted">Teléfono</td><td>{s.phone ?? "—"}</td></tr>
+              <tr>
+                <td className="muted">¿Aceptó contacto?</td>
+                <td>{s.consent ? <span className="pill good">Sí</span> : <span className="pill">No</span>}</td>
+              </tr>
               <tr><td className="muted">Origen</td><td>{sourceLabel(s.source ?? "direct")}</td></tr>
-              <tr><td className="muted">Entró por</td><td>{s.surface}</td></tr>
+              {campana && <tr><td className="muted">Campaña</td><td>{campana}</td></tr>}
+              <tr><td className="muted">Entró por</td><td>{SUPERFICIES[s.surface] ?? s.surface}</td></tr>
+              {s.landing_page && (
+                <tr>
+                  <td className="muted">Página</td>
+                  <td style={{ wordBreak: "break-all", fontSize: ".82rem" }}>{s.landing_page}</td>
+                </tr>
+              )}
               <tr><td className="muted">Primera visita</td><td>{fmtLong(s.created_at)}</td></tr>
             </tbody>
           </table>

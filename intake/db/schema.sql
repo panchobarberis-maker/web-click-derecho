@@ -10,6 +10,9 @@ create table if not exists firms (
   slug          text not null unique,
   notify_email  text,
   accent        text not null default '#2d0a4e',
+  logo_url      text,
+  hero_url      text,
+  intro         text,          -- parrafo de privacidad de la landing
   created_at    timestamptz not null default now()
 );
 
@@ -49,8 +52,13 @@ create table if not exists sessions (
   workflow_id     uuid references workflows(id) on delete set null,
   data            jsonb not null default '{}'::jsonb,
   email           text,
-  full_name       text,
+  first_name      text,
+  last_name       text,
+  -- derivada, para no repetir el concat en cada consulta del panel
+  full_name       text generated always as
+                  (nullif(trim(coalesce(first_name, '') || ' ' || coalesce(last_name, '')), '')) stored,
   phone           text,
+  consent         boolean not null default false,   -- opt-in explicito a que le escriban
   max_step        int not null default 0,
   submitted_at    timestamptz,
   recovery_sent_at timestamptz,
@@ -58,6 +66,7 @@ create table if not exists sessions (
   status          text not null default 'new',
   source          text,
   referrer        text,
+  landing_page    text,        -- URL del sitio del estudio donde se abrio el form
   utm             jsonb not null default '{}'::jsonb,
   surface         text not null default 'page',
   created_at      timestamptz not null default now(),
@@ -77,6 +86,19 @@ create table if not exists events (
   meta        jsonb not null default '{}'::jsonb,
   created_at  timestamptz not null default now()
 );
+
+-- Migraciones sobre bases ya creadas (los create table de arriba no las aplican).
+alter table firms    add column if not exists logo_url text;
+alter table firms    add column if not exists hero_url text;
+alter table firms    add column if not exists intro    text;
+
+alter table sessions add column if not exists first_name   text;
+alter table sessions add column if not exists last_name    text;
+alter table sessions add column if not exists consent      boolean not null default false;
+alter table sessions add column if not exists landing_page text;
+alter table sessions drop column if exists full_name;
+alter table sessions add column if not exists full_name text generated always as
+  (nullif(trim(coalesce(first_name, '') || ' ' || coalesce(last_name, '')), '')) stored;
 
 create index if not exists idx_sessions_firm       on sessions (firm_id, created_at desc);
 create index if not exists idx_sessions_recovery   on sessions (submitted_at, recovery_sent_at, updated_at) where email is not null;

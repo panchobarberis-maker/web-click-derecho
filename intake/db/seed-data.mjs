@@ -7,9 +7,18 @@ const contacto = {
   title: "¿Con quién hablamos?",
   subtitle: "Con esto ya podemos abrir la consulta y contactarte.",
   fields: [
-    { key: "full_name", label: "Nombre y apellido", type: "text", required: true },
+    { key: "first_name", label: "Nombre", type: "text", required: true },
+    { key: "last_name", label: "Apellido", type: "text", required: true },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "phone", label: "Teléfono / WhatsApp", type: "tel", required: false },
+    // Opt-in explicito. No bloquea el envio: responder la consulta ya esta
+    // cubierto por la finalidad con la que dejo el dato.
+    {
+      key: "consent",
+      label: "Quiero que me contacten por email y WhatsApp sobre mi consulta",
+      type: "checkbox",
+      required: false,
+    },
   ],
 };
 
@@ -17,7 +26,12 @@ export const firm = {
   name: "Alzogaray & Serrano",
   slug: "alzogaray-serrano",
   notify_email: "consultas@alzogarayserrano.com.ar",
-  accent: "#2d0a4e",
+  accent: "#8a6f4e",
+  logo_url: null,
+  // Imagen propia por defecto: el estudio la reemplaza por la suya.
+  hero_url: "/hero-default.svg",
+  intro:
+    "Tu privacidad nos importa. Todo lo que compartas en este formulario es estrictamente confidencial y se usa únicamente para evaluar tu caso. Nunca compartimos tu información con terceros sin tu consentimiento.",
 };
 
 export const funnels = [

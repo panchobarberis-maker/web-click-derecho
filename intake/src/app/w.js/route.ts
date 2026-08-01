@@ -10,6 +10,10 @@ export const dynamic = "force-dynamic";
  *
  * Va todo dentro de un iframe a proposito: aisla el CSS del sitio del estudio,
  * que es de donde sale casi todo el soporte en este tipo de widgets.
+ *
+ * El widget es ademas el unico que puede ver la atribucion real: desde adentro
+ * del iframe el referrer es el sitio del estudio. Por eso lee los utm_* y el
+ * referrer de la pagina madre y los reenvia en la URL del iframe.
  */
 export async function GET(req: Request) {
   const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
@@ -23,19 +27,63 @@ export async function GET(req: Request) {
   var firm = s.getAttribute("data-firm");
   if (!firm) return console.error("[intake] falta data-firm");
 
-  var mode    = s.getAttribute("data-mode") || "popup";        // popup | inline | button
+  var mode    = s.getAttribute("data-mode") || "popup";        // popup | inline | button | clip
   var funnel  = s.getAttribute("data-funnel") || "";
   var flow    = s.getAttribute("data-workflow") || "";
   var trigger = s.getAttribute("data-trigger") || "delay:12";  // delay:N | scroll:N | exit | now
   var cta     = s.getAttribute("data-cta") || "Consultá tu caso";
   var accent  = s.getAttribute("data-accent") || "#2d0a4e";
   var target  = s.getAttribute("data-target") || "";
+  var video   = s.getAttribute("data-video") || "";
+  var poster  = s.getAttribute("data-poster") || "";
   var once    = s.getAttribute("data-once") !== "false";
   var KEY     = "intake:popup:" + firm;
+  var ATTR    = "intake:attr:" + firm;
+
+  var ATTR_KEYS = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term",
+                   "gclid","fbclid","ttclid","msclkid"];
+
+  /**
+   * Atribucion de la pagina madre. Se guarda en el primer aterrizaje: si la
+   * persona llega desde Instagram, navega tres paginas y recien ahi abre el
+   * form, el origen sigue siendo Instagram.
+   */
+  function attribution() {
+    var qs = new URLSearchParams(location.search);
+    var found = {};
+    for (var i = 0; i < ATTR_KEYS.length; i++) {
+      var v = qs.get(ATTR_KEYS[i]);
+      if (v) found[ATTR_KEYS[i]] = v;
+    }
+
+    var ref = document.referrer || "";
+    var mismoSitio = false;
+    try { mismoSitio = !!ref && new URL(ref).hostname === location.hostname; } catch (e) {}
+
+    var fresh = Object.keys(found).length > 0 || (ref && !mismoSitio);
+    if (fresh) {
+      var data = { utm: found, ref: ref, lp: location.href, t: Date.now() };
+      try { sessionStorage.setItem(ATTR, JSON.stringify(data)); } catch (e) {}
+      return data;
+    }
+
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(ATTR) || "null");
+      if (saved) return saved;
+    } catch (e) {}
+
+    return { utm: {}, ref: ref, lp: location.href };
+  }
 
   function url(surface) {
+    var a = attribution();
     var p = "/f/" + firm + (funnel ? "/" + funnel : "") + (funnel && flow ? "/" + flow : "");
-    return ORIGIN + p + "?surface=" + surface;
+    var q = new URLSearchParams();
+    q.set("surface", surface);
+    for (var k in a.utm) if (Object.prototype.hasOwnProperty.call(a.utm, k)) q.set(k, a.utm[k]);
+    if (a.ref) q.set("ref", a.ref);
+    if (a.lp) q.set("lp", a.lp);
+    return ORIGIN + p + "?" + q.toString();
   }
 
   function frame(surface) {
@@ -58,12 +106,13 @@ export async function GET(req: Request) {
     return;
   }
 
-  // ---------- popup / button ----------
-  var overlay, opened = false;
+  // ---------- popup ----------
+  var overlay, opened = false, surfaceActual = "popup";
 
-  function open() {
+  function open(surface) {
     if (opened) return;
     opened = true;
+    surfaceActual = surface || "popup";
     try { if (once) sessionStorage.setItem(KEY, "1"); } catch (e) {}
 
     overlay = document.createElement("div");
@@ -75,7 +124,7 @@ export async function GET(req: Request) {
 
     var panel = document.createElement("div");
     panel.style.cssText =
-      "position:relative;width:100%;max-width:600px;height:min(88vh,720px);background:#f7f5f2;" +
+      "position:relative;width:100%;max-width:920px;height:min(90vh,760px);background:#f7f5f2;" +
       "border-radius:16px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.3);transform:translateY(12px);transition:transform .25s";
 
     var close = document.createElement("button");
@@ -87,7 +136,7 @@ export async function GET(req: Request) {
     close.onclick = shut;
 
     panel.appendChild(close);
-    panel.appendChild(frame("popup"));
+    panel.appendChild(frame(surfaceActual));
     overlay.appendChild(panel);
     overlay.onclick = function (e) { if (e.target === overlay) shut(); };
     document.body.appendChild(overlay);
@@ -115,13 +164,77 @@ export async function GET(req: Request) {
     if (e.data.type === "intake:submit") setTimeout(shut, 3500);
   });
 
+  // ---------- clip: video corto en una esquina que lleva al form ----------
+  if (mode === "clip") {
+    if (!video) return console.error("[intake] el modo clip necesita data-video");
+
+    var card = document.createElement("div");
+    card.style.cssText =
+      "position:fixed;right:20px;bottom:20px;z-index:2147482000;width:230px;border-radius:14px;" +
+      "overflow:hidden;background:#000;box-shadow:0 10px 34px rgba(0,0,0,.28);font:400 14px/1.3 system-ui,sans-serif";
+
+    var v = document.createElement("video");
+    v.src = video;
+    if (poster) v.poster = poster;
+    v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
+    v.style.cssText = "width:100%;height:306px;object-fit:cover;display:block;cursor:pointer";
+    v.onclick = function () { open("clip"); };
+    v.play().catch(function () { /* si el navegador bloquea el autoplay queda el poster */ });
+
+    var bar = document.createElement("div");
+    bar.style.cssText = "position:absolute;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center";
+
+    function chip(label, aria, fn) {
+      var btn = document.createElement("button");
+      btn.innerHTML = label;
+      btn.setAttribute("aria-label", aria);
+      btn.style.cssText =
+        "width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;" +
+        "font-size:13px;line-height:1;cursor:pointer;display:grid;place-items:center;flex:none";
+      btn.onclick = fn;
+      return btn;
+    }
+
+    var play = chip("&#10073;&#10073;", "Pausar", function () {
+      if (v.paused) { v.play(); play.innerHTML = "&#10073;&#10073;"; play.setAttribute("aria-label", "Pausar"); }
+      else { v.pause(); play.innerHTML = "&#9654;"; play.setAttribute("aria-label", "Reproducir"); }
+    });
+    var sound = chip("&#128263;", "Activar sonido", function () {
+      v.muted = !v.muted;
+      sound.innerHTML = v.muted ? "&#128263;" : "&#128266;";
+      sound.setAttribute("aria-label", v.muted ? "Activar sonido" : "Silenciar");
+    });
+    var hide = chip("&times;", "Cerrar el video", function () { card.remove(); });
+    hide.style.marginLeft = "auto";
+
+    bar.appendChild(play);
+    bar.appendChild(chip("&#8635;", "Volver a empezar", function () { v.currentTime = 0; v.play(); }));
+    bar.appendChild(sound);
+    bar.appendChild(hide);
+
+    var go = document.createElement("button");
+    go.textContent = cta;
+    go.style.cssText =
+      "display:block;width:100%;border:0;background:" + accent + ";color:#fff;padding:12px;" +
+      "font:500 14px/1 system-ui,sans-serif;cursor:pointer";
+    go.onclick = function () { open("clip"); };
+
+    card.appendChild(v);
+    card.appendChild(bar);
+    card.appendChild(go);
+    document.body.appendChild(card);
+    return;
+  }
+
+  // ---------- boton flotante ----------
   if (mode === "button") {
     var btn = document.createElement("button");
     btn.textContent = cta;
     btn.style.cssText =
       "position:fixed;right:20px;bottom:20px;z-index:2147482000;background:" + accent + ";color:#fff;border:0;" +
       "padding:14px 26px;border-radius:99px;font:500 15px/1 system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.22)";
-    btn.onclick = open;
+    btn.onclick = function () { open("popup"); };
     document.body.appendChild(btn);
     return;
   }
@@ -131,22 +244,22 @@ export async function GET(req: Request) {
   var kind = trigger.split(":")[0];
   var arg = parseFloat(trigger.split(":")[1] || "0");
 
-  if (kind === "now") open();
-  else if (kind === "delay") setTimeout(open, (arg || 12) * 1000);
+  if (kind === "now") open("popup");
+  else if (kind === "delay") setTimeout(function () { open("popup"); }, (arg || 12) * 1000);
   else if (kind === "scroll") {
     var onScroll = function () {
       var h = document.documentElement;
       var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight || 1)) * 100;
-      if (pct >= (arg || 50)) { open(); window.removeEventListener("scroll", onScroll); }
+      if (pct >= (arg || 50)) { open("popup"); window.removeEventListener("scroll", onScroll); }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
   } else if (kind === "exit") {
     var onOut = function (e) {
-      if (e.clientY <= 0) { open(); document.removeEventListener("mouseout", onOut); }
+      if (e.clientY <= 0) { open("popup"); document.removeEventListener("mouseout", onOut); }
     };
     document.addEventListener("mouseout", onOut);
     // En mobile no hay exit intent: se cae a un delay largo.
-    if (matchMedia("(pointer:coarse)").matches) setTimeout(open, 25000);
+    if (matchMedia("(pointer:coarse)").matches) setTimeout(function () { open("popup"); }, 25000);
   }
 })();`;
 

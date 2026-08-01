@@ -28,8 +28,10 @@ export async function POST(req: Request) {
     update sessions set
       data       = ${sql.json(data)},
       email      = coalesce(nullif(${data.email ?? null}, ''), email),
-      full_name  = coalesce(nullif(${data.full_name ?? null}, ''), full_name),
+      first_name = coalesce(nullif(${data.first_name ?? null}, ''), first_name),
+      last_name  = coalesce(nullif(${data.last_name ?? null}, ''), last_name),
       phone      = coalesce(nullif(${data.phone ?? null}, ''), phone),
+      consent    = ${data.consent === "Sí"},
       max_step   = ${alcanzado},
       updated_at = now()
     where id = ${b.sessionId}`;

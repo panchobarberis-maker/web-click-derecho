@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0%" stop-color="#2f2618"/>
+      <stop offset="45%" stop-color="#6d5738"/>
+      <stop offset="100%" stop-color="#a98a5c"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity=".10"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="1000" fill="url(#g)"/>
+  <!-- lineas verticales tenues: sugieren columnas sin ser literales -->
+  <g stroke="#fff" stroke-opacity=".07" stroke-width="1">
+    <path d="M70 0v1000M140 0v1000M210 0v1000M280 0v1000M350 0v1000"/>
+  </g>
+  <rect width="400" height="1000" fill="url(#fade)"/>
+</svg>

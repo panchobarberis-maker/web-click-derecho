@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Field, Firm, Funnel, Workflow } from "@/lib/db";
 import { sessionKey } from "@/lib/session-key";
+import { pickAttribution } from "@/lib/attribution";
 
 type Props = {
   firm: Firm;
@@ -45,9 +46,10 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
         funnelId: funnel.id,
         workflowId: workflow.id,
         surface: search.surface ?? "page",
-        source: search.utm_source ?? search.src ?? null,
-        referrer: document.referrer || null,
-        utm: Object.fromEntries(Object.entries(search).filter(([k]) => k.startsWith("utm_"))),
+        // `ref` y `lp` los reenvia el widget: son de la pagina madre, no del iframe.
+        referrer: search.ref || document.referrer || null,
+        landingPage: search.lp || location.href,
+        utm: pickAttribution(search),
       });
 
       if (!res.ok || cancelled) return;
@@ -124,6 +126,10 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
     const errs: Record<string, string> = {};
     for (const f of steps[step]?.fields ?? []) {
       const v = (data[f.key] ?? "").trim();
+      if (f.type === "checkbox") {
+        if (f.required && v !== "Sí") errs[f.key] = "Necesitamos tu confirmación para seguir";
+        continue;
+      }
       if (f.required && !v) errs[f.key] = "Completá este campo";
       else if (f.type === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) errs[f.key] = "Revisá el email";
     }
@@ -225,7 +231,13 @@ function FieldInput({
 
   return (
     <div className={`ffield${error ? " err" : ""}`}>
-      {field.type === "radio" ? <span style={{ display: "block", fontSize: ".9rem", fontWeight: 500, marginBottom: ".5rem" }}>{field.label} {field.required && <span className="req">*</span>}</span> : label}
+      {field.type === "radio" ? (
+        <span style={{ display: "block", fontSize: ".9rem", fontWeight: 500, marginBottom: ".5rem" }}>
+          {field.label} {field.required && <span className="req">*</span>}
+        </span>
+      ) : field.type === "checkbox" ? null : (
+        label
+      )}
 
       {field.type === "textarea" ? (
         <textarea id={id} value={value} onChange={(e) => onChange(field.key, e.target.value)} />
@@ -234,6 +246,15 @@ function FieldInput({
           <option value="">Elegí una opción…</option>
           {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
+      ) : field.type === "checkbox" ? (
+        <label className="fcheck">
+          <input
+            type="checkbox"
+            checked={value === "Sí"}
+            onChange={(e) => onChange(field.key, e.target.checked ? "Sí" : "No")}
+          />
+          <span>{field.label} {field.required && <span className="req">*</span>}</span>
+        </label>
       ) : field.type === "radio" ? (
         <div className="fradios">
           {field.options?.map((o) => (

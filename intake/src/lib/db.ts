@@ -17,6 +17,9 @@ export type Firm = {
   slug: string;
   notify_email: string | null;
   accent: string;
+  logo_url: string | null;
+  hero_url: string | null;
+  intro: string | null;
 };
 
 export type Funnel = {
@@ -32,7 +35,7 @@ export type Funnel = {
 export type Field = {
   key: string;
   label: string;
-  type: "text" | "email" | "tel" | "textarea" | "select" | "radio" | "date";
+  type: "text" | "email" | "tel" | "textarea" | "select" | "radio" | "date" | "checkbox";
   required?: boolean;
   options?: string[];
 };

@@ -26,9 +26,12 @@ if (reset) {
 }
 
 const [f] = await sql`
-  insert into firms (name, slug, notify_email, accent)
-  values (${firm.name}, ${firm.slug}, ${firm.notify_email}, ${firm.accent})
-  on conflict (slug) do update set name = excluded.name, notify_email = excluded.notify_email
+  insert into firms (name, slug, notify_email, accent, logo_url, hero_url, intro)
+  values (${firm.name}, ${firm.slug}, ${firm.notify_email}, ${firm.accent},
+          ${firm.logo_url}, ${firm.hero_url}, ${firm.intro})
+  on conflict (slug) do update set
+    name = excluded.name, notify_email = excluded.notify_email, accent = excluded.accent,
+    logo_url = excluded.logo_url, hero_url = excluded.hero_url, intro = excluded.intro
   returning *`;
 
 const workflowIds = [];
@@ -52,9 +55,10 @@ console.log(`estudio "${f.name}": ${funnels.length} areas, ${workflowIds.length}
 if (demo) {
   await sql`delete from sessions where firm_id = ${f.id} and data->>'_demo' = '1'`;
 
-  const nombres = ["Martín Ruiz", "Carla Gómez", "Diego Fernández", "Lucía Paz", "Javier Sosa", "Ana Torres",
-    "Nicolás Vega", "Sofía Ledesma", "Pablo Ibarra", "Valeria Cabrera", "Tomás Rivas", "Julieta Moyano"];
-  const fuentes = ["organic", "google", "instagram", "whatsapp", "referral", "direct"];
+  const nombres = [["Martín", "Ruiz"], ["Carla", "Gómez"], ["Diego", "Fernández"], ["Lucía", "Paz"],
+    ["Javier", "Sosa"], ["Ana", "Torres"], ["Nicolás", "Vega"], ["Sofía", "Ledesma"],
+    ["Pablo", "Ibarra"], ["Valeria", "Cabrera"], ["Tomás", "Rivas"], ["Julieta", "Moyano"]];
+  const fuentes = ["organic", "google", "instagram", "whatsapp", "referral", "direct", "facebook"];
   const superficies = ["page", "popup", "clip"];
   const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -81,10 +85,13 @@ if (demo) {
       // 45% ni empieza
       if (Math.random() < 0.45) continue;
 
-      const nombre = rnd(nombres);
-      const email = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/ /g, ".") + "@gmail.com";
-      await sql`update sessions set full_name = ${nombre}, email = ${email}, max_step = 1,
-        data = ${sql.json({ _demo: "1", full_name: nombre, email })} where id = ${s.id}`;
+      const [nombre, apellido] = rnd(nombres);
+      const email = `${nombre}.${apellido}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + "@gmail.com";
+      const consent = Math.random() < 0.8;
+      await sql`update sessions set first_name = ${nombre}, last_name = ${apellido}, email = ${email},
+        consent = ${consent}, max_step = 1,
+        data = ${sql.json({ _demo: "1", first_name: nombre, last_name: apellido, email, consent: consent ? "Sí" : "No" })}
+        where id = ${s.id}`;
       await sql`insert into events (session_id, firm_id, funnel_id, workflow_id, type, step_index, surface, created_at)
         values (${s.id}, ${f.id}, ${wf.funnel_id}, ${wf.workflow_id}, 'start', 0, ${surface}, ${at})`;
 
