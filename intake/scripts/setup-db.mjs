@@ -42,6 +42,15 @@ try {
       "reemplazado [YOUR-PASSWORD]. Se regenera en Supabase, en\n" +
       "Project Settings > Database > Reset database password.\n",
     );
+  } else if (/CONNECT_TIMEOUT|ETIMEDOUT|ECONNREFUSED/i.test(e.message)) {
+    console.error(
+      "No se llego al servidor. Suele ser la red bloqueando el puerto de\n" +
+      "salida. Probalo con:\n\n" +
+      "  Test-NetConnection <host>.pooler.supabase.com -Port 5432   (Windows)\n" +
+      "  nc -vz <host>.pooler.supabase.com 5432                     (Mac/Linux)\n\n" +
+      "Si da bloqueado, probá desde otra red (datos del celular) o usá la\n" +
+      "cadena del transaction pooler, que va por el puerto 6543.\n",
+    );
   } else if (/ENETUNREACH|EHOSTUNREACH|ENOTFOUND/i.test(e.message)) {
     console.error(
       "No hay ruta al servidor. Si copiaste la conexion directa\n" +

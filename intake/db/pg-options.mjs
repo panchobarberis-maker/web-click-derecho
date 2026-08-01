@@ -48,6 +48,9 @@ export function pgConfig(url) {
       // El pooler comparte un cupo chico entre todas las instancias.
       max: transactionPooler ? 3 : 10,
       idle_timeout: 20,
+      // Sin esto, una red que bloquea el puerto 5432 de salida deja el proceso
+      // colgado sin decir nada. Mejor fallar y mostrar el motivo.
+      connect_timeout: 15,
       onnotice: () => {},
     },
   };
