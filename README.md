@@ -188,8 +188,13 @@ esta app no usa. Cuando Next publique un parche, se actualiza y listo.
 
 ## Definir los formularios de un estudio
 
-Están en `db/seed-data.mjs` como JSON y se cargan con `npm run db:setup`.
-Tipos de campo: `text`, `email`, `tel`, `textarea`, `select`, `radio`, `date`, `checkbox`.
+**Desde el panel**, en *Áreas y formularios*. Se crea un área, se le agregan
+casos, y cada caso tiene su editor de pasos y preguntas. No hace falta tocar
+código.
+
+`db/seed-data.mjs` sigue existiendo, pero solo para el estudio de ejemplo que
+carga el seed. Tipos de campo: `text`, `email`, `tel`, `textarea`, `select`,
+`radio`, `date`, `checkbox`.
 
 ```js
 {
@@ -310,11 +315,10 @@ Lo que quedó afuera del MVP, en orden de valor:
   poder hacerlo la agencia desde la interfaz.
 - **Límite de intentos de login.** Falta frenar el fuerza bruta por IP y por
   cuenta. scrypt ya lo hace caro, pero no lo reemplaza.
-- **Constructor visual de formularios.** Hoy se editan en `seed-data.mjs`. Es el
-  80% del trabajo restante y el 10% del valor mientras la agencia arme los forms.
 - **Impresiones de pop-up y clip.** Se cuentan desde que se abre el formulario;
   no se registra cuántas veces se mostraron sin que los abrieran.
-- **Subida de videos para los clips.** Hoy se pasa una URL en `data-video`.
+- **Subida de videos para los clips.** Hoy se pega la URL de un mp4 hospedado
+  en otro lado.
 - **Secuencia de recuperación.** Hoy es un solo mail. Lo normal son 2 o 3.
 - **Scoring del lead** y aviso por WhatsApp al estudio.
 
@@ -339,3 +343,20 @@ legacy/           el sitio estático y los scripts de Python que había antes
 ```
 
 `legacy/` no forma parte de la app y Vercel lo ignora; queda como archivo.
+
+## Dar de alta un estudio nuevo
+
+El checklist del Inicio va marcando esto solo, a medida que se completa:
+
+1. **Crear el estudio.** Hoy con un `insert` en `firms`; falta la pantalla.
+2. **Cargar las áreas de práctica** — los temas que atiende.
+3. **Armar los formularios** — un caso por área, con sus preguntas. El primer
+   paso pide el contacto y ya viene armado.
+4. **Instalarlo en el sitio** — crear un pop-up o un clip y pasarle el
+   `<script>` a quien maneja la web del estudio.
+5. **Invitar al estudio** desde *Equipo*.
+6. **Probar el formulario** de punta a punta, incluido dejarlo a medias para
+   ver el circuito de recuperación.
+
+Los pasos 2 a 6 los puede hacer el estudio solo; en la práctica conviene
+dejarle los formularios armados y que después los ajuste.

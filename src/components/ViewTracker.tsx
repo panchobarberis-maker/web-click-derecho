@@ -32,6 +32,7 @@ export function ViewTracker({
         funnelId: funnelId ?? null,
         sessionId: localStorage.getItem(key),
         surface: search.surface ?? "page",
+        surfaceId: search.sid ?? null,
         // `ref` y `lp` los reenvia el widget: son de la pagina madre, no del iframe.
         referrer: search.ref || document.referrer || null,
         landingPage: search.lp || location.href,

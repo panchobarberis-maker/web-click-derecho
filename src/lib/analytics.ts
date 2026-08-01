@@ -138,3 +138,23 @@ export async function abandoned(firmId: string, limit = 100) {
     order by s.updated_at desc
     limit ${limit}`;
 }
+
+/** Rendimiento de cada pop-up o clip. Clicks = abrieron el formulario. */
+export async function porWidget(firmId: string, tipo: "popups" | "clips", range: Range) {
+  const s = since(range);
+  const surface = tipo === "popups" ? "popup" : "clip";
+
+  return sql<{ id: string; name: string; active: boolean; clicks: number; responses: number; conversion: number }[]>`
+    select w.id, w.name, w.active,
+      count(se.id)::int                                           as clicks,
+      count(se.id) filter (where se.submitted_at is not null)::int as responses,
+      coalesce(round(100.0 * count(se.id) filter (where se.submitted_at is not null)
+              / nullif(count(se.id), 0)), 0)::int                  as conversion
+    from ${sql(tipo)} w
+    left join sessions se
+      on se.surface_id = w.id and se.surface = ${surface}
+      ${s ? sql`and se.created_at > now() - ${s}::interval` : sql``}
+    where w.firm_id = ${firmId}
+    group by w.id, w.name, w.active, w.created_at
+    order by w.created_at desc`;
+}

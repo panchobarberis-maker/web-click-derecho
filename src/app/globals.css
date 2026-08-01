@@ -141,3 +141,110 @@ pre.snippet { background: #1c1230; color: #e8e2f5; padding: 1rem 1.2rem; border-
   font-family: inherit; font-size: .78rem; color: var(--muted); text-decoration: underline;
 }
 .linkish:hover { color: var(--ink); }
+
+/* ---------- editor de formularios ---------- */
+.lbl { display: block; font-size: .8rem; font-weight: 500; color: var(--muted); margin: .9rem 0 .35rem; }
+.lbl:first-child { margin-top: 0; }
+
+.editor input[type="text"], .editor input:not([type]), .editor select,
+.ajustes input:not([type="checkbox"]), .ajustes select,
+.nueva input, .fila-alta input {
+  width: 100%; padding: .6rem .75rem; border: 1px solid #ddd8e4; border-radius: 8px;
+  font-family: inherit; font-size: .9rem; color: var(--ink); background: #fff;
+}
+.editor input:focus, .editor select:focus, .ajustes input:focus, .ajustes select:focus,
+.nueva input:focus, .fila-alta input:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45, 10, 78, .08);
+}
+
+.editor { display: grid; gap: 1rem; }
+.paso > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.paso-n { font-size: .74rem; text-transform: uppercase; letter-spacing: .09em; color: var(--brass, #8a6f4e); font-weight: 600; }
+.paso .acciones, .pregunta .botones { display: flex; gap: .3rem; align-items: flex-end; }
+.paso .acciones button, .pregunta .botones button {
+  border: 1px solid var(--line); background: #fff; border-radius: 6px; cursor: pointer;
+  font-family: inherit; font-size: .78rem; padding: .35rem .55rem; color: var(--ink-2);
+}
+.paso .acciones button:disabled, .pregunta .botones button:disabled { opacity: .35; cursor: default; }
+.paso .acciones button:hover:not(:disabled), .pregunta .botones button:hover:not(:disabled) { background: var(--accent-soft); }
+.borrar { color: #96271b !important; }
+
+.preguntas { display: grid; gap: .75rem; margin-top: 1.25rem; }
+.pregunta { border: 1px solid var(--line); border-radius: 10px; padding: .9rem 1rem; background: #fdfcfe; }
+.pregunta .fila { display: flex; gap: .7rem; align-items: flex-end; }
+.pregunta .crece { flex: 1; min-width: 0; }
+.pregunta .pie { display: flex; align-items: center; gap: 1.25rem; margin-top: .7rem; flex-wrap: wrap; }
+.pregunta .clave { font-size: .76rem; color: var(--muted); }
+.pregunta .clave code { background: var(--accent-soft); padding: .1em .4em; border-radius: 4px; }
+
+.opciones { margin-top: .7rem; }
+.fila-opcion { display: flex; gap: .4rem; margin-bottom: .4rem; }
+.fila-opcion input { flex: 1; }
+
+.agregar {
+  border: 1px dashed #cfc7db; background: none; border-radius: 8px; cursor: pointer;
+  padding: .6rem; font-family: inherit; font-size: .85rem; color: var(--accent); width: 100%;
+}
+.agregar:hover { background: var(--accent-soft); border-color: var(--accent); }
+.agregar.chico { width: auto; padding: .35rem .8rem; font-size: .8rem; }
+.paso-nuevo { padding: .9rem; }
+
+.problemas {
+  background: #fdecea; color: #96271b; border-radius: 10px; padding: 1rem 1.2rem; font-size: .88rem;
+}
+.problemas ul { margin: .5rem 0 0 1.1rem; }
+.problemas li { margin-bottom: .3rem; }
+
+.barra { display: flex; align-items: center; gap: .75rem; }
+.barra .ok { color: var(--good); font-size: .86rem; font-weight: 500; }
+
+.check { display: flex; align-items: center; gap: .5rem; font-size: .86rem; color: var(--ink-2); cursor: pointer; margin: .6rem 0; }
+.check input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* ---------- areas ---------- */
+.card.area { text-decoration: none; display: block; transition: border-color .15s, transform .15s; }
+.card.area:hover { border-color: var(--accent); transform: translateY(-1px); }
+.area-datos { display: flex; gap: 1rem; margin-top: .9rem; font-size: .84rem; color: var(--muted); }
+.card.nueva { display: flex; flex-direction: column; justify-content: center; border-style: dashed; }
+.fila-alta { display: flex; gap: .6rem; margin-top: 1rem; align-items: center; }
+.fila-alta input { flex: 1; }
+.ajustes { display: block; }
+
+/* ---------- pop-ups y clips ---------- */
+.widget-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.widget-head h3 { margin-bottom: .4rem; }
+.widget-stats { display: flex; gap: 1.5rem; text-align: right; }
+.widget-stats div { display: flex; flex-direction: column; }
+.widget-stats strong { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.widget-stats span { font-size: .74rem; color: var(--muted); }
+
+.snippet-wrap { position: relative; }
+.snippet-wrap .snippet { padding-right: 5.5rem; }
+.copiar {
+  position: absolute; top: .6rem; right: .6rem; border: 0; border-radius: 6px; cursor: pointer;
+  background: rgba(255,255,255,.14); color: #e8e2f5; font-family: inherit; font-size: .76rem; padding: .3rem .7rem;
+}
+.copiar:hover { background: rgba(255,255,255,.24); }
+
+details.ajuste { margin-top: 1rem; }
+details.ajuste summary { cursor: pointer; font-size: .85rem; color: var(--accent); font-weight: 500; }
+details.ajuste[open] summary { margin-bottom: .75rem; }
+
+/* ---------- checklist de puesta en marcha ---------- */
+.onboarding { margin-bottom: 1rem; }
+.onboarding > header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.25rem; }
+.onboarding > header p { font-size: .88rem; margin-top: .2rem; }
+.onboarding .progreso { font-size: .8rem; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.onboarding ol { list-style: none; display: grid; gap: .2rem; }
+.onboarding li { display: flex; align-items: center; gap: .9rem; padding: .7rem 0; border-top: 1px solid var(--line); }
+.onboarding li:first-child { border-top: 0; }
+.onboarding li strong { font-size: .92rem; font-weight: 500; }
+.onboarding li p { font-size: .82rem; color: var(--muted); margin-top: .15rem; }
+.onboarding li > div { flex: 1; }
+.onboarding li .btn { flex: none; padding: .45rem 1rem; font-size: .82rem; }
+.onboarding .marca {
+  width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line); flex: none;
+  display: grid; place-items: center; font-size: .7rem; color: #fff;
+}
+.onboarding li.listo .marca { background: var(--good); border-color: var(--good); }
+.onboarding li.listo strong { color: var(--muted); text-decoration: line-through; }

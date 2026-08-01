@@ -214,6 +214,54 @@ begin
   end loop;
 end $$;
 
+-- ---------------------------------------------------------------------------
+-- Pop-ups y clips
+--
+-- Cada uno es una entidad con su propia configuracion y sus propias metricas.
+-- El widget se identifica con su id (/w.js?popup=<id>), asi la configuracion
+-- se cambia desde el panel sin volver a tocar el sitio del estudio, y cada
+-- visita queda atribuida al pop-up o clip que la trajo.
+-- ---------------------------------------------------------------------------
+
+create table if not exists popups (
+  id          uuid primary key default gen_random_uuid(),
+  firm_id     uuid not null references firms(id) on delete cascade,
+  name        text not null,
+  funnel_id   uuid references funnels(id) on delete set null,
+  workflow_id uuid references workflows(id) on delete set null,
+  trigger     text not null default 'delay:12',  -- delay:N | scroll:N | exit | now | button
+  cta         text not null default 'Consultá tu caso',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_popups_firm on popups (firm_id);
+
+create table if not exists clips (
+  id          uuid primary key default gen_random_uuid(),
+  firm_id     uuid not null references firms(id) on delete cascade,
+  name        text not null,
+  video_url   text not null,
+  poster_url  text,
+  cta         text not null default 'Empezar',
+  funnel_id   uuid references funnels(id) on delete set null,
+  workflow_id uuid references workflows(id) on delete set null,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_clips_firm on clips (firm_id);
+
+-- Que pop-up o clip trajo esta visita. surface ya dice de que tipo es.
+alter table sessions add column if not exists surface_id uuid;
+create index if not exists idx_sessions_surface on sessions (surface, surface_id);
+
+do $rls$
+declare t text;
+begin
+  foreach t in array array['popups', 'clips'] loop
+    execute format('alter table %I enable row level security', t);
+  end loop;
+end $rls$;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -307,11 +355,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$LO9P9pLudgIpRoHVa9VBuA==$fdj5FWgzHM+NSwBxEiq4DnwEKP6TnfhjzG0+LkRuEnBEpKff8tTIJOL9aVAAoDYcCAQWCHE4yptNrHnBBgEG6A==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$cYYuYoeb5PSr4M/UOIPgxA==$cqfZVq4EnWXul2PtlEVA2fmQoTkSHMAKE95zRNEUkv4W/NvcOxoSAtEQWLE86CErVGxD7vRClEZLHR+uWN1caQ==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$qccotVN+YhNQbBa47vHHeA==$I8nmEdivdptG6xHRh8nSp/5uBdpNk8GETPTs7NWwif6D0+Jd/Tb2WnwIxexWKclRNRIg0I9vlfOfhsCjsKecPQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$tCQVvzOTTDZCgUsLMo4bqA==$Z14U9NDX+HjBgHNuTJIeSc7NmmLDeqeh4XWwJ/9Us67LCKiJ8S39hOdOyl0qfBxsDAsUhJE3yeJfslzFqJn3Fw==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

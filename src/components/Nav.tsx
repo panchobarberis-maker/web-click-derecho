@@ -12,6 +12,8 @@ const items = [
   { href: "/analytics", label: "Analytics" },
   { sep: true },
   { href: "/funnels", label: "Áreas y formularios" },
+  { href: "/popups", label: "Pop-ups" },
+  { href: "/clips", label: "Clips" },
   { href: "/embed", label: "Instalación" },
   { href: "/equipo", label: "Equipo", ownerOnly: true },
 ];

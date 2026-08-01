@@ -1,8 +1,39 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import { activeFirm } from "@/lib/tenancy";
+import { activeFirm, requireOwner } from "@/lib/tenancy";
+import { slugUrl } from "@/lib/forms";
 
 export const dynamic = "force-dynamic";
+
+const COLORES = ["#c9a227", "#b05c3c", "#4b7a68", "#7a5c9e", "#3c6fb0", "#8a6f4e"];
+
+async function crearArea(formData: FormData) {
+  "use server";
+  const { firm } = await requireOwner();
+
+  const name = String(formData.get("name") ?? "").trim();
+  if (!name) return;
+
+  // El slug va en la URL pública, así que tiene que ser único dentro del estudio.
+  const base = slugUrl(name);
+  let slug = base;
+  for (let i = 2; ; i++) {
+    const [existe] = await sql`select 1 from funnels where firm_id = ${firm.id} and slug = ${slug}`;
+    if (!existe) break;
+    slug = `${base}-${i}`;
+  }
+
+  const [{ n }] = await sql<{ n: number }[]>`select count(*)::int as n from funnels where firm_id = ${firm.id}`;
+
+  await sql`
+    insert into funnels (firm_id, name, slug, color, sort_order)
+    values (${firm.id}, ${name}, ${slug}, ${COLORES[n % COLORES.length]}, ${n})`;
+
+  revalidatePath("/funnels");
+  redirect(`/funnels/${slug}`);
+}
 
 type Row = {
   id: string;
@@ -10,27 +41,21 @@ type Row = {
   slug: string;
   color: string;
   active: boolean;
-  workflows: { name: string; slug: string; steps: number; visits: number; responses: number }[];
+  formularios: number;
+  consultas: number;
 };
 
 export default async function Funnels() {
   const { firm } = await activeFirm();
+  const puedeEditar = firm.role !== "member";
 
   const rows = await sql<Row[]>`
     select f.id, f.name, f.slug, f.color, f.active,
-      coalesce(json_agg(
-        json_build_object(
-          'name', w.name, 'slug', w.slug,
-          'steps', jsonb_array_length(w.steps->'steps'),
-          'visits', (select count(*) from sessions s where s.workflow_id = w.id),
-          'responses', (select count(*) from sessions s where s.workflow_id = w.id and s.submitted_at is not null)
-        ) order by w.sort_order
-      ) filter (where w.id is not null), '[]') as workflows
+      (select count(*)::int from workflows w where w.funnel_id = f.id) as formularios,
+      (select count(*)::int from sessions s where s.funnel_id = f.id and s.submitted_at is not null) as consultas
     from funnels f
-    left join workflows w on w.funnel_id = f.id
     where f.firm_id = ${firm.id}
-    group by f.id
-    order by f.sort_order`;
+    order by f.sort_order, f.name`;
 
   return (
     <>
@@ -38,43 +63,43 @@ export default async function Funnels() {
         <div>
           <h1>Áreas y formularios</h1>
           <p>
-            Cada <strong>área de práctica</strong> agrupa los formularios de casos concretos. El visitante elige su
-            área, después su caso, y responde solo las preguntas de ese caso. Los formularios se definen en{" "}
-            <code>db/seed-data.mjs</code>.
+            Cada <strong>área de práctica</strong> agrupa los casos que atiende el estudio, y cada caso tiene su
+            propio formulario. La persona elige su área, después su caso, y responde solo las preguntas de ese caso.
           </p>
         </div>
-        <Link href={`/f/${firm.slug}`} className="btn" target="_blank">
+        <Link href={`/f/${firm.slug}`} className="btn ghost" target="_blank">
           Ver página pública
         </Link>
       </div>
 
+      {rows.length === 0 && (
+        <div className="card" style={{ marginBottom: "1rem" }}>
+          <p className="muted">
+            Todavía no hay áreas cargadas. Empezá por una: &ldquo;Derecho Laboral&rdquo;, &ldquo;Familia&rdquo;, lo
+            que atienda el estudio.
+          </p>
+        </div>
+      )}
+
       <div className="grid cols-3">
         {rows.map((f) => (
-          <div className="card" key={f.id}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
-              <span className="pill" style={{ background: `${f.color}1f`, color: f.color }}>{f.name}</span>
-              {f.active && <span className="muted" style={{ fontSize: ".78rem" }}>Activa</span>}
+          <Link className="card area" key={f.id} href={`/funnels/${f.slug}`}>
+            <span className="pill" style={{ background: `${f.color}1f`, color: f.color }}>{f.name}</span>
+            <div className="area-datos">
+              <span>{f.formularios} {f.formularios === 1 ? "caso" : "casos"}</span>
+              <span>{f.consultas} {f.consultas === 1 ? "consulta" : "consultas"}</span>
             </div>
-
-            <table>
-              <tbody>
-                {f.workflows.map((w) => (
-                  <tr key={w.slug}>
-                    <td>
-                      <Link href={`/f/${firm.slug}/${f.slug}/${w.slug}`} target="_blank" style={{ textDecoration: "none" }}>
-                        {w.name}
-                      </Link>
-                      <div className="muted" style={{ fontSize: ".78rem" }}>{w.steps} pasos</div>
-                    </td>
-                    <td className="num muted" style={{ fontSize: ".82rem", whiteSpace: "nowrap" }}>
-                      {w.responses}/{w.visits}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            {!f.active && <span className="muted" style={{ fontSize: ".8rem" }}>Desactivada</span>}
+          </Link>
         ))}
+
+        {puedeEditar && (
+          <form action={crearArea} className="card nueva">
+            <label htmlFor="name" className="lbl">Área nueva</label>
+            <input id="name" name="name" placeholder="Derecho Laboral" required />
+            <button type="submit" className="btn" style={{ marginTop: ".75rem" }}>Crear área</button>
+          </form>
+        )}
       </div>
     </>
   );

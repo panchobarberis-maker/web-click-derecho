@@ -193,3 +193,51 @@ begin
     execute format('alter table %I enable row level security', t);
   end loop;
 end $$;
+
+-- ---------------------------------------------------------------------------
+-- Pop-ups y clips
+--
+-- Cada uno es una entidad con su propia configuracion y sus propias metricas.
+-- El widget se identifica con su id (/w.js?popup=<id>), asi la configuracion
+-- se cambia desde el panel sin volver a tocar el sitio del estudio, y cada
+-- visita queda atribuida al pop-up o clip que la trajo.
+-- ---------------------------------------------------------------------------
+
+create table if not exists popups (
+  id          uuid primary key default gen_random_uuid(),
+  firm_id     uuid not null references firms(id) on delete cascade,
+  name        text not null,
+  funnel_id   uuid references funnels(id) on delete set null,
+  workflow_id uuid references workflows(id) on delete set null,
+  trigger     text not null default 'delay:12',  -- delay:N | scroll:N | exit | now | button
+  cta         text not null default 'Consultá tu caso',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_popups_firm on popups (firm_id);
+
+create table if not exists clips (
+  id          uuid primary key default gen_random_uuid(),
+  firm_id     uuid not null references firms(id) on delete cascade,
+  name        text not null,
+  video_url   text not null,
+  poster_url  text,
+  cta         text not null default 'Empezar',
+  funnel_id   uuid references funnels(id) on delete set null,
+  workflow_id uuid references workflows(id) on delete set null,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now()
+);
+create index if not exists idx_clips_firm on clips (firm_id);
+
+-- Que pop-up o clip trajo esta visita. surface ya dice de que tipo es.
+alter table sessions add column if not exists surface_id uuid;
+create index if not exists idx_sessions_surface on sessions (surface, surface_id);
+
+do $rls$
+declare t text;
+begin
+  foreach t in array array['popups', 'clips'] loop
+    execute format('alter table %I enable row level security', t);
+  end loop;
+end $rls$;

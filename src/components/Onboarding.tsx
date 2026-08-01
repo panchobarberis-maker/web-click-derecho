@@ -1,0 +1,46 @@
+import Link from "next/link";
+
+export type Paso = {
+  titulo: string;
+  detalle: string;
+  href: string;
+  accion: string;
+  listo: boolean;
+};
+
+/**
+ * Checklist de puesta en marcha de un estudio.
+ *
+ * Se calcula del estado real de la base, no de una tabla de "pasos
+ * completados": si alguien borra sus formularios, el paso vuelve a aparecer.
+ * Desaparece del Inicio cuando esta todo hecho.
+ */
+export function Onboarding({ pasos }: { pasos: Paso[] }) {
+  const hechos = pasos.filter((p) => p.listo).length;
+  if (hechos === pasos.length) return null;
+
+  return (
+    <section className="card onboarding">
+      <header>
+        <div>
+          <h3>Puesta en marcha</h3>
+          <p className="muted">Lo que falta para que el estudio empiece a recibir consultas.</p>
+        </div>
+        <span className="progreso">{hechos} de {pasos.length}</span>
+      </header>
+
+      <ol>
+        {pasos.map((p) => (
+          <li key={p.titulo} className={p.listo ? "listo" : ""}>
+            <span className="marca" aria-hidden="true">{p.listo ? "✓" : ""}</span>
+            <div>
+              <strong>{p.titulo}</strong>
+              <p>{p.detalle}</p>
+            </div>
+            {!p.listo && <Link href={p.href} className="btn ghost">{p.accion}</Link>}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}

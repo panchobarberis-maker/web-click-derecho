@@ -55,8 +55,10 @@ export async function POST(req: Request) {
   }
 
   const [s] = await sql<{ id: string }[]>`
-    insert into sessions (firm_id, funnel_id, workflow_id, surface, source, referrer, landing_page, utm)
+    insert into sessions (firm_id, funnel_id, workflow_id, surface, surface_id,
+                          source, referrer, landing_page, utm)
     values (${firm.id}, ${b.funnelId ?? null}, ${b.workflowId ?? null}, ${b.surface ?? "page"},
+            ${/^[0-9a-f-]{36}$/i.test(String(b.surfaceId ?? "")) ? b.surfaceId : null},
             ${source}, ${referrer}, ${landingPage}, ${sql.json(utm)})
     returning id`;
 

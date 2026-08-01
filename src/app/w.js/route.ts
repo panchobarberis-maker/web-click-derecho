@@ -1,6 +1,58 @@
 import { baseUrl } from "@/lib/base-url";
+import { sql } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+
+type Cfg = {
+  firm: string; mode: string; funnel: string; workflow: string;
+  trigger: string; cta: string; accent: string; video: string; poster: string; id: string;
+};
+
+const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "" };
+
+/**
+ * Configuracion guardada de un pop-up o un clip.
+ *
+ * El sitio del estudio solo lleva el id; todo lo demas sale de la base. Asi
+ * cambiar el disparador o el texto no obliga a volver a pegar el snippet, y
+ * cada visita queda atribuida a ese pop-up o clip concreto.
+ */
+async function cargarCfg(url: URL): Promise<Cfg> {
+  const popup = url.searchParams.get("popup");
+  const clip = url.searchParams.get("clip");
+  if (!popup && !clip) return VACIO;
+
+  const tabla = popup ? "popups" : "clips";
+  const id = popup ?? clip!;
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return VACIO;
+
+  const [row] = await sql<
+    { name: string; cta: string; active: boolean; accent: string; firm: string;
+      funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string }[]
+  >`
+    select w.*, fi.slug as firm, fi.accent,
+           f.slug as funnel, wf.slug as workflow
+    from ${sql(tabla)} w
+    join firms fi on fi.id = w.firm_id
+    left join funnels f on f.id = w.funnel_id
+    left join workflows wf on wf.id = w.workflow_id
+    where w.id = ${id}`;
+
+  if (!row || !row.active) return VACIO;
+
+  return {
+    firm: row.firm,
+    mode: popup ? (row.trigger === "button" ? "button" : "popup") : "clip",
+    funnel: row.funnel ?? "",
+    workflow: row.workflow ?? "",
+    trigger: row.trigger ?? "delay:12",
+    cta: row.cta,
+    accent: row.accent,
+    video: row.video_url ?? "",
+    poster: row.poster_url ?? "",
+    id,
+  };
+}
 
 /**
  * Widget embebible. El estudio pega una sola linea en su sitio:
@@ -19,25 +71,31 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: Request) {
   const origin = baseUrl() || new URL(req.url).origin;
+  const cfg = await cargarCfg(new URL(req.url));
 
   const js = `(function () {
   "use strict";
   var ORIGIN = ${JSON.stringify(origin)};
+  var CFG = ${JSON.stringify(cfg)};
   var s = document.currentScript;
   if (!s) return;
 
-  var firm = s.getAttribute("data-firm");
-  if (!firm) return console.error("[intake] falta data-firm");
+  // Los atributos del <script> pisan lo guardado en el panel.
+  var attr = function (n, def) { return s.getAttribute("data-" + n) || CFG[n] || def; };
 
-  var mode    = s.getAttribute("data-mode") || "popup";        // popup | inline | button | clip
-  var funnel  = s.getAttribute("data-funnel") || "";
-  var flow    = s.getAttribute("data-workflow") || "";
-  var trigger = s.getAttribute("data-trigger") || "delay:12";  // delay:N | scroll:N | exit | now
-  var cta     = s.getAttribute("data-cta") || "Consultá tu caso";
-  var accent  = s.getAttribute("data-accent") || "#2d0a4e";
+  var firm = attr("firm", "");
+  if (!firm) return console.error("[intake] falta data-firm o un pop-up/clip valido");
+
+  var mode    = attr("mode", "popup");        // popup | inline | button | clip
+  var funnel  = attr("funnel", "");
+  var flow    = attr("workflow", "");
+  var trigger = attr("trigger", "delay:12");  // delay:N | scroll:N | exit | now
+  var cta     = attr("cta", "Consultá tu caso");
+  var accent  = attr("accent", "#2d0a4e");
   var target  = s.getAttribute("data-target") || "";
-  var video   = s.getAttribute("data-video") || "";
-  var poster  = s.getAttribute("data-poster") || "";
+  var video   = attr("video", "");
+  var poster  = attr("poster", "");
+  var wid     = CFG.id || "";
   var once    = s.getAttribute("data-once") !== "false";
   var KEY     = "intake:popup:" + firm;
   var ATTR    = "intake:attr:" + firm;
@@ -82,6 +140,7 @@ export async function GET(req: Request) {
     var p = "/f/" + firm + (funnel ? "/" + funnel : "") + (funnel && flow ? "/" + flow : "");
     var q = new URLSearchParams();
     q.set("surface", surface);
+    if (wid) q.set("sid", wid);
     for (var k in a.utm) if (Object.prototype.hasOwnProperty.call(a.utm, k)) q.set(k, a.utm[k]);
     if (a.ref) q.set("ref", a.ref);
     if (a.lp) q.set("lp", a.lp);
