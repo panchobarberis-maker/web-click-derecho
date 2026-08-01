@@ -22,6 +22,33 @@ async function hashPassword(plain) {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Carga .env.local a mano.
+ *
+ * Next lo lee solo, pero un script suelto de Node no: sin esto el script se
+ * conectaba al Postgres local por defecto e ignoraba la configuracion, que es
+ * justo donde vive DATABASE_URL.
+ */
+async function cargarEnvLocal() {
+  let texto;
+  try {
+    texto = await readFile(join(here, "..", ".env.local"), "utf8");
+  } catch {
+    return; // sin archivo: se usan las variables del entorno
+  }
+
+  for (const linea of texto.split(/\r?\n/)) {
+    const m = /^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/.exec(linea);
+    if (!m) continue;
+    const clave = m[1];
+    const valor = m[2].trim().replace(/^(['"])(.*)\1$/, "$2");
+    // Lo que venga por entorno pisa al archivo.
+    if (!(clave in process.env)) process.env[clave] = valor;
+  }
+}
+await cargarEnvLocal();
+
 const { url, options } = pgConfig(
   process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake",
 );
