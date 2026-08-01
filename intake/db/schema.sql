@@ -1,8 +1,6 @@
--- Esquema del intake. Postgres 14+.
+-- Esquema del intake. Postgres 14+ (gen_random_uuid() es nativo desde la 13).
 -- Modelo: firm > funnel (area de practica) > workflow (caso concreto, con su form).
 -- Una session es un visitante que abrio un form; se guarda parcial desde el paso 1.
-
-create extension if not exists "pgcrypto";
 
 create table if not exists firms (
   id            uuid primary key default gen_random_uuid(),
@@ -166,3 +164,32 @@ create table if not exists invitations (
   created_at timestamptz not null default now()
 );
 create index if not exists idx_invitations_email on invitations (lower(email)) where accepted_at is null;
+
+
+-- ---------------------------------------------------------------------------
+-- Cierre para Supabase
+--
+-- Supabase deja privilegios por defecto que le dan acceso a los roles `anon` y
+-- `authenticated` sobre las tablas del esquema `public`, y las publica sola a
+-- traves de su API REST. Sin esto, cualquiera con la clave publica del
+-- proyecto podria leer las consultas de los estudios desde el navegador.
+--
+-- Activar RLS sin definir ninguna politica cierra esa puerta por completo. La
+-- app no se ve afectada: se conecta con el rol dueño de las tablas, y el dueño
+-- no queda sujeto a RLS mientras no se use FORCE ROW LEVEL SECURITY. En un
+-- Postgres local esto no cambia nada.
+--
+-- El control de acceso real lo hace la app: cada consulta filtra por firm_id
+-- contra la membresia del usuario (ver src/lib/tenancy.ts).
+-- ---------------------------------------------------------------------------
+
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'firms', 'funnels', 'workflows', 'sessions', 'events',
+    'users', 'memberships', 'oauth_accounts', 'auth_sessions', 'invitations'
+  ] loop
+    execute format('alter table %I enable row level security', t);
+  end loop;
+end $$;

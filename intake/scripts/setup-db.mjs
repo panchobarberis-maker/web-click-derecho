@@ -10,6 +10,7 @@ import postgres from "postgres";
 import { randomBytes, scrypt as scryptCb } from "node:crypto";
 import { promisify } from "node:util";
 import { firm, funnels } from "../db/seed-data.mjs";
+import { pgConfig } from "../db/pg-options.mjs";
 
 const scrypt = promisify(scryptCb);
 
@@ -21,8 +22,10 @@ async function hashPassword(plain) {
 }
 
 const here = dirname(fileURLToPath(import.meta.url));
-const url = process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake";
-const sql = postgres(url, { onnotice: () => {} });
+const { url, options } = pgConfig(
+  process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake",
+);
+const sql = postgres(url, options);
 
 const demo = process.argv.includes("--demo");
 const reset = process.argv.includes("--reset");

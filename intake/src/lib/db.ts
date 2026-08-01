@@ -1,13 +1,15 @@
 import postgres from "postgres";
+import { pgConfig } from "../../db/pg-options.mjs";
 
-const url = process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake";
+const { url, options } = pgConfig(
+  process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake",
+);
 
 // En dev Next recarga los modulos en cada cambio; sin el cache global se abren
 // conexiones nuevas hasta agotar el pool de Postgres.
 const g = globalThis as unknown as { _sql?: postgres.Sql };
 
-export const sql: postgres.Sql =
-  g._sql ?? postgres(url, { max: 10, idle_timeout: 20, onnotice: () => {} });
+export const sql: postgres.Sql = g._sql ?? postgres(url, options);
 
 if (process.env.NODE_ENV !== "production") g._sql = sql;
 

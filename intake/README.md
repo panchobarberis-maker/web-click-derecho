@@ -75,23 +75,42 @@ andando.
 
 ## Arranque local
 
-Con Docker (levanta Postgres solo):
+La única dependencia externa es una base Postgres. Dos caminos.
+
+### Con Supabase (recomendado)
+
+Es gratis y te deja la base ya lista para cuando lo pongas online.
+
+1. Crear una cuenta en [supabase.com](https://supabase.com) y un proyecto nuevo.
+   Anotá la contraseña que te pide: no la vuelve a mostrar.
+2. En **SQL Editor**, pegar todo el contenido de `db/schema.sql` y ejecutar.
+3. En **Project Settings → Database → Connection string → URI**, copiar la
+   cadena del **Session pooler** y reemplazar `[YOUR-PASSWORD]` por la contraseña
+   del paso 1.
 
 ```bash
 git clone -b claude/legal-form-app-clone-mcn4lt <este-repo>
 cd web-click-derecho/intake
-cp .env.example .env.local
+cp .env.example .env.local     # pegar ahí la cadena en DATABASE_URL
 npm install
-npm run setup      # Postgres + tablas + estudio de ejemplo + servidor
+npm run setup
 ```
 
-Y listo: http://localhost:3000
+### Con Docker
 
-Si ya tenés un Postgres propio, salteá Docker: poné tu cadena de conexión en
-`DATABASE_URL` dentro de `.env.local` y corré `npm run db:setup -- --demo && npm run dev`.
+Si preferís no depender de una cuenta:
 
-Las veces siguientes alcanza con `npm run dev` (los datos quedan en el volumen
-de Docker). Para volver a empezar de cero: `npm run db:setup -- --reset --demo`.
+```bash
+cp .env.example .env.local     # dejar el DATABASE_URL como viene
+npm install
+npm run docker:up              # levanta Postgres 16 en un contenedor
+npm run setup
+```
+
+En los dos casos, `npm run setup` crea las tablas, carga el estudio de ejemplo
+con tráfico simulado y arranca en http://localhost:3000. Las veces siguientes
+alcanza con `npm run dev`. Para volver a empezar de cero:
+`npm run db:setup -- --reset --demo`.
 
 - Panel: http://localhost:3000 — el seed crea dos cuentas con la contraseña
   `clickderecho2026` (cambiable con `SEED_PASSWORD`):
@@ -107,6 +126,30 @@ Para probar el job de recuperación sin esperar los 45 minutos:
 ```bash
 curl -H "Authorization: Bearer dev-secret" localhost:3000/api/cron/recover
 ```
+
+### Notas sobre Supabase
+
+**Qué cadena de conexión usar.** Supabase ofrece tres y no dan lo mismo:
+
+| | Cuándo |
+|---|---|
+| Conexión directa | Solo si tu red tiene IPv6 |
+| **Session pooler** (5432) | Desarrollo local — es la que conviene |
+| **Transaction pooler** (6543) | Vercel y cualquier entorno serverless |
+
+La app detecta cuál le pasaste y se configura sola: activa SSL fuera de
+localhost y desactiva los *prepared statements* con el transaction pooler.
+Sin eso último, pgbouncer reparte cada consulta entre conexiones distintas y
+Postgres responde `prepared statement does not exist` — es el error más común
+al combinar Vercel con Supabase.
+
+**RLS.** El esquema activa Row Level Security en todas las tablas sin definir
+políticas. Supabase publica automáticamente el esquema `public` por su API
+REST, así que sin esto cualquiera con la clave pública del proyecto podría leer
+las consultas de los estudios desde el navegador. La app no se ve afectada: se
+conecta con el rol dueño de las tablas, que no queda sujeto a RLS. El control
+de acceso real lo hace la app filtrando por `firm_id` contra la membresía del
+usuario.
 
 ## Definir los formularios de un estudio
 
@@ -181,8 +224,9 @@ romper el formulario ni al revés.
 
 Vercel + Supabase entran en el free tier de los dos.
 
-1. Crear el proyecto en Supabase y correr `db/schema.sql` en el SQL Editor.
-2. En Vercel setear `DATABASE_URL` (el connection string *pooled* de Supabase),
+1. Reusar el proyecto de Supabase del arranque local, o crear uno nuevo y
+   correr `db/schema.sql` en su SQL Editor.
+2. En Vercel setear `DATABASE_URL` (acá sí el **transaction pooler**, puerto 6543),
    `NEXT_PUBLIC_APP_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET` y —si
    se quiere login con Google— `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
 3. Agregar `vercel.json` para el job de recuperación:
