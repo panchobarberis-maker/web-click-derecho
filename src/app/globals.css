@@ -147,13 +147,15 @@ pre.snippet { background: #1c1230; color: #e8e2f5; padding: 1rem 1.2rem; border-
 .lbl:first-child { margin-top: 0; }
 
 .editor input[type="text"], .editor input:not([type]), .editor select,
-.ajustes input:not([type="checkbox"]), .ajustes select,
+.ajustes input:not([type="checkbox"]), .ajustes select, .ajustes textarea,
 .nueva input, .fila-alta input {
   width: 100%; padding: .6rem .75rem; border: 1px solid #ddd8e4; border-radius: 8px;
   font-family: inherit; font-size: .9rem; color: var(--ink); background: #fff;
 }
+.ajustes textarea { resize: vertical; line-height: 1.5; }
+.ajustes input[type="color"] { padding: .2rem; height: 2.4rem; cursor: pointer; }
 .editor input:focus, .editor select:focus, .ajustes input:focus, .ajustes select:focus,
-.nueva input:focus, .fila-alta input:focus {
+.ajustes textarea:focus, .nueva input:focus, .fila-alta input:focus {
   outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45, 10, 78, .08);
 }
 
@@ -229,6 +231,11 @@ pre.snippet { background: #1c1230; color: #e8e2f5; padding: 1rem 1.2rem; border-
 details.ajuste { margin-top: 1rem; }
 details.ajuste summary { cursor: pointer; font-size: .85rem; color: var(--accent); font-weight: 500; }
 details.ajuste[open] summary { margin-bottom: .75rem; }
+
+/* ---------- ayuda al costado de los ajustes ---------- */
+.ayuda { list-style: none; display: grid; gap: .9rem; }
+.ayuda li { font-size: .84rem; color: var(--muted); line-height: 1.55; padding-left: .9rem; border-left: 2px solid var(--line); }
+.ayuda li strong { color: var(--ink-2); font-weight: 500; }
 
 /* ---------- checklist de puesta en marcha ---------- */
 .onboarding { margin-bottom: 1rem; }

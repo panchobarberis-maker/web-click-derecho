@@ -42,7 +42,7 @@ se le vincula la cuenta en vez de duplicarla.
 
 Tres niveles:
 
-| | Ve consultas | Invita gente | Ve todos los estudios |
+| | Ve consultas | Invita gente y edita los ajustes | Crea y borra estudios |
 |---|---|---|---|
 | **Miembro** del estudio | ✓ | | |
 | **Dueño** del estudio | ✓ | ✓ | |
@@ -51,6 +51,30 @@ Tres niveles:
 La agencia tiene un selector de estudio en la barra lateral. La cookie solo
 elige entre los estudios a los que la cuenta ya tiene acceso: el permiso se
 resuelve siempre contra la base, así que forzar la cookie no abre nada.
+
+`is_staff` no se puede pedir desde la aplicación: se marca a mano en la base
+(`update users set is_staff = true where email = '…'`). Es la única cosa que
+sigue necesitando SQL.
+
+## Poner en marcha un estudio nuevo
+
+Todo desde el navegador, sin tocar la base:
+
+1. **Estudios → Estudio nuevo** (agencia). Nombre, a dónde llegan las
+   consultas, color, logo y texto de privacidad. La dirección pública
+   (`/f/<slug>`) sale del nombre. Al crearlo el panel queda parado ahí.
+2. **Áreas y formularios.** Las áreas de práctica y, dentro de cada una, los
+   casos con sus preguntas.
+3. **Pop-ups** o **Clips.** Generan la línea de `<script>` que se pega en el
+   sitio del estudio.
+4. **Equipo.** Invitar a quien va a atender las consultas.
+5. **Probar el formulario** de punta a punta.
+
+El Inicio muestra ese checklist calculado del estado real de la base — si
+alguien borra sus formularios, el paso vuelve a aparecer pendiente — y
+desaparece solo cuando está todo hecho. *Ajustes del estudio* deja cambiar
+después la marca y a dónde llegan las consultas; la dirección pública solo la
+cambia la agencia, porque rompe los links ya publicados.
 
 Cómo funciona por dentro:
 
@@ -218,8 +242,9 @@ Las claves `first_name`, `last_name`, `email`, `phone` y `consent` son
 especiales: se promueven a columnas y arman el bloque de contacto del mail al
 estudio. El resto de las respuestas van abajo, con la etiqueta del formulario.
 
-La landing se configura por estudio: `logo_url`, `hero_url` (la foto de la
-columna izquierda), `accent` y `intro` (el texto de privacidad).
+La landing se configura por estudio desde *Ajustes del estudio*: `logo_url`,
+`hero_url` (la foto de la columna izquierda), `accent` y `intro` (el texto de
+privacidad).
 
 ## Atribución del origen
 

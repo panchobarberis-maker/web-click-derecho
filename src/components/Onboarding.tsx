@@ -1,12 +1,5 @@
 import Link from "next/link";
-
-export type Paso = {
-  titulo: string;
-  detalle: string;
-  href: string;
-  accion: string;
-  listo: boolean;
-};
+import type { Paso } from "@/lib/onboarding";
 
 /**
  * Checklist de puesta en marcha de un estudio.

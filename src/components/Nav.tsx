@@ -6,7 +6,9 @@ import { useState } from "react";
 
 type Firm = { id: string; name: string; role: string };
 
-const items = [
+type Item = { href?: string; label?: string; sep?: boolean; ownerOnly?: boolean; staffOnly?: boolean };
+
+const items: Item[] = [
   { href: "/", label: "Inicio" },
   { href: "/responses", label: "Consultas" },
   { href: "/analytics", label: "Analytics" },
@@ -15,7 +17,10 @@ const items = [
   { href: "/popups", label: "Pop-ups" },
   { href: "/clips", label: "Clips" },
   { href: "/embed", label: "Instalación" },
+  { sep: true },
+  { href: "/ajustes", label: "Ajustes del estudio", ownerOnly: true },
   { href: "/equipo", label: "Equipo", ownerOnly: true },
+  { href: "/estudios", label: "Estudios", staffOnly: true },
 ];
 
 export function Nav({
@@ -72,7 +77,7 @@ export function Nav({
         {items.map((it, i) =>
           it.sep ? (
             <div className="sep" key={i} />
-          ) : it.ownerOnly && !esOwner ? null : (
+          ) : (it.ownerOnly && !esOwner) || (it.staffOnly && !user.is_staff) ? null : (
             <Link
               key={it.href}
               href={it.href!}

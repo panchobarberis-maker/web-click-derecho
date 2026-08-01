@@ -42,6 +42,17 @@ export async function activeFirm(): Promise<{ user: SessionUser; firm: FirmAcces
   return { user, firm, firms };
 }
 
+/**
+ * Para lo que es de la agencia y no del estudio: crear estudios nuevos,
+ * verlos todos. El flag vive en users.is_staff y no se puede pedir desde la
+ * aplicacion; se marca a mano en la base.
+ */
+export async function requireStaff(): Promise<SessionUser> {
+  const user = await requireUser();
+  if (!user.is_staff) redirect("/");
+  return user;
+}
+
 /** Para acciones que solo puede hacer quien administra el estudio. */
 export async function requireOwner(): Promise<{ user: SessionUser; firm: FirmAccess }> {
   const { user, firm } = await activeFirm();
