@@ -49,9 +49,46 @@ async function cargarEnvLocal() {
 }
 await cargarEnvLocal();
 
-const { url, options } = pgConfig(
-  process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake",
-);
+/**
+ * Revisa la cadena antes de pasarsela al driver.
+ *
+ * Los tres errores de abajo son los que aparecen al armar el .env.local a
+ * mano, y sin esto el driver responde con un TypeError que no dice nada.
+ */
+function revisarUrl(v) {
+  if (/^\s*DATABASE_URL\s*=/i.test(v)) {
+    return 'La linea quedo duplicada: el valor arranca con "DATABASE_URL=".\n' +
+           "En .env.local tiene que aparecer una sola vez, asi:\n\n" +
+           "  DATABASE_URL=postgresql://usuario:clave@host:5432/postgres\n";
+  }
+  if (/TU_CONTRASE|TU-CONTRASE|YOUR-PASSWORD|\[[^\]]*\]/i.test(v)) {
+    return "Falta reemplazar la contraseña: quedo el texto de ejemplo.\n" +
+           "Poné la contraseña real de la base, sin corchetes.\n";
+  }
+  // new URL() sola no alcanza: acepta cualquier cosa con dos puntos como
+  // esquema, y despues el driver intenta conectarse a un host inventado.
+  let u;
+  try {
+    u = new URL(v);
+  } catch {
+    u = null;
+  }
+  if (!u || !/^postgres(ql)?:$/.test(u.protocol) || !u.hostname) {
+    return "No parece una cadena de conexion valida. Tiene que empezar con\n" +
+           "postgresql:// y estar toda en una sola linea:\n\n" +
+           "  postgresql://usuario:clave@host:5432/postgres\n";
+  }
+  return null;
+}
+
+const rawUrl = process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake";
+const problema = revisarUrl(rawUrl);
+if (problema) {
+  console.error(`\nDATABASE_URL mal configurada en .env.local\n\n${problema}`);
+  process.exit(1);
+}
+
+const { url, options } = pgConfig(rawUrl);
 const sql = postgres(url, options);
 
 const demo = process.argv.includes("--demo");
