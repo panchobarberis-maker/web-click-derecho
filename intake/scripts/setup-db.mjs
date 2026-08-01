@@ -31,8 +31,31 @@ const demo = process.argv.includes("--demo");
 const reset = process.argv.includes("--reset");
 
 const schema = await readFile(join(here, "..", "db", "schema.sql"), "utf8");
-await sql.unsafe(schema);
-console.log("esquema aplicado");
+try {
+  await sql.unsafe(schema);
+  console.log("esquema aplicado");
+} catch (e) {
+  console.error(`\nNo se pudo aplicar el esquema: ${e.message}\n`);
+  if (/password authentication|SASL|SCRAM/i.test(e.message)) {
+    console.error(
+      "Parece la contraseña de la base. Revisá que en DATABASE_URL hayas\n" +
+      "reemplazado [YOUR-PASSWORD]. Se regenera en Supabase, en\n" +
+      "Project Settings > Database > Reset database password.\n",
+    );
+  } else if (/ENETUNREACH|EHOSTUNREACH|ENOTFOUND/i.test(e.message)) {
+    console.error(
+      "No hay ruta al servidor. Si copiaste la conexion directa\n" +
+      "(db.<ref>.supabase.co), necesita IPv6: usa la cadena del pooler,\n" +
+      "la que tiene 'pooler.supabase.com'.\n",
+    );
+  } else {
+    console.error(
+      "Alternativa: pega el contenido de db/schema.sql en el SQL Editor de\n" +
+      "Supabase, ejecutalo, y volve a correr este comando.\n",
+    );
+  }
+  process.exit(1);
+}
 
 if (reset) {
   // users tambien: no tiene FK a firms, asi que sin nombrarla explicitamente

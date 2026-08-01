@@ -84,8 +84,18 @@ Es gratis y te deja la base ya lista para cuando lo pongas online.
 1. Crear una cuenta en [supabase.com](https://supabase.com) y un proyecto nuevo.
    Anotá la contraseña que te pide: no la vuelve a mostrar.
 2. Botón **Connect** (arriba, al lado del nombre del proyecto) → pestaña
-   **App Frameworks** o **ORMs** → copiar la cadena del **Session pooler**, y
-   reemplazar `[YOUR-PASSWORD]` por la contraseña del paso 1.
+   **Direct Connection string** (la tercera). Ahí aparecen las tres variantes;
+   copiar la del **Session pooler** y reemplazar `[YOUR-PASSWORD]` por la
+   contraseña del paso 1.
+
+   Las otras pestañas —Framework, Server, ORM, MCP— son para usar las
+   librerías de Supabase, que esta app no usa: se conecta a Postgres directo.
+
+   Sirve cualquiera de las tres cadenas y la app se configura sola, pero:
+   la **directa** (`db.<ref>.supabase.co`) solo funciona si tu red tiene IPv6,
+   y la de **transaction pooler** (puerto 6543) conviene reservarla para
+   producción. Para local, la del **session pooler** es la que menos problemas
+   da.
 
 No hace falta tocar el SQL Editor: `npm run setup` aplica `db/schema.sql` solo
 a través de la conexión.
