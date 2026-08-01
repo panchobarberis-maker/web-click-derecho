@@ -172,6 +172,20 @@ conecta con el rol dueño de las tablas, que no queda sujeto a RLS. El control
 de acceso real lo hace la app filtrando por `firm_id` contra la membresía del
 usuario.
 
+### Sobre el aviso de `npm audit`
+
+`npm install` reporta tres vulnerabilidades altas en `postcss` y `sharp`. Las
+dos son dependencias internas de Next.js, no nuestras, y afectan a todas las
+versiones publicadas de Next: no hay a que actualizar todavia.
+
+**No corras `npm audit fix --force`**: la unica forma que encuentra npm de
+"arreglarlas" es bajar Next a la version 9.3.3, de 2020, que no soporta nada de
+lo que usa esta app.
+
+Ninguna de las dos se puede explotar aca: `postcss` procesa CSS propio en el
+build, y `sharp` solo entra por el optimizador de imagenes de `next/image`, que
+esta app no usa. Cuando Next publique un parche, se actualiza y listo.
+
 ## Definir los formularios de un estudio
 
 Están en `db/seed-data.mjs` como JSON y se cargan con `npm run db:setup`.
