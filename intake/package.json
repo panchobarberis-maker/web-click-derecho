@@ -6,7 +6,9 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "db:setup": "node scripts/setup-db.mjs"
+    "db:up": "docker compose up -d --wait",
+    "db:setup": "node scripts/setup-db.mjs",
+    "setup": "npm run db:up && node scripts/setup-db.mjs --demo && next dev -p 3000"
   },
   "dependencies": {
     "next": "16.2.12",

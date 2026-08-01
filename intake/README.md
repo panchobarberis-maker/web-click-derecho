@@ -75,13 +75,23 @@ andando.
 
 ## Arranque local
 
+Con Docker (levanta Postgres solo):
+
 ```bash
-createdb intake
+git clone -b claude/legal-form-app-clone-mcn4lt <este-repo>
+cd web-click-derecho/intake
 cp .env.example .env.local
 npm install
-npm run db:setup -- --demo    # esquema + estudio de ejemplo + tráfico falso
-npm run dev
+npm run setup      # Postgres + tablas + estudio de ejemplo + servidor
 ```
+
+Y listo: http://localhost:3000
+
+Si ya tenés un Postgres propio, salteá Docker: poné tu cadena de conexión en
+`DATABASE_URL` dentro de `.env.local` y corré `npm run db:setup -- --demo && npm run dev`.
+
+Las veces siguientes alcanza con `npm run dev` (los datos quedan en el volumen
+de Docker). Para volver a empezar de cero: `npm run db:setup -- --reset --demo`.
 
 - Panel: http://localhost:3000 — el seed crea dos cuentas con la contraseña
   `clickderecho2026` (cambiable con `SEED_PASSWORD`):
