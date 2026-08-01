@@ -83,10 +83,21 @@ Es gratis y te deja la base ya lista para cuando lo pongas online.
 
 1. Crear una cuenta en [supabase.com](https://supabase.com) y un proyecto nuevo.
    Anotá la contraseña que te pide: no la vuelve a mostrar.
-2. En **SQL Editor**, pegar todo el contenido de `db/schema.sql` y ejecutar.
-3. En **Project Settings → Database → Connection string → URI**, copiar la
-   cadena del **Session pooler** y reemplazar `[YOUR-PASSWORD]` por la contraseña
-   del paso 1.
+2. Botón **Connect** (arriba, al lado del nombre del proyecto) → pestaña
+   **App Frameworks** o **ORMs** → copiar la cadena del **Session pooler**, y
+   reemplazar `[YOUR-PASSWORD]` por la contraseña del paso 1.
+
+No hace falta tocar el SQL Editor: `npm run setup` aplica `db/schema.sql` solo
+a través de la conexión.
+
+Si perdiste la contraseña de la base (pasa si entraste con GitHub y salteaste
+ese paso), se genera una nueva en **Project Settings → Database → Database
+password → Reset database password**. Es la contraseña de Postgres, distinta de
+la de tu cuenta de Supabase.
+
+La cadena de conexión incluye esa contraseña: tratala como una credencial y no
+la pegues en chats, capturas ni commits. Vive en `.env.local`, que está
+ignorado por git.
 
 ```bash
 git clone -b claude/legal-form-app-clone-mcn4lt <este-repo>
