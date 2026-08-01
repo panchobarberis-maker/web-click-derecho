@@ -1,0 +1,88 @@
+/* Formulario publico. Se renderiza tanto a pantalla completa como dentro
+   del iframe del widget, asi que todo es fluido y sin alto fijo. */
+.fbody {
+  --accent: #2d0a4e;
+  min-height: 100vh;
+  background: #f7f5f2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 3rem 1.25rem;
+}
+.fwrap { width: 100%; max-width: 560px; }
+
+.fcard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.25rem 2.25rem 2rem;
+  box-shadow: 0 1px 3px rgba(28, 18, 48, .06), 0 12px 32px rgba(28, 18, 48, .06);
+}
+@media (max-width: 560px) { .fcard { padding: 1.5rem 1.25rem; } .fbody { padding: 1.25rem .75rem; } }
+
+.fhead { margin-bottom: 1.75rem; }
+.fhead .eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: #8b8397; font-weight: 500; }
+.fhead h1 { font-family: var(--font-serif), Georgia, serif; font-size: 1.9rem; line-height: 1.2; color: var(--accent); margin-top: .4rem; }
+.fhead p { color: #6b6478; font-size: .95rem; margin-top: .5rem; line-height: 1.55; }
+
+/* barra de progreso: la persona necesita ver que falta poco */
+.fprogress { height: 4px; background: #eae7f0; border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+.fprogress > span { display: block; height: 100%; background: var(--accent); border-radius: 2px; transition: width .3s ease; }
+.fsteps { font-size: .8rem; color: #8b8397; margin-bottom: .5rem; }
+
+.ffield { margin-bottom: 1.35rem; }
+.ffield > label { display: block; font-size: .9rem; font-weight: 500; margin-bottom: .5rem; color: #2a2338; }
+.ffield .req { color: #b8860b; }
+
+.ffield input[type="text"], .ffield input[type="email"], .ffield input[type="tel"],
+.ffield input[type="date"], .ffield select, .ffield textarea {
+  width: 100%; padding: .8rem .9rem; border: 1px solid #ddd8e4; border-radius: 10px;
+  font-family: inherit; font-size: .98rem; color: #1c1230; background: #fff; transition: border-color .15s;
+}
+.ffield textarea { min-height: 110px; resize: vertical; }
+.ffield input:focus, .ffield select:focus, .ffield textarea:focus {
+  outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45, 10, 78, .08);
+}
+.ffield.err input, .ffield.err select, .ffield.err textarea { border-color: #c0392b; }
+.ffield .msg { font-size: .8rem; color: #c0392b; margin-top: .4rem; }
+
+/* radios como tarjetas: mas faciles de tocar en celular */
+.fradios { display: flex; flex-direction: column; gap: .5rem; }
+.fradios label {
+  display: flex; align-items: center; gap: .7rem; padding: .8rem .9rem;
+  border: 1px solid #ddd8e4; border-radius: 10px; cursor: pointer; font-size: .95rem; transition: all .15s;
+}
+.fradios label:hover { border-color: #bdb4cc; background: #fbfafd; }
+.fradios label:has(input:checked) { border-color: var(--accent); background: rgba(45, 10, 78, .04); }
+.fradios input { accent-color: var(--accent); width: 17px; height: 17px; flex: none; }
+
+.fnav { display: flex; gap: .75rem; align-items: center; margin-top: 2rem; }
+.fbtn {
+  background: var(--accent); color: #fff; border: none; padding: .85rem 1.9rem; border-radius: 99px;
+  font-family: inherit; font-size: .95rem; font-weight: 500; cursor: pointer; transition: opacity .15s;
+}
+.fbtn:hover { opacity: .88; }
+.fbtn:disabled { opacity: .5; cursor: default; }
+.fbtn.back { background: transparent; color: #6b6478; padding-left: 0; }
+
+.fnote { font-size: .8rem; color: #8b8397; margin-top: 1.5rem; line-height: 1.5; text-align: center; }
+
+/* pantalla final */
+.fdone { text-align: center; padding: 1.5rem 0; }
+.fdone .check {
+  width: 56px; height: 56px; border-radius: 50%; background: #e9f5ee; color: #2f7d51;
+  display: grid; place-items: center; margin: 0 auto 1.25rem; font-size: 1.6rem;
+}
+.fdone h2 { font-family: var(--font-serif), Georgia, serif; font-size: 1.8rem; color: var(--accent); }
+.fdone p { color: #6b6478; margin-top: .75rem; line-height: 1.6; }
+
+/* storefront: elegir area / caso */
+.fgrid { display: grid; gap: .7rem; }
+.fopt {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1.1rem 1.25rem; background: #fff; border: 1px solid #e6e2ec; border-radius: 12px;
+  text-decoration: none; color: #1c1230; font-size: 1rem; transition: all .15s;
+}
+.fopt:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(28, 18, 48, .07); }
+.fopt .arrow { color: #b5adc4; }
+.fopt small { display: block; color: #8b8397; font-size: .82rem; margin-top: .2rem; }
+.fback { display: inline-block; font-size: .88rem; color: #8b8397; text-decoration: none; margin-bottom: 1.25rem; }

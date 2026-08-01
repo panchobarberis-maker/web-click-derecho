@@ -1,0 +1,22 @@
+{
+  "name": "intake",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "db:setup": "node scripts/setup-db.mjs"
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "postgres": "^3.4.5",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "typescript": "^5.7.0"
+  }
+}

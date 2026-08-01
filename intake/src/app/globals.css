@@ -1,0 +1,110 @@
+/* Panel interno: un solo look, claro. Los colores de serie estan validados
+   contra la superficie #fcfcfb (ver dataviz/validate_palette). */
+:root {
+  --surface: #fcfcfb;
+  --card: #ffffff;
+  --ink: #1c1230;
+  --ink-2: #4a4358;
+  --muted: #6b6478;
+  --line: #e8e5ee;
+  --accent: #2d0a4e;
+  --accent-soft: #f3eefa;
+  --s1: #6b4fbb; /* serie 1 - visitas */
+  --s2: #b8860b; /* serie 2 - consultas */
+  --good: #2f7d51;
+  --warn: #b8860b;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--surface);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: var(--font-serif), Georgia, serif; color: var(--accent); font-weight: 700; }
+h1 { font-size: 2.6rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.1rem; font-family: var(--font-sans), sans-serif; font-weight: 600; color: var(--ink); }
+a { color: inherit; }
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+
+.sidebar {
+  background: var(--card);
+  border-right: 1px solid var(--line);
+  padding: 1.5rem 1rem;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  position: sticky; top: 0; height: 100vh;
+}
+.brand { font-family: var(--font-serif), serif; font-size: 1.5rem; font-weight: 700; color: var(--accent); padding: 0 .5rem; }
+.brand small { display: block; font-family: var(--font-sans), sans-serif; font-size: .72rem; font-weight: 400; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.nav { display: flex; flex-direction: column; gap: .15rem; }
+.nav a {
+  padding: .6rem .75rem; border-radius: 8px; text-decoration: none;
+  color: var(--ink-2); font-size: .92rem; font-weight: 500;
+}
+.nav a:hover { background: var(--accent-soft); }
+.nav a[aria-current="page"] { background: var(--accent); color: #fff; }
+.nav .sep { height: 1px; background: var(--line); margin: .6rem .5rem; }
+.sidebar footer { margin-top: auto; font-size: .78rem; color: var(--muted); padding: 0 .5rem; }
+
+.main { padding: 2.5rem 3rem; max-width: 1400px; }
+.head { display: flex; align-items: flex-end; justify-content: space-between; gap: 2rem; margin-bottom: 2rem; flex-wrap: wrap; }
+.head p { color: var(--muted); font-size: .95rem; margin-top: .35rem; max-width: 60ch; }
+
+/* ---------- cards & tiles ---------- */
+.grid { display: grid; gap: 1rem; }
+.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.cols-4 { grid-template-columns: repeat(4, 1fr); }
+.cols-2-1 { grid-template-columns: 2fr 1fr; }
+@media (max-width: 1100px) { .cols-3, .cols-4, .cols-2-1 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 700px) { .shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .main { padding: 1.5rem; } .cols-3, .cols-4, .cols-2-1 { grid-template-columns: 1fr; } }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem 1.4rem; }
+.card > h3 { margin-bottom: 1rem; }
+
+.tile .label { font-size: .85rem; color: var(--muted); font-weight: 500; }
+.tile .value { font-size: 2.6rem; font-weight: 700; line-height: 1.1; margin-top: .3rem; font-variant-numeric: tabular-nums; }
+.tile .sub { font-size: .82rem; color: var(--muted); margin-top: .35rem; }
+
+/* medidor lineal: un solo porcentaje no justifica un donut */
+.meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: .75rem; }
+.meter > span { display: block; height: 100%; border-radius: 3px; background: var(--s2); }
+
+/* ---------- tablas ---------- */
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; padding: .5rem .6rem; border-bottom: 1px solid var(--line); }
+td { padding: .7rem .6rem; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll-x { overflow-x: auto; }
+
+/* ---------- varios ---------- */
+.pill { display: inline-block; padding: .2rem .6rem; border-radius: 99px; font-size: .78rem; font-weight: 500; background: var(--accent-soft); color: var(--accent); }
+.pill.warn { background: #fdf4e0; color: #8a6508; }
+.pill.good { background: #e9f5ee; color: var(--good); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: .5rem; vertical-align: middle; }
+.legend { display: flex; gap: 1.25rem; font-size: .82rem; color: var(--ink-2); }
+.legend span { display: flex; align-items: center; }
+.muted { color: var(--muted); }
+.empty { color: var(--muted); font-size: .9rem; padding: 2rem 0; text-align: center; }
+
+.ranges { display: flex; gap: .35rem; }
+.ranges a { padding: .35rem .8rem; border-radius: 99px; font-size: .82rem; text-decoration: none; color: var(--ink-2); border: 1px solid transparent; }
+.ranges a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.ranges a:hover { border-color: var(--line); }
+
+.tabs { display: flex; gap: 1.75rem; border-bottom: 1px solid var(--line); margin-bottom: 1.75rem; }
+.tabs a { padding: .7rem .1rem; text-decoration: none; color: var(--ink-2); font-size: .95rem; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tabs a[aria-current="page"] { color: var(--accent); font-weight: 600; border-bottom-color: var(--accent); }
+
+.btn { display: inline-block; background: var(--accent); color: #fff; border: none; padding: .7rem 1.4rem; border-radius: 99px; font-size: .92rem; font-weight: 500; cursor: pointer; text-decoration: none; font-family: inherit; }
+.btn:hover { opacity: .9; }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+
+pre.snippet { background: #1c1230; color: #e8e2f5; padding: 1rem 1.2rem; border-radius: 8px; font-size: .82rem; overflow-x: auto; line-height: 1.6; }
