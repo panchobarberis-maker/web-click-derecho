@@ -21,6 +21,6 @@ export const config = {
   // APIs que usa— se excluye acá, así agregar una pantalla nueva al panel la
   // deja protegida por omisión y no al revés.
   matcher: [
-    "/((?!f/|w\\.js|login|invite/|sin-acceso|api/auth/|api/track|api/answer|api/submit|api/cron/|hero-default\\.svg|_next/|favicon\\.ico).*)",
+    "/((?!f/|w\\.js|login|invite/|sin-acceso|api/auth/|api/track|api/answer|api/submit|api/cron/|api/health|hero-default\\.svg|_next/|favicon\\.ico).*)",
   ],
 };

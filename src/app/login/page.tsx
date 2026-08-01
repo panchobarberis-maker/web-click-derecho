@@ -14,6 +14,7 @@ const ERRORES: Record<string, string> = {
   google_off: "El acceso con Google no está configurado en este servidor.",
   email_no_verificado: "Tu cuenta de Google no tiene el email verificado.",
   sin_invitacion: "Ese email no tiene acceso. Pedile una invitación al estudio.",
+  db: "No se pudo conectar con la base de datos. Abrí /api/health para ver qué está fallando.",
 };
 
 async function login(formData: FormData) {
@@ -23,8 +24,16 @@ async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   if (!email || !password) redirect("/login?e=cred");
 
-  const [user] = await sql<{ id: string; password_hash: string | null }[]>`
-    select id, password_hash from users where lower(email) = ${email}`;
+  // Si la base no responde, el server action moriria sin decir nada y el
+  // boton pareceria no hacer nada. Preferimos mandar al login con un motivo.
+  let user: { id: string; password_hash: string | null } | undefined;
+  try {
+    [user] = await sql<{ id: string; password_hash: string | null }[]>`
+      select id, password_hash from users where lower(email) = ${email}`;
+  } catch (e) {
+    console.error("login: la base no respondió:", e);
+    redirect("/login?e=db");
+  }
 
   // El usuario inexistente también paga el costo del hash: si no, el tiempo de
   // respuesta delata qué emails están registrados.
@@ -50,7 +59,17 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
           <small>Panel de consultas</small>
         </div>
 
-        {error && <p className="auth-error">{error}</p>}
+        {error && (
+          <p className="auth-error">
+            {error}
+            {(await searchParams).e === "db" && (
+              <>
+                {" "}
+                <a href="/api/health" style={{ color: "inherit", fontWeight: 600 }}>Ver el diagnóstico</a>
+              </>
+            )}
+          </p>
+        )}
 
         {googleEnabled() && (
           <>
