@@ -110,8 +110,8 @@ la pegues en chats, capturas ni commits. Vive en `.env.local`, que está
 ignorado por git.
 
 ```bash
-git clone -b claude/legal-form-app-clone-mcn4lt <este-repo>
-cd web-click-derecho/intake
+git clone https://github.com/panchobarberis-maker/web-click-derecho
+cd web-click-derecho
 cp .env.example .env.local     # pegar ahí la cadena en DATABASE_URL
 npm install
 npm run setup
@@ -261,9 +261,9 @@ Entra en el plan gratuito. Es todo por navegador: no hace falta terminal.
 
 1. **Vercel** → crear cuenta con GitHub → **Add New… → Project** → importar
    `web-click-derecho`.
-2. En la pantalla de configuración, desplegar **Root Directory** y elegir
-   `intake`. Es el paso que más se olvida: sin eso Vercel busca la app en la
-   raíz del repo y el build falla.
+2. **Root Directory**: dejarlo vacío. La app vive en la raíz del repo, así que
+   Vercel la detecta sola. (Lo viejo del repo quedó en `legacy/`, que Vercel
+   ignora.)
 3. En **Environment Variables**, agregar:
 
    | Variable | Valor | ¿Obligatoria? |
@@ -281,13 +281,15 @@ Entra en el plan gratuito. Es todo por navegador: no hace falta terminal.
 5. Cargar las tablas y el estudio de ejemplo. Desde cualquier máquina con Node,
    una sola vez:
 
+   **Sin terminal:** pegar todo `db/bootstrap.sql` en el **SQL Editor** de
+   Supabase y ejecutarlo. Crea las tablas, el estudio de ejemplo, las cuentas y
+   tráfico de prueba, y se puede correr más de una vez sin duplicar nada.
+
+   Con terminal, si preferís:
+
    ```bash
    DATABASE_URL="<la cadena de Supabase>" node scripts/setup-db.mjs --demo
    ```
-
-   O, sin terminal: pegar `db/schema.sql` en el **SQL Editor** de Supabase y
-   ejecutarlo. Eso crea las tablas; el estudio de ejemplo y las cuentas se
-   cargan igual con el comando de arriba.
 
 **Para el login con Google**, en Google Cloud hay que autorizar el dominio que
 te dio Vercel: origen `https://TU-APP.vercel.app` y redirect
@@ -325,3 +327,15 @@ que tenga link de baja, y que esa base no se use para otra cosa.
 
 Las respuestas incluyen datos sensibles de casos. No mandarlas a Google Analytics
 ni a ninguna herramienta de terceros — GA además prohíbe expresamente cargar PII.
+
+## Estructura del repo
+
+```
+/                 la app (Next.js). Vercel la toma de acá sin configurar nada.
+  db/             esquema, datos de ejemplo y bootstrap.sql
+  scripts/        setup de la base y generador del bootstrap
+  src/            código
+legacy/           el sitio estático y los scripts de Python que había antes
+```
+
+`legacy/` no forma parte de la app y Vercel lo ignora; queda como archivo.
