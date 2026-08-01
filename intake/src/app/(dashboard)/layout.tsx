@@ -1,17 +1,16 @@
 import { Nav } from "@/components/Nav";
-import { currentFirm } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  let firmName = "—";
-  try {
-    firmName = (await currentFirm()).name;
-  } catch {
-    // Sin base cargada, la home muestra las instrucciones de setup.
-  }
+  const { user, firm, firms } = await activeFirm();
 
   return (
     <div className="shell">
-      <Nav firmName={firmName} />
+      <Nav
+        firm={{ id: firm.id, name: firm.name, role: firm.role }}
+        firms={firms.map((f) => ({ id: f.id, name: f.name, role: f.role }))}
+        user={{ name: user.name, email: user.email, is_staff: user.is_staff }}
+      />
       <main className="main">{children}</main>
     </div>
   );

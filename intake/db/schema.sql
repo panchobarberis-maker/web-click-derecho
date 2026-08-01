@@ -105,3 +105,64 @@ create index if not exists idx_sessions_recovery   on sessions (submitted_at, re
 create index if not exists idx_events_firm_type    on events (firm_id, type, created_at desc);
 create index if not exists idx_events_session      on events (session_id);
 create index if not exists idx_workflows_funnel    on workflows (funnel_id);
+
+-- ---------------------------------------------------------------------------
+-- Cuentas y acceso
+--
+-- No hay registro abierto: al panel se entra por invitacion. Cada usuario ve
+-- solo los estudios donde tiene membresia; los usuarios de la agencia
+-- (is_staff) ven todos.
+-- ---------------------------------------------------------------------------
+
+create table if not exists users (
+  id            uuid primary key default gen_random_uuid(),
+  email         text not null,
+  name          text,
+  image         text,
+  password_hash text,        -- null = entra solo con Google
+  is_staff      boolean not null default false,
+  last_login_at timestamptz,
+  created_at    timestamptz not null default now()
+);
+create unique index if not exists idx_users_email on users (lower(email));
+
+create table if not exists memberships (
+  user_id    uuid not null references users(id) on delete cascade,
+  firm_id    uuid not null references firms(id) on delete cascade,
+  role       text not null default 'member' check (role in ('owner', 'member')),
+  created_at timestamptz not null default now(),
+  primary key (user_id, firm_id)
+);
+
+-- Cuenta de Google vinculada. Un usuario puede tener password y Google a la vez.
+create table if not exists oauth_accounts (
+  provider            text not null,
+  provider_account_id text not null,
+  user_id             uuid not null references users(id) on delete cascade,
+  created_at          timestamptz not null default now(),
+  primary key (provider, provider_account_id)
+);
+
+-- Sesiones opacas: el token va en una cookie httpOnly y en la base solo queda
+-- su hash, asi un volcado de la tabla no sirve para hacerse pasar por nadie.
+create table if not exists auth_sessions (
+  token_hash text primary key,
+  user_id    uuid not null references users(id) on delete cascade,
+  expires_at timestamptz not null,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_auth_sessions_user on auth_sessions (user_id);
+
+create table if not exists invitations (
+  id         uuid primary key default gen_random_uuid(),
+  token_hash text not null unique,
+  email      text not null,
+  firm_id    uuid not null references firms(id) on delete cascade,
+  role       text not null default 'member' check (role in ('owner', 'member')),
+  invited_by uuid references users(id) on delete set null,
+  expires_at timestamptz not null,
+  accepted_at timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_invitations_email on invitations (lower(email)) where accepted_at is null;

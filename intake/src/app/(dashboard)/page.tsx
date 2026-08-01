@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { currentFirm, sql } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 import { totals, series, abandoned, type Range } from "@/lib/analytics";
 import { LineChart, Tile } from "@/components/Charts";
 import { RangePicker } from "@/components/RangePicker";
@@ -10,19 +11,9 @@ export const dynamic = "force-dynamic";
 export default async function Home({ searchParams }: { searchParams: Promise<{ r?: string }> }) {
   const range = (((await searchParams).r as Range) ?? "30d") satisfies Range;
 
-  let firm;
-  try {
-    firm = await currentFirm();
-  } catch {
-    return (
-      <>
-        <h1>Falta cargar la base</h1>
-        <p className="muted" style={{ marginTop: ".75rem" }}>
-          Corré <code>npm run db:setup -- --demo</code> para crear las tablas y cargar el estudio de ejemplo.
-        </p>
-      </>
-    );
-  }
+  // Sin try/catch: activeFirm redirige a /login o /sin-acceso lanzando, y
+  // atraparlo se comería el redirect.
+  const { firm } = await activeFirm();
 
   const [t, s, pendientes, [nuevas]] = await Promise.all([
     totals(firm.id, range),

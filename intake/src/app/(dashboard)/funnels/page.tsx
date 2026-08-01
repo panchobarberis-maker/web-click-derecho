@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { currentFirm, sql } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ type Row = {
 };
 
 export default async function Funnels() {
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
 
   const rows = await sql<Row[]>`
     select f.id, f.name, f.slug, f.color, f.active,

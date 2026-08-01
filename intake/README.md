@@ -33,6 +33,46 @@ un cuestionario único para todos.
 | **Atribución de origen** | De dónde vino cada consulta, incluso embebida en un iframe en el sitio del estudio |
 | **Landing partida** | Foto del estudio + áreas de práctica como botones, con logo y texto de privacidad propios |
 
+## Acceso
+
+**No hay registro abierto.** Al panel se entra solo por invitación, con Google
+o con email + contraseña. Los dos caminos llevan al mismo usuario: si alguien
+creó su cuenta con contraseña y después entra con Google usando el mismo mail,
+se le vincula la cuenta en vez de duplicarla.
+
+Tres niveles:
+
+| | Ve consultas | Invita gente | Ve todos los estudios |
+|---|---|---|---|
+| **Miembro** del estudio | ✓ | | |
+| **Dueño** del estudio | ✓ | ✓ | |
+| **Agencia** (`is_staff`) | ✓ | ✓ | ✓ |
+
+La agencia tiene un selector de estudio en la barra lateral. La cookie solo
+elige entre los estudios a los que la cuenta ya tiene acceso: el permiso se
+resuelve siempre contra la base, así que forzar la cookie no abre nada.
+
+Cómo funciona por dentro:
+
+- **Contraseñas** con scrypt (`N=2^15`), sal aleatoria por usuario y
+  comparación en tiempo constante. Un email inexistente igual paga el costo del
+  hash, para que el tiempo de respuesta no delate qué cuentas existen.
+- **Sesiones** opacas: token aleatorio de 32 bytes en cookie `httpOnly` +
+  `SameSite=Lax`, y en la base solo su SHA-256. Se pueden revocar de a una.
+- **Google** por authorization code flow con `state` en cookie contra CSRF de
+  login. No se verifica la firma del `id_token` porque no se usa: el código se
+  canjea server-to-server y los datos salen de `userinfo`.
+- **Invitaciones** con token de un solo uso que vence a los 7 días; en la base
+  también va solo el hash.
+
+Para configurar Google, en la consola de Google Cloud:
+
+- Origen autorizado: el valor de `NEXT_PUBLIC_APP_URL`
+- Redirect URI: ese mismo valor + `/api/auth/google/callback`
+
+Sin `GOOGLE_CLIENT_ID` el botón no aparece y el login por contraseña sigue
+andando.
+
 ## Arranque local
 
 ```bash
@@ -43,7 +83,10 @@ npm run db:setup -- --demo    # esquema + estudio de ejemplo + tráfico falso
 npm run dev
 ```
 
-- Panel: http://localhost:3000
+- Panel: http://localhost:3000 — el seed crea dos cuentas con la contraseña
+  `clickderecho2026` (cambiable con `SEED_PASSWORD`):
+  - `hola@clickderecho.com` — la agencia, ve todos los estudios
+  - `consultas@alzogarayserrano.com.ar` — dueño del estudio de ejemplo
 - Formulario público: http://localhost:3000/f/alzogaray-serrano
 
 Sin `RESEND_API_KEY` los mails no se mandan: se imprimen en la consola del
@@ -130,7 +173,8 @@ Vercel + Supabase entran en el free tier de los dos.
 
 1. Crear el proyecto en Supabase y correr `db/schema.sql` en el SQL Editor.
 2. En Vercel setear `DATABASE_URL` (el connection string *pooled* de Supabase),
-   `NEXT_PUBLIC_APP_URL`, `RESEND_API_KEY`, `RESEND_FROM` y `CRON_SECRET`.
+   `NEXT_PUBLIC_APP_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET` y —si
+   se quiere login con Google— `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
 3. Agregar `vercel.json` para el job de recuperación:
 
 ```json
@@ -144,8 +188,11 @@ desde el de la agencia: llegan mejor y es lo que la persona espera.
 
 Lo que quedó afuera del MVP, en orden de valor:
 
-- **Login y multi-estudio.** Hoy el panel muestra el primer estudio de la tabla,
-  sin autenticación. Es lo primero antes de ponerlo en manos de un cliente.
+- **Recuperar contraseña.** Hoy si alguien la olvida hay que reinvitarlo.
+- **Alta de estudios desde el panel.** Se crean en `seed-data.mjs`; debería
+  poder hacerlo la agencia desde la interfaz.
+- **Límite de intentos de login.** Falta frenar el fuerza bruta por IP y por
+  cuenta. scrypt ya lo hace caro, pero no lo reemplaza.
 - **Constructor visual de formularios.** Hoy se editan en `seed-data.mjs`. Es el
   80% del trabajo restante y el 10% del valor mientras la agencia arme los forms.
 - **Impresiones de pop-up y clip.** Se cuentan desde que se abre el formulario;

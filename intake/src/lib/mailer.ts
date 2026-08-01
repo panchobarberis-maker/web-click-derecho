@@ -9,6 +9,9 @@ export async function sendMail({ to, subject, html, replyTo }: Mail): Promise<bo
 
   if (!key) {
     const texto = html
+      // Los links importan: sin ellos no se puede seguir una invitacion ni
+      // retomar un formulario desde la consola en desarrollo.
+      .replace(/<a[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g, (_m, href, txt) => `${txt.replace(/<[^>]+>/g, "").trim()}: ${href}`)
       .replace(/<\/(tr|p|h2|h3|div)>/g, "\n")
       .replace(/<[^>]+>/g, " ")
       .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")

@@ -1,4 +1,5 @@
-import { currentFirm, sql } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 import { totals, series, attribution, byFunnel, bySurface, dropoff, type Range } from "@/lib/analytics";
 import { LineChart, BarList, Tile } from "@/components/Charts";
 import { RangePicker } from "@/components/RangePicker";
@@ -20,7 +21,7 @@ export default async function Analytics({
 }) {
   const params = await searchParams;
   const range = ((params.r as Range) ?? "30d") satisfies Range;
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
 
   const workflows = await sql<{ id: string; name: string; funnel: string }[]>`
     select w.id, w.name, f.name as funnel

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { revalidatePath } from "next/cache";
-import { currentFirm, sql } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace } from "@/lib/format";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
 
@@ -24,7 +25,7 @@ type Row = {
 async function recuperar(formData: FormData) {
   "use server";
   const id = String(formData.get("id"));
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
 
   const [s] = await sql<{ email: string; full_name: string | null; funnel: string; slug: string }[]>`
     select s.email, s.full_name, coalesce(f.name, 'tu consulta') as funnel, ${firm.slug} as slug
@@ -48,7 +49,7 @@ async function recuperar(formData: FormData) {
 
 export default async function Responses({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const tab = (await searchParams).tab === "abandonadas" ? "abandonadas" : "enviadas";
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
 
   const rows = await sql<Row[]>`
     select s.id, s.full_name, s.email, s.max_step, s.submitted_at, s.read_at,
@@ -132,7 +133,7 @@ export default async function Responses({ searchParams }: { searchParams: Promis
                       ) : (
                         <form action={recuperar}>
                           <input type="hidden" name="id" value={r.id} />
-                          <button className="btn ghost" style={{ padding: ".4rem 1rem", fontSize: ".82rem" }}>
+                          <button type="submit" className="btn ghost" style={{ padding: ".4rem 1rem", fontSize: ".82rem" }}>
                             Enviar recordatorio
                           </button>
                         </form>

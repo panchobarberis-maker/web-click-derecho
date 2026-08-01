@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+
+type Firm = { id: string; name: string; role: string };
 
 const items = [
   { href: "/", label: "Inicio" },
@@ -10,22 +13,64 @@ const items = [
   { sep: true },
   { href: "/funnels", label: "Áreas y formularios" },
   { href: "/embed", label: "Instalación" },
+  { href: "/equipo", label: "Equipo", ownerOnly: true },
 ];
 
-export function Nav({ firmName }: { firmName: string }) {
+export function Nav({
+  firm,
+  firms,
+  user,
+}: {
+  firm: Firm;
+  firms: Firm[];
+  user: { name: string | null; email: string; is_staff: boolean };
+}) {
   const path = usePathname();
+  const router = useRouter();
+  const [abierto, setAbierto] = useState(false);
+  const esOwner = firm.role !== "member";
+
+  function cambiarEstudio(id: string) {
+    // La cookie solo elige entre los estudios permitidos; el servidor
+    // igual valida el acceso en cada request.
+    document.cookie = `intake_firm=${id}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    router.refresh();
+    setAbierto(false);
+  }
 
   return (
     <nav className="sidebar">
-      <div className="brand">
-        Click Derecho
-        <small>{firmName}</small>
+      <div>
+        <div className="brand">Click Derecho</div>
+
+        {firms.length > 1 ? (
+          <div className="switch">
+            <button onClick={() => setAbierto(!abierto)} aria-expanded={abierto}>
+              <span>{firm.name}</span>
+              <span aria-hidden="true">{abierto ? "▴" : "▾"}</span>
+            </button>
+            {abierto && (
+              <ul>
+                {firms.map((f) => (
+                  <li key={f.id}>
+                    <button onClick={() => cambiarEstudio(f.id)} aria-current={f.id === firm.id ? "true" : undefined}>
+                      {f.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="switch-static">{firm.name}</div>
+        )}
       </div>
+
       <div className="nav">
         {items.map((it, i) =>
           it.sep ? (
             <div className="sep" key={i} />
-          ) : (
+          ) : it.ownerOnly && !esOwner ? null : (
             <Link
               key={it.href}
               href={it.href!}
@@ -36,7 +81,16 @@ export function Nav({ firmName }: { firmName: string }) {
           ),
         )}
       </div>
-      <footer>Intake v0.1</footer>
+
+      <footer>
+        <div className="who">
+          <strong>{user.name ?? user.email}</strong>
+          {user.is_staff && <span className="pill" style={{ fontSize: ".68rem" }}>Agencia</span>}
+        </div>
+        <form action="/api/auth/logout" method="post">
+          <button type="submit" className="linkish">Cerrar sesión</button>
+        </form>
+      </footer>
     </nav>
   );
 }

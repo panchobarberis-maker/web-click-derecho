@@ -1,9 +1,10 @@
-import { currentFirm, sql } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 
 export const dynamic = "force-dynamic";
 
 export default async function Embed() {
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
   const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const funnels = await sql<{ name: string; slug: string }[]>`

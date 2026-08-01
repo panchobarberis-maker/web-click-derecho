@@ -14,6 +14,17 @@ export function hace(d: Date | string) {
   return dias === 1 ? "ayer" : `hace ${dias} días`;
 }
 
+/** Contraparte de hace(), para fechas futuras: vencimientos de invitaciones. */
+export function dentroDe(d: Date | string) {
+  const min = Math.round((new Date(d).getTime() - Date.now()) / 6e4);
+  if (min <= 0) return "vencida";
+  if (min < 60) return `en ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return `en ${h} h`;
+  const dias = Math.round(h / 24);
+  return dias === 1 ? "mañana" : `en ${dias} días`;
+}
+
 export const SOURCE_LABELS: Record<string, string> = {
   organic: "Orgánico",
   google: "Google",

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { currentFirm, sql, type Workflow } from "@/lib/db";
+import { sql, type Workflow } from "@/lib/db";
+import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace, sourceLabel } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ const SUPERFICIES: Record<string, string> = {
 
 export default async function ResponseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const firm = await currentFirm();
+  const { firm } = await activeFirm();
 
   const [s] = await sql<
     {

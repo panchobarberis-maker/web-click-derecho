@@ -50,10 +50,3 @@ export type Workflow = {
   active: boolean;
   steps: { steps: Step[] };
 };
-
-/** El estudio activo. Hoy hay uno solo; con multi-tenant sale de la sesion del usuario. */
-export async function currentFirm(): Promise<Firm> {
-  const [firm] = await sql<Firm[]>`select * from firms order by created_at limit 1`;
-  if (!firm) throw new Error("No hay ningun estudio cargado. Corré: npm run db:setup");
-  return firm;
-}

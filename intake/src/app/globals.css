@@ -108,3 +108,36 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); }
 
 pre.snippet { background: #1c1230; color: #e8e2f5; padding: 1rem 1.2rem; border-radius: 8px; font-size: .82rem; overflow-x: auto; line-height: 1.6; }
+
+/* ---------- selector de estudio y usuario en la barra lateral ---------- */
+.switch { position: relative; margin-top: .75rem; }
+.switch > button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  padding: .55rem .7rem; border: 1px solid var(--line); border-radius: 8px; background: #fff;
+  font-family: inherit; font-size: .85rem; color: var(--ink); cursor: pointer; text-align: left;
+}
+.switch > button:hover { border-color: #d5d0de; }
+.switch ul {
+  position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0;
+  list-style: none; background: #fff; border: 1px solid var(--line); border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(28, 18, 48, .12); overflow: hidden; max-height: 320px; overflow-y: auto;
+}
+.switch li button {
+  width: 100%; padding: .55rem .7rem; border: 0; background: none; text-align: left;
+  font-family: inherit; font-size: .85rem; color: var(--ink-2); cursor: pointer;
+}
+.switch li button:hover { background: var(--accent-soft); }
+.switch li button[aria-current="true"] { font-weight: 600; color: var(--accent); }
+
+.switch-static {
+  margin-top: .5rem; padding: 0 .5rem; font-size: .72rem; color: var(--muted);
+  letter-spacing: .04em; text-transform: uppercase;
+}
+
+.sidebar footer .who { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin-bottom: .4rem; }
+.sidebar footer .who strong { font-weight: 500; color: var(--ink-2); font-size: .82rem; word-break: break-word; }
+.linkish {
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font-family: inherit; font-size: .78rem; color: var(--muted); text-decoration: underline;
+}
+.linkish:hover { color: var(--ink); }

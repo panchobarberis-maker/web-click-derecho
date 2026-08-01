@@ -7,7 +7,18 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import postgres from "postgres";
+import { randomBytes, scrypt as scryptCb } from "node:crypto";
+import { promisify } from "node:util";
 import { firm, funnels } from "../db/seed-data.mjs";
+
+const scrypt = promisify(scryptCb);
+
+// Mismo formato que src/lib/auth.ts
+async function hashPassword(plain) {
+  const salt = randomBytes(16);
+  const key = await scrypt(plain.normalize("NFKC"), salt, 64, { N: 32768, r: 8, p: 1, maxmem: 64 * 1024 * 1024 });
+  return `scrypt$32768$8$1$${salt.toString("base64")}$${key.toString("base64")}`;
+}
 
 const here = dirname(fileURLToPath(import.meta.url));
 const url = process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/intake";
@@ -21,7 +32,10 @@ await sql.unsafe(schema);
 console.log("esquema aplicado");
 
 if (reset) {
-  await sql`truncate events, sessions, workflows, funnels, firms restart identity cascade`;
+  // users tambien: no tiene FK a firms, asi que sin nombrarla explicitamente
+  // las cuentas sobreviven al reset y ensucian la corrida siguiente.
+  await sql`truncate events, sessions, workflows, funnels, firms, users
+            restart identity cascade`;
   console.log("datos borrados");
 }
 
@@ -51,6 +65,27 @@ for (const [i, fn] of funnels.entries()) {
   }
 }
 console.log(`estudio "${f.name}": ${funnels.length} areas, ${workflowIds.length} formularios`);
+
+// Dos cuentas para arrancar: la de la agencia (ve todos los estudios) y la
+// del estudio. La contraseña se cambia despues desde el panel.
+const CUENTAS = [
+  { email: process.env.SEED_STAFF_EMAIL || "hola@clickderecho.com", name: "Click Derecho", staff: true },
+  { email: firm.notify_email, name: "Mariano Alzogaray", staff: false },
+];
+const PASS = process.env.SEED_PASSWORD || "clickderecho2026";
+
+for (const c of CUENTAS) {
+  const [u] = await sql`
+    insert into users (email, name, password_hash, is_staff)
+    values (${c.email.toLowerCase()}, ${c.name}, ${await hashPassword(PASS)}, ${c.staff})
+    on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff
+    returning id`;
+  if (!c.staff) {
+    await sql`insert into memberships (user_id, firm_id, role) values (${u.id}, ${f.id}, 'owner')
+      on conflict (user_id, firm_id) do update set role = 'owner'`;
+  }
+}
+console.log(`cuentas: ${CUENTAS.map((c) => c.email).join(", ")} — contraseña: ${PASS}`);
 
 if (demo) {
   await sql`delete from sessions where firm_id = ${f.id} and data->>'_demo' = '1'`;
