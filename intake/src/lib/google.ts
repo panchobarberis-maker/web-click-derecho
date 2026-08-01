@@ -11,14 +11,15 @@
  * un IdP falso; por defecto apuntan a Google.
  */
 
+import { baseUrl } from "./base-url";
+
 const BASE_AUTH = process.env.GOOGLE_AUTH_URL || "https://accounts.google.com/o/oauth2/v2/auth";
 const BASE_TOKEN = process.env.GOOGLE_TOKEN_URL || "https://oauth2.googleapis.com/token";
 const BASE_USERINFO = process.env.GOOGLE_USERINFO_URL || "https://openidconnect.googleapis.com/v1/userinfo";
 
 export const googleEnabled = () => Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 
-export const redirectUri = () =>
-  `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/auth/google/callback`;
+export const redirectUri = () => `${baseUrl()}/api/auth/google/callback`;
 
 export function authorizeUrl(state: string): string {
   const q = new URLSearchParams({

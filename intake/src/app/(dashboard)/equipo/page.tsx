@@ -4,6 +4,7 @@ import { createInvitation } from "@/lib/auth";
 import { requireOwner } from "@/lib/tenancy";
 import { sendMail } from "@/lib/mailer";
 import { dentroDe, fmtLong, hace } from "@/lib/format";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ async function invitar(formData: FormData) {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return;
 
   const token = await createInvitation({ email, firmId: firm.id, role, invitedBy: user.id });
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = baseUrl();
   const link = `${base}/invite/${token}`;
 
   await sendMail({

@@ -255,20 +255,46 @@ el referrer y la URL exacta del sitio del estudio donde se abrió.
 Todo va dentro de un iframe, así que el CSS del sitio del estudio no puede
 romper el formulario ni al revés.
 
-## Despliegue
+## Despliegue en Vercel
 
-Vercel + Supabase entran en el free tier de los dos.
+Entra en el plan gratuito. Es todo por navegador: no hace falta terminal.
 
-1. Reusar el proyecto de Supabase del arranque local, o crear uno nuevo y
-   correr `db/schema.sql` en su SQL Editor.
-2. En Vercel setear `DATABASE_URL` (acá sí el **transaction pooler**, puerto 6543),
-   `NEXT_PUBLIC_APP_URL`, `RESEND_API_KEY`, `RESEND_FROM`, `CRON_SECRET` y —si
-   se quiere login con Google— `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET`.
-3. Agregar `vercel.json` para el job de recuperación:
+1. **Vercel** → crear cuenta con GitHub → **Add New… → Project** → importar
+   `web-click-derecho`.
+2. En la pantalla de configuración, desplegar **Root Directory** y elegir
+   `intake`. Es el paso que más se olvida: sin eso Vercel busca la app en la
+   raíz del repo y el build falla.
+3. En **Environment Variables**, agregar:
 
-```json
-{ "crons": [{ "path": "/api/cron/recover", "schedule": "*/15 * * * *" }] }
-```
+   | Variable | Valor | ¿Obligatoria? |
+   |---|---|---|
+   | `DATABASE_URL` | El **transaction pooler** de Supabase (puerto 6543) | Sí |
+   | `CRON_SECRET` | Cualquier texto largo al azar | Sí |
+   | `RESEND_API_KEY` | De [resend.com](https://resend.com) | No, sin esto no salen mails |
+   | `RESEND_FROM` | `Consultas <consultas@tudominio.com>` | Solo con Resend |
+   | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | De Google Cloud | Solo para login con Google |
+
+   `NEXT_PUBLIC_APP_URL` **no hace falta**: la app deduce su dominio del
+   entorno de Vercel. Solo se setea cuando hay dominio propio.
+
+4. **Deploy**. Al terminar te da una URL `.vercel.app`.
+5. Cargar las tablas y el estudio de ejemplo. Desde cualquier máquina con Node,
+   una sola vez:
+
+   ```bash
+   DATABASE_URL="<la cadena de Supabase>" node scripts/setup-db.mjs --demo
+   ```
+
+   O, sin terminal: pegar `db/schema.sql` en el **SQL Editor** de Supabase y
+   ejecutarlo. Eso crea las tablas; el estudio de ejemplo y las cuentas se
+   cargan igual con el comando de arriba.
+
+**Para el login con Google**, en Google Cloud hay que autorizar el dominio que
+te dio Vercel: origen `https://TU-APP.vercel.app` y redirect
+`https://TU-APP.vercel.app/api/auth/google/callback`.
+
+Sobre el envío de recordatorios y la restricción de cron del plan gratuito, ver
+[CRON.md](CRON.md).
 
 Los mails de recuperación conviene mandarlos desde el dominio del estudio, no
 desde el de la agencia: llegan mejor y es lo que la persona espera.

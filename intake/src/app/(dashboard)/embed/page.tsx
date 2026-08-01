@@ -1,11 +1,12 @@
 import { sql } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
 export default async function Embed() {
   const { firm } = await activeFirm();
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = baseUrl();
 
   const funnels = await sql<{ name: string; slug: string }[]>`
     select name, slug from funnels where firm_id = ${firm.id} and active order by sort_order`;

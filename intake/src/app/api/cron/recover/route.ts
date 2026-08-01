@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     if (auth !== `Bearer ${secret}`) return NextResponse.json({ error: "no autorizado" }, { status: 401 });
   }
 
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = baseUrl();
 
   const pendientes = await sql<
     { id: string; email: string; full_name: string | null; firm: string; slug: string; accent: string; notify_email: string | null; funnel: string }[]

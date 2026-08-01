@@ -4,6 +4,7 @@ import { sql } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace } from "@/lib/format";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ async function recuperar(formData: FormData) {
     where s.id = ${id} and s.firm_id = ${firm.id} and s.email is not null`;
   if (!s) return;
 
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = baseUrl();
   const mail = recoveryEmail({
     name: s.full_name,
     firm: firm.name,

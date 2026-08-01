@@ -1,3 +1,5 @@
+import { baseUrl } from "@/lib/base-url";
+
 export const dynamic = "force-dynamic";
 
 /**
@@ -16,7 +18,7 @@ export const dynamic = "force-dynamic";
  * referrer de la pagina madre y los reenvia en la URL del iframe.
  */
 export async function GET(req: Request) {
-  const origin = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin;
+  const origin = baseUrl() || new URL(req.url).origin;
 
   const js = `(function () {
   "use strict";

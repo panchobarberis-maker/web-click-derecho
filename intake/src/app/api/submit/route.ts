@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sql, type Workflow } from "@/lib/db";
 import { leadEmail, sendMail } from "@/lib/mailer";
 import { sourceLabel } from "@/lib/format";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
     const labels = new Map<string, string>();
     for (const st of s.steps?.steps ?? []) for (const f of st.fields) labels.set(f.key, f.label);
 
-    const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const base = baseUrl();
     const mail = leadEmail({
       firstName: data.first_name ?? "",
       lastName: data.last_name ?? "",

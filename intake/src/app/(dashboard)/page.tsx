@@ -5,6 +5,7 @@ import { totals, series, abandoned, type Range } from "@/lib/analytics";
 import { LineChart, Tile } from "@/components/Charts";
 import { RangePicker } from "@/components/RangePicker";
 import { fmtShort } from "@/lib/format";
+import { baseUrl } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       where firm_id = ${firm.id} and submitted_at is not null and read_at is null`,
   ]);
 
-  const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const base = baseUrl();
 
   return (
     <>
