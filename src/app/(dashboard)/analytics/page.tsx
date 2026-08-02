@@ -48,7 +48,17 @@ export default async function Analytics({
           <h1>Analytics</h1>
           <p>Cuánta gente llega al formulario, cuánta lo termina y en qué paso se cae.</p>
         </div>
-        <RangePicker current={range} />
+        <div style={{ display: "flex", gap: ".6rem", alignItems: "center", flexWrap: "wrap" }}>
+          <RangePicker current={range} />
+          {/*
+            Descarga directa, sin JavaScript: es un link a una ruta que
+            devuelve el archivo. Lleva el mismo rango que se está mirando, así
+            lo exportado coincide con los números de la pantalla.
+          */}
+          <a href={`/export?r=${range}`} className="btn ghost" download>
+            Exportar a Excel
+          </a>
+        </div>
       </div>
 
       <div className="grid cols-4" style={{ marginBottom: "1rem" }}>
