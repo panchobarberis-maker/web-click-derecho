@@ -16,11 +16,12 @@ async function crear(formData: FormData) {
   if (!name || !video) return;
 
   await sql`
-    insert into clips (firm_id, name, video_url, poster_url, cta, funnel_id)
+    insert into clips (firm_id, name, video_url, poster_url, cta, funnel_id, paginas)
     values (${firm.id}, ${name}, ${video},
             ${String(formData.get("poster_url") ?? "").trim() || null},
             ${String(formData.get("cta") ?? "").trim() || "Empezar"},
-            ${String(formData.get("funnel_id") ?? "") || null})`;
+            ${String(formData.get("funnel_id") ?? "") || null},
+            ${String(formData.get("paginas") ?? "").trim() || null})`;
   revalidatePath("/clips");
 }
 
@@ -34,6 +35,7 @@ async function guardar(formData: FormData) {
       poster_url = ${String(formData.get("poster_url") ?? "").trim() || null},
       cta        = ${String(formData.get("cta") ?? "").trim() || "Empezar"},
       funnel_id  = ${String(formData.get("funnel_id") ?? "") || null},
+      paginas    = ${String(formData.get("paginas") ?? "").trim() || null},
       active     = ${formData.get("active") === "on"}
     where id = ${String(formData.get("id"))} and firm_id = ${firm.id}`;
   revalidatePath("/clips");
@@ -48,7 +50,7 @@ async function borrar(formData: FormData) {
 
 type Clip = {
   id: string; name: string; video_url: string; poster_url: string | null;
-  cta: string; funnel_id: string | null; active: boolean;
+  cta: string; funnel_id: string | null; active: boolean; paginas: string | null;
 };
 
 export default async function Clips({ searchParams }: { searchParams: Promise<{ r?: string }> }) {
@@ -57,7 +59,7 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
   const puedeEditar = firm.role !== "member";
 
   const [clips, areas, stats] = await Promise.all([
-    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active from clips
+    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas from clips
                 where firm_id = ${firm.id} order by created_at desc`,
     sql<{ id: string; name: string }[]>`select id, name from funnels where firm_id = ${firm.id} order by sort_order`,
     porWidget(firm.id, "clips", range),
@@ -129,6 +131,15 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                         {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                       </select>
 
+                      <label className="lbl">¿En qué páginas aparece?</label>
+                      <textarea name="paginas" rows={4} defaultValue={c.paginas ?? ""}
+                                placeholder={"Vacío = en todo el sitio\n/laboral\n/servicios/*\n!/contacto"} />
+                      <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+                        Una dirección por línea. <code>*</code> vale por cualquier cosa
+                        (<code>/blog/*</code>). Una línea que empieza con <code>!</code> la excluye
+                        (<code>!/contacto</code>). Si lo dejás vacío, aparece en todo el sitio.
+                      </p>
+
                       <label className="check">
                         <input type="checkbox" name="active" defaultChecked={c.active} /> Activo
                       </label>
@@ -170,6 +181,10 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                 <option value="">Todas las áreas (menú)</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
+
+              <label className="lbl">¿En qué páginas aparece?</label>
+              <textarea name="paginas" rows={3}
+                        placeholder={"Vacío = en todo el sitio\n/laboral\n!/contacto"} />
 
               <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Crear</button>
             </form>

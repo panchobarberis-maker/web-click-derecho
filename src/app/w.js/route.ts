@@ -6,9 +6,10 @@ export const dynamic = "force-dynamic";
 type Cfg = {
   firm: string; mode: string; funnel: string; workflow: string;
   trigger: string; cta: string; accent: string; video: string; poster: string; id: string;
+  paginas: string;
 };
 
-const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "" };
+const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "" };
 
 /**
  * Configuracion guardada de un pop-up o un clip.
@@ -28,7 +29,8 @@ async function cargarCfg(url: URL): Promise<Cfg> {
 
   const [row] = await sql<
     { name: string; cta: string; active: boolean; accent: string; firm: string;
-      funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string }[]
+      funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string;
+      paginas?: string | null }[]
   >`
     select w.*, fi.slug as firm, fi.accent,
            f.slug as funnel, wf.slug as workflow
@@ -50,6 +52,7 @@ async function cargarCfg(url: URL): Promise<Cfg> {
     accent: row.accent,
     video: row.video_url ?? "",
     poster: row.poster_url ?? "",
+    paginas: row.paginas ?? "",
     id,
   };
 }
@@ -97,6 +100,62 @@ export async function GET(req: Request) {
   var poster  = attr("poster", "");
   var wid     = CFG.id || "";
   var once    = s.getAttribute("data-once") !== "false";
+  var paginas = CFG.paginas || "";
+
+  /**
+   * En que paginas del sitio del estudio corresponde mostrarse.
+   *
+   * Una regla por linea, contra la ruta de la pagina. El * es comodin y una
+   * linea que arranca con ! excluye. Sin reglas, en todas —que es como venia
+   * funcionando y no queremos cambiarselo a quien ya lo tiene puesto.
+   *
+   * Excluir gana sobre incluir: es lo que uno espera al escribir "en todo el
+   * sitio menos /contacto", y es el lado seguro si las dos listas se pisan.
+   */
+  function correspondeAca() {
+    var lineas = paginas.split("\\n").map(function (l) { return l.trim(); })
+                        .filter(function (l) { return l.length > 0; });
+    if (!lineas.length) return true;
+
+    var ruta = location.pathname.replace(/\\/+$/, "") || "/";
+
+    // Comparacion literal por tramos en vez de armar una expresion regular:
+    // una ruta puede traer parentesis, puntos o signos de pregunta, y escapar
+    // todo eso a mano para meterlo en un regex es de donde salen los bugs.
+    function coincide(regla) {
+      var r = regla.replace(/\\/+$/, "") || "/";
+      // Aceptamos que peguen la URL entera; nos quedamos con la ruta.
+      if (/^https?:/i.test(r)) { try { r = new URL(r).pathname.replace(/\\/+$/, "") || "/"; } catch (e) {} }
+      if (r.charAt(0) !== "/") r = "/" + r;
+
+      var partes = r.split("*");
+      if (partes.length === 1) return ruta === r;
+      if (ruta.indexOf(partes[0]) !== 0) return false;
+
+      var pos = partes[0].length;
+      for (var i = 1; i < partes.length - 1; i++) {
+        var idx = ruta.indexOf(partes[i], pos);
+        if (idx < 0) return false;
+        pos = idx + partes[i].length;
+      }
+      var ult = partes[partes.length - 1];
+      return ruta.length - pos >= ult.length &&
+             ruta.lastIndexOf(ult) === ruta.length - ult.length;
+    }
+
+    var incluir = [], excluir = [];
+    for (var i = 0; i < lineas.length; i++) {
+      if (lineas[i].charAt(0) === "!") excluir.push(lineas[i].slice(1).trim());
+      else incluir.push(lineas[i]);
+    }
+
+    for (var j = 0; j < excluir.length; j++) if (coincide(excluir[j])) return false;
+    if (!incluir.length) return true;
+    for (var k = 0; k < incluir.length; k++) if (coincide(incluir[k])) return true;
+    return false;
+  }
+
+  if (!correspondeAca()) return;
   var KEY     = "intake:popup:" + firm;
   var ATTR    = "intake:attr:" + firm;
 
@@ -327,7 +386,12 @@ export async function GET(req: Request) {
   return new Response(js, {
     headers: {
       "Content-Type": "application/javascript; charset=utf-8",
-      "Cache-Control": "public, max-age=300",
+      // El script lleva adentro la configuracion del widget, asi que el cache
+      // es tambien el retraso con el que se ve un cambio hecho en el panel.
+      // Un minuto de cache firme y cinco de reuso mientras se revalida: el
+      // sitio del estudio no paga la ida al servidor en cada visita, y quien
+      // cambia una regla la ve aplicada en el proximo minuto y no en cinco.
+      "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
       "Access-Control-Allow-Origin": "*",
     },
   });

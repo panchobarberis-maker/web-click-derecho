@@ -305,6 +305,15 @@ end $rls2$;
 -- Arranca en true para no cambiar lo que ya se ve; se destilda por estudio.
 alter table firms add column if not exists show_on_home boolean not null default true;
 
+-- En que paginas del sitio del estudio se muestra cada widget.
+--
+-- Vacio = en todas, que es como venia funcionando. Una regla por linea, con *
+-- de comodin; una linea que empieza con ! excluye. Se guarda como texto y no
+-- como arreglo porque lo escribe una persona en un textarea, y un texto libre
+-- no se rompe si alguien pega algo raro.
+alter table popups add column if not exists paginas text;
+alter table clips  add column if not exists paginas text;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -404,11 +413,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$w7LgCmkUCeEztqZ2nWKF0g==$0Y8BI8u7M2PYQHaqfBh5qedpzNTDf9mngDADxpJ6wFT7qtcLv9OlE+IYOvm4t5E3XK6IQbIcpbMzdZAIR1FQCw==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$ZABQ/qqUO4YCj6jM67mHmw==$lRR1X/XN4qtMbu3vleaw+LVjU9X06ARtIjGIaAGEU3fQhUkT6pg3HoMAaSuurVp4kvPO/eQhNn9POP1fyHG1EQ==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$aHRv0/AgQBMubRjAh24t2w==$8X6NFul1FiF/1w+Xk650Z2RzoMzKu3qNxmf2PkPeR+aQDRFOzscS1YKkmj8KcKHU5rdxFpuCoHZR0Yn8t0McGA==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$Lx8qhsoS5EIn3+gOrzLz1g==$5G9POl0syy1IHk9NdC0yVycRU9qDSRWGOnAJMpQJ0mOwTmXnbtLSTp7xoy8JzhfgMvK61hoi0QZh6wqvPdPgoA==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

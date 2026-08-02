@@ -24,11 +24,12 @@ async function crear(formData: FormData) {
   if (!name) return;
 
   await sql`
-    insert into popups (firm_id, name, trigger, cta, funnel_id)
+    insert into popups (firm_id, name, trigger, cta, funnel_id, paginas)
     values (${firm.id}, ${name},
             ${String(formData.get("trigger") ?? "delay:12")},
             ${String(formData.get("cta") ?? "").trim() || "Consultá tu caso"},
-            ${String(formData.get("funnel_id") ?? "") || null})`;
+            ${String(formData.get("funnel_id") ?? "") || null},
+            ${String(formData.get("paginas") ?? "").trim() || null})`;
   revalidatePath("/popups");
 }
 
@@ -41,6 +42,7 @@ async function guardar(formData: FormData) {
       trigger   = ${String(formData.get("trigger") ?? "delay:12")},
       cta       = ${String(formData.get("cta") ?? "").trim() || "Consultá tu caso"},
       funnel_id = ${String(formData.get("funnel_id") ?? "") || null},
+      paginas   = ${String(formData.get("paginas") ?? "").trim() || null},
       active    = ${formData.get("active") === "on"}
     where id = ${String(formData.get("id"))} and firm_id = ${firm.id}`;
   revalidatePath("/popups");
@@ -55,7 +57,7 @@ async function borrar(formData: FormData) {
 
 type Popup = {
   id: string; name: string; trigger: string; cta: string;
-  funnel_id: string | null; active: boolean;
+  funnel_id: string | null; active: boolean; paginas: string | null;
 };
 
 export default async function Popups({ searchParams }: { searchParams: Promise<{ r?: string }> }) {
@@ -64,7 +66,7 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
   const puedeEditar = firm.role !== "member";
 
   const [popups, areas, stats] = await Promise.all([
-    sql<Popup[]>`select id, name, trigger, cta, funnel_id, active from popups
+    sql<Popup[]>`select id, name, trigger, cta, funnel_id, active, paginas from popups
                  where firm_id = ${firm.id} order by created_at desc`,
     sql<{ id: string; name: string }[]>`select id, name from funnels where firm_id = ${firm.id} order by sort_order`,
     porWidget(firm.id, "popups", range),
@@ -135,6 +137,15 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
                         {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                       </select>
 
+                      <label className="lbl">¿En qué páginas aparece?</label>
+                      <textarea name="paginas" rows={4} defaultValue={p.paginas ?? ""}
+                                placeholder={"Vacío = en todo el sitio\n/laboral\n/servicios/*\n!/contacto"} />
+                      <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+                        Una dirección por línea. <code>*</code> vale por cualquier cosa
+                        (<code>/blog/*</code>). Una línea que empieza con <code>!</code> la excluye
+                        (<code>!/contacto</code>). Si lo dejás vacío, aparece en todo el sitio.
+                      </p>
+
                       <label className="check">
                         <input type="checkbox" name="active" defaultChecked={p.active} /> Activo
                       </label>
@@ -175,6 +186,10 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
                 <option value="">Todas las áreas (menú)</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
+
+              <label className="lbl">¿En qué páginas aparece?</label>
+              <textarea name="paginas" rows={3}
+                        placeholder={"Vacío = en todo el sitio\n/laboral\n!/contacto"} />
 
               <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Crear</button>
             </form>

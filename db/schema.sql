@@ -284,3 +284,12 @@ end $rls2$;
 -- estudio de ejemplo del seed figuraba como si fuera un cliente real.
 -- Arranca en true para no cambiar lo que ya se ve; se destilda por estudio.
 alter table firms add column if not exists show_on_home boolean not null default true;
+
+-- En que paginas del sitio del estudio se muestra cada widget.
+--
+-- Vacio = en todas, que es como venia funcionando. Una regla por linea, con *
+-- de comodin; una linea que empieza con ! excluye. Se guarda como texto y no
+-- como arreglo porque lo escribe una persona en un textarea, y un texto libre
+-- no se rompe si alguien pega algo raro.
+alter table popups add column if not exists paginas text;
+alter table clips  add column if not exists paginas text;
