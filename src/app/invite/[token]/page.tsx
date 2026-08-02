@@ -63,6 +63,22 @@ export default async function Invite({
 
   const corta = (await searchParams).e === "corta";
 
+  function FormularioClave({ token }: { token: string }) {
+    return (
+      <form action={aceptar}>
+        <input type="hidden" name="token" value={token} />
+
+        <label htmlFor="name">Tu nombre</label>
+        <input id="name" name="name" type="text" autoComplete="name" />
+
+        <label htmlFor="password">Contraseña</label>
+        <input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required />
+
+        <button type="submit">Crear mi acceso</button>
+      </form>
+    );
+  }
+
   return (
     <div className="auth">
       <div className="auth-card">
@@ -77,7 +93,14 @@ export default async function Invite({
 
         {corta && <p className="auth-error">La contraseña tiene que tener al menos 10 caracteres.</p>}
 
-        {googleEnabled() && (
+        {/*
+          Con Google alcanza un click y no hay contraseña que recordar ni que
+          perder. Por eso es el camino principal y la contraseña queda plegada:
+          no la sacamos porque hay estudios sin cuenta de Google, pero pedirle
+          a alguien que invente una contraseña cuando no hace falta es la forma
+          mas facil de que abandone el alta.
+        */}
+        {googleEnabled() ? (
           <>
             <a className="auth-google" href="/api/auth/google">
               <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -88,28 +111,18 @@ export default async function Invite({
               </svg>
               Entrar con Google
             </a>
-            <div className="auth-or"><span>o creá una contraseña</span></div>
+            <p className="auth-foot" style={{ marginTop: ".9rem" }}>
+              Un click y listo. No tenés que inventar ninguna contraseña.
+            </p>
+
+            <details className="auth-alt">
+              <summary>Prefiero entrar con una contraseña</summary>
+              <FormularioClave token={token} />
+            </details>
           </>
+        ) : (
+          <FormularioClave token={token} />
         )}
-
-        <form action={aceptar}>
-          <input type="hidden" name="token" value={token} />
-
-          <label htmlFor="name">Tu nombre</label>
-          <input id="name" name="name" type="text" autoComplete="name" />
-
-          <label htmlFor="password">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            minLength={10}
-            required
-          />
-
-          <button type="submit">Crear mi acceso</button>
-        </form>
       </div>
     </div>
   );
