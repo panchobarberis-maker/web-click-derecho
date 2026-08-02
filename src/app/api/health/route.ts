@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { dbConfigError, sql } from "@/lib/db";
 import { googleEnabled, redirectUri } from "@/lib/google";
 import { TABLAS, COLUMNAS } from "@/lib/estructura";
+import { almacenamientoListo } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -102,6 +103,9 @@ export async function GET() {
       // memoria es el error que hace fallar el primer intento.
       google: googleEnabled() ? "configurado" : "falta GOOGLE_CLIENT_ID y/o GOOGLE_CLIENT_SECRET",
       google_redirect_uri: redirectUri(),
+      videos: almacenamientoListo()
+        ? "configurado"
+        : "falta SUPABASE_SERVICE_ROLE_KEY: los clips aceptan pegar una dirección pero no subir",
       mails: process.env.RESEND_API_KEY
         ? "configurado"
         : "falta RESEND_API_KEY: las consultas se guardan pero no se avisa por mail",

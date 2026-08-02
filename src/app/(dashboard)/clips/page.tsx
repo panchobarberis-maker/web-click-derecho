@@ -5,6 +5,8 @@ import { porWidget, type Range } from "@/lib/analytics";
 import { baseUrl } from "@/lib/base-url";
 import { RangePicker } from "@/components/RangePicker";
 import { Snippet } from "@/components/Snippet";
+import { SubirVideo } from "@/components/SubirVideo";
+import { almacenamientoListo, MAX_MB } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +70,7 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
   ]);
 
   const stat = new Map(stats.map((s) => [s.id, s]));
+  const puedeSubir = almacenamientoListo();
   const base = baseUrl();
 
   return (
@@ -123,8 +126,9 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                       <label className="lbl">Nombre</label>
                       <input name="name" defaultValue={c.name} required />
 
-                      <label className="lbl">URL del video (mp4)</label>
-                      <input name="video_url" defaultValue={c.video_url} required />
+                      <label className="lbl">Video</label>
+                      <SubirVideo name="video_url" defaultValue={c.video_url}
+                                  habilitado={puedeSubir} maxMb={MAX_MB} />
 
                       <label className="lbl">Imagen de portada (opcional)</label>
                       <input name="poster_url" defaultValue={c.poster_url ?? ""} />
@@ -183,8 +187,8 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
               <label className="lbl">Nombre</label>
               <input name="name" placeholder="Home — presentación" required />
 
-              <label className="lbl">URL del video (mp4)</label>
-              <input name="video_url" placeholder="https://…/clip.mp4" required />
+              <label className="lbl">Video</label>
+              <SubirVideo name="video_url" habilitado={puedeSubir} maxMb={MAX_MB} />
 
               <label className="lbl">Imagen de portada (opcional)</label>
               <input name="poster_url" placeholder="https://…/portada.jpg" />
@@ -206,8 +210,9 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
             </form>
 
             <p className="muted" style={{ fontSize: ".8rem", marginTop: "1rem", lineHeight: 1.55 }}>
-              El video lo hospedás donde quieras y pegás la dirección acá. Vertical y de 15 a 30 segundos es lo
-              que mejor funciona.
+              {puedeSubir
+                ? "Subís el video y queda hospedado con nosotros. Vertical y de 15 a 20 segundos es lo que mejor funciona."
+                : "La subida no está configurada en este servidor: por ahora el video lo hospedás donde quieras y pegás la dirección."}
             </p>
           </div>
         )}

@@ -430,3 +430,32 @@ El checklist del Inicio va marcando esto solo, a medida que se completa:
 
 Los pasos 2 a 6 los puede hacer el estudio solo; en la práctica conviene
 dejarle los formularios armados y que después los ajuste.
+
+## Videos de los clips
+
+El navegador sube el archivo **directo a Supabase Storage**, no a través de la
+aplicación: en Vercel el cuerpo de un request está limitado a 4,5 MB y un video
+no entra. El servidor solo firma un permiso de subida de un solo uso —eso
+requiere la clave de servicio, que nunca sale al navegador— y el archivo viaja
+aparte. Cada estudio escribe en su propia carpeta, con la ruta armada por el
+servidor.
+
+Para habilitarlo:
+
+1. Supabase → **Storage** → New bucket llamado `videos`, marcado **público**.
+   Es público porque el video lo miran los visitantes del sitio del estudio,
+   que no tienen sesión.
+2. En Vercel, `SUPABASE_SERVICE_ROLE_KEY` con la clave de servicio (Project
+   Settings → API Keys). `SUPABASE_URL` no hace falta: se deduce de
+   `DATABASE_URL`, donde el usuario del pooler es `postgres.<ref>`.
+
+Sin configurar, los clips siguen aceptando la dirección de un video hospedado
+en cualquier otro lado: el botón de subir simplemente no aparece.
+
+**El costo del video es el egress, no el almacenamiento.** El clip se descarga
+en cada visita al sitio del estudio, y los 5 GB mensuales del plan gratis son
+de todo el proyecto, no por estudio: con dos o tres clientes se agotan. Apagar
+el autoplay del clip pasa el video a `preload="none"` y lo descarga solo quien
+lo toca. Cuando el egress empiece a pesar, conviene mover los archivos a
+Cloudflare R2, que no lo cobra: como el clip guarda una URL, es cambiar el
+campo.

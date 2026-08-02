@@ -272,3 +272,13 @@ details.ajuste[open] summary { margin-bottom: .75rem; }
 
 .pasos-nuevos { display: flex; gap: .6rem; flex-wrap: wrap; }
 .pasos-nuevos .agregar { flex: 1; min-width: 12rem; }
+
+/* ---------- subida de video ---------- */
+.subir .lbl { margin-top: .9rem; }
+.subir input[type="text"], .subir input:not([type]) {
+  width: 100%; padding: .6rem .75rem; border: 1px solid #ded5c6; border-radius: 8px;
+  font-family: inherit; font-size: .9rem; color: var(--ink); background: #fff;
+}
+.subir-ok { font-size: .82rem; color: var(--good); margin-top: .5rem; }
+.subir-error { font-size: .82rem; color: #96271b; margin-top: .5rem; line-height: 1.5; }
+.subir-ayuda { font-size: .76rem; margin-top: .5rem; line-height: 1.5; }
