@@ -419,11 +419,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$CIEyFg3tksq8/N2WPzb4eQ==$TjTG6ymOgqkqMdySObgyW3M24D+oDhXrh8qh3EISmpp/kqXmnLwsuuIXOCLnCJNye+8W/wJtuNAJhmdtXfDhwA==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$bGEc4Rh75bzK567C8tcznQ==$WLrofKpPm5RzXVQLYaKgM/Eak3jTg8aZceEZXZfza8pN+lMMLQyoGTOMqsrBNYulO8eoMh0/RuKcu5JwN8uUgw==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$agHtfAbHveEPwJnhZv3LyA==$x9X/tExDYwajgMmG36UIlK1s0T1qHcA/ynWYaS1IMZ7454yX687LcWQY5PIVMJj1ywiRIiDrBIf6O/AXW3sRjA==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$r4cp0zCWSsNiK8BMar7dAQ==$TdLWfQvz7hQQQ2FgIPZVniZx55ZikVL76EO6pjyCc+qpcr+4a5A6gvxFWRbSYpc8mU9n6Rr7QoZtW99q6xRbUQ==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

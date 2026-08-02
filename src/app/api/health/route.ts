@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConfigError, sql } from "@/lib/db";
 import { googleEnabled, redirectUri } from "@/lib/google";
+import { TABLAS, COLUMNAS } from "@/lib/estructura";
 
 export const dynamic = "force-dynamic";
 
@@ -13,34 +14,7 @@ function hostDeLaBase(): string {
   }
 }
 
-/**
- * Todas las tablas del esquema, no solo las del principio.
- *
- * Una base que se creo con una version anterior de bootstrap.sql conecta,
- * responde y parece sana, pero le faltan las tablas nuevas y la app se cae
- * recien al abrir la pantalla que las usa. Nombrar cual falta es la diferencia
- * entre un diagnostico y una adivinanza.
- */
-const TABLAS = [
-  "firms", "funnels", "workflows", "sessions", "events",
-  "users", "memberships", "oauth_accounts", "auth_sessions", "invitations",
-  "popups", "clips", "password_resets", "login_attempts",
-] as const;
 
-/**
- * Columnas agregadas despues del esquema inicial.
- *
- * Chequear solo las tablas no alcanza: una base creada con una version
- * anterior tiene las 14 tablas y le faltan columnas, y entonces el
- * diagnostico dice que esta todo bien mientras la pantalla que usa esa
- * columna se cae. Cada vez que se agrega una columna va acá.
- */
-const COLUMNAS: [tabla: string, columna: string][] = [
-  ["sessions", "surface_id"],
-  ["firms", "show_on_home"],
-  ["popups", "paginas"],
-  ["clips", "paginas"],
-];
 
 /**
  * Diagnostico desde el navegador: /api/health
@@ -113,7 +87,7 @@ export async function GET() {
       columnas: `${COLUMNAS.length - sinColumna.length} de ${COLUMNAS.length}`,
       ...c,
       problema: faltan.length
-        ? `${faltan.join("; ")}. Volvé a correr db/bootstrap.sql en el SQL Editor de Supabase: es idempotente, no duplica lo que ya está.`
+        ? `${faltan.join("; ")}. Entrá al panel como agencia, a Base de datos, y corré el SQL que muestra esa pantalla.`
         : null,
       // Para diagnosticar lentitud: si ida_ms es alto, la base esta lejos de
       // donde corre la app y hay que igualar las regiones.

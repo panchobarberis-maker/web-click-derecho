@@ -36,6 +36,7 @@ const items: Item[] = [
   { href: "/ajustes", label: "Ajustes del estudio", ownerOnly: true },
   { href: "/equipo", label: "Equipo", ownerOnly: true },
   { href: "/estudios", label: "Estudios", staffOnly: true },
+  { href: "/base", label: "Base de datos", staffOnly: true },
 ];
 
 export function Nav({

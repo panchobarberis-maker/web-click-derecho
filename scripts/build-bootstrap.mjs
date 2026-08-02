@@ -220,3 +220,17 @@ from sessions where data->>'_demo' = '1';
 
 await writeFile(join(here, "..", "db", "bootstrap.sql"), partes.join(""));
 console.log("db/bootstrap.sql generado");
+
+// El esquema tambien como modulo, para que el panel pueda mostrarlo.
+//
+// Va como TypeScript y no leyendo el .sql en tiempo de ejecucion porque en
+// Vercel solo se despliega lo que el bundle referencia: un archivo suelto en
+// db/ no viaja, y la pantalla quedaria vacia justo en produccion, que es donde
+// hace falta.
+await writeFile(
+  join(here, "..", "src", "lib", "esquema.ts"),
+  "// GENERADO por scripts/build-bootstrap.mjs a partir de db/schema.sql.\n" +
+  "// No editar a mano: se pisa en la proxima generacion.\n\n" +
+  "export const ESQUEMA_SQL = " + JSON.stringify(schema) + ";\n",
+);
+console.log("src/lib/esquema.ts generado");
