@@ -10,6 +10,20 @@ export const dynamic = "force-dynamic";
  * la base y estan cargados los datos?— y sin esto hay que ir a leer los logs
  * de funciones de Vercel. No expone nada sensible: solo conteos.
  */
+/**
+ * Todas las tablas del esquema, no solo las del principio.
+ *
+ * Una base que se creo con una version anterior de bootstrap.sql conecta,
+ * responde y parece sana, pero le faltan las tablas nuevas y la app se cae
+ * recien al abrir la pantalla que las usa. Nombrar cual falta es la diferencia
+ * entre un diagnostico y una adivinanza.
+ */
+const TABLAS = [
+  "firms", "funnels", "workflows", "sessions", "events",
+  "users", "memberships", "oauth_accounts", "auth_sessions", "invitations",
+  "popups", "clips",
+] as const;
+
 export async function GET() {
   const t0 = Date.now();
 
@@ -21,13 +35,14 @@ export async function GET() {
   }
 
   try {
-    const [tablas] = await sql<{ n: number }[]>`
-      select count(*)::int as n from information_schema.tables
-      where table_schema = 'public'
-        and table_name in ('firms','funnels','workflows','sessions','events',
-                           'users','memberships','oauth_accounts','auth_sessions','invitations')`;
+    const presentes = await sql<{ table_name: string }[]>`
+      select table_name from information_schema.tables
+      where table_schema = 'public' and table_name in ${sql(TABLAS)}`;
 
-    if (Number(tablas.n) === 0) {
+    const hay = new Set(presentes.map((r) => r.table_name));
+    const sinTabla = TABLAS.filter((t) => !hay.has(t));
+
+    if (hay.size === 0) {
       return NextResponse.json({
         base: "conecta",
         tablas: 0,
@@ -45,15 +60,17 @@ export async function GET() {
         (select count(*)::int from sessions)  as consultas`;
 
     const faltan: string[] = [];
+    if (sinTabla.length) faltan.push(`faltan tablas: ${sinTabla.join(", ")}`);
     if (c.estudios === 0) faltan.push("no hay ningún estudio cargado");
     if (c.usuarios === 0) faltan.push("no hay usuarios: no vas a poder entrar");
-    if (Number(tablas.n) < 10) faltan.push(`faltan tablas (hay ${tablas.n} de 10)`);
 
     return NextResponse.json({
       base: "conecta",
-      tablas: Number(tablas.n),
+      tablas: `${hay.size} de ${TABLAS.length}`,
       ...c,
-      problema: faltan.length ? faltan.join("; ") + ". Corré db/bootstrap.sql en Supabase." : null,
+      problema: faltan.length
+        ? `${faltan.join("; ")}. Volvé a correr db/bootstrap.sql en el SQL Editor de Supabase: es idempotente, no duplica lo que ya está.`
+        : null,
       ms: Date.now() - t0,
     });
   } catch (e) {
