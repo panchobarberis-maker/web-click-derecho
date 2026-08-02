@@ -1,6 +1,6 @@
 import { sql } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
-import { totals, series, attribution, byFunnel, bySurface, dropoff, type Range } from "@/lib/analytics";
+import { totals, series, attribution, byFunnel, bySurface, campanas, dropoff, type Range } from "@/lib/analytics";
 import { LineChart, BarList, Tile } from "@/components/Charts";
 import { RangePicker } from "@/components/RangePicker";
 import { fmtShort, sourceLabel } from "@/lib/format";
@@ -31,12 +31,13 @@ export default async function Analytics({
 
   const wfId = params.wf || workflows[0]?.id;
 
-  const [t, s, attr, funnels, surfaces, drop] = await Promise.all([
+  const [t, s, attr, funnels, surfaces, camps, drop] = await Promise.all([
     totals(firm.id, range),
     series(firm.id, range),
     attribution(firm.id, range),
     byFunnel(firm.id, range),
     bySurface(firm.id, range),
+    campanas(firm.id, range),
     wfId ? dropoff(firm.id, wfId, range) : null,
   ]);
 
@@ -91,9 +92,55 @@ export default async function Analytics({
         <div className="card">
           <h3>De dónde vienen</h3>
           <BarList
-            rows={attr.map((a) => ({ label: sourceLabel(a.source), value: Number(a.n), caption: `${a.pct}%` }))}
+            rows={attr.map((a) => ({
+              label: sourceLabel(a.source),
+              value: Number(a.n),
+              caption: `${Number(a.consultas)} de ${Number(a.n)}`,
+            }))}
           />
+          <p className="muted" style={{ fontSize: ".82rem", marginTop: "1rem" }}>
+            Consultas sobre visitas de cada origen.
+          </p>
         </div>
+      </div>
+
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <h3>Campañas</h3>
+        <p className="muted" style={{ fontSize: ".86rem", marginTop: "-.4rem", marginBottom: "1rem", lineHeight: 1.55 }}>
+          Cada consulta guarda los <code>utm_</code> de la página donde se abrió el formulario, aunque esté
+          embebido en el sitio del estudio. Acá se ve qué pauta trae consultas y no solo clics.
+        </p>
+
+        {camps.length === 0 ? (
+          <p className="empty">Todavía no hay visitas en este período.</p>
+        ) : (
+          <div className="scroll-x">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fuente</th>
+                  <th>Medio</th>
+                  <th>Campaña</th>
+                  <th className="num">Visitas</th>
+                  <th className="num">Consultas</th>
+                  <th className="num">Conversión</th>
+                </tr>
+              </thead>
+              <tbody>
+                {camps.map((c) => (
+                  <tr key={`${c.fuente}|${c.medio}|${c.campana}`}>
+                    <td style={{ fontWeight: 500 }}>{sourceLabel(c.fuente)}</td>
+                    <td className="muted">{c.medio}</td>
+                    <td>{c.campana}</td>
+                    <td className="num">{Number(c.visitas)}</td>
+                    <td className="num">{Number(c.consultas)}</td>
+                    <td className="num">{Number(c.conversion)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="grid cols-2-1">

@@ -49,16 +49,54 @@ export async function series(firmId: string, range: Range) {
 
 export async function attribution(firmId: string, range: Range) {
   const s = since(range);
-  return sql<{ source: string; n: number; pct: number }[]>`
+  return sql<{ source: string; n: number; consultas: number; pct: number }[]>`
     with t as (
-      select coalesce(nullif(source, ''), 'direct') as source
+      select coalesce(nullif(source, ''), 'direct') as source, submitted_at
       from sessions
       where firm_id = ${firmId}
         ${s ? sql`and created_at > now() - ${s}::interval` : sql``}
     )
     select source, count(*) as n,
+           count(*) filter (where submitted_at is not null)::int as consultas,
            round(100.0 * count(*) / nullif(sum(count(*)) over (), 0), 1) as pct
-    from t group by source order by n desc`;
+    from t group by source order by consultas desc, n desc`;
+}
+
+export type Campana = {
+  fuente: string; medio: string; campana: string;
+  visitas: number; consultas: number; conversion: number;
+};
+
+/**
+ * De donde vienen las consultas, al nivel de campaña.
+ *
+ * La tabla de arriba agrupa por origen grueso ("google", "instagram"), que
+ * sirve para mirar de reojo pero no para decidir nada: dos campañas de
+ * Instagram pueden rendir distinto y ahi se ven iguales. Esto abre por
+ * utm_source / utm_medium / utm_campaign, que es lo que se necesita para saber
+ * que pauta cortar.
+ *
+ * Las visitas sin utm no se descartan: caen bajo su origen resuelto (el
+ * buscador, el sitio que las trajo, o directo), asi la suma sigue cerrando con
+ * el total.
+ */
+export async function campanas(firmId: string, range: Range): Promise<Campana[]> {
+  const s = since(range);
+  return sql<Campana[]>`
+    select
+      coalesce(nullif(utm->>'utm_source', ''), nullif(source, ''), 'direct') as fuente,
+      coalesce(nullif(utm->>'utm_medium', ''), '—')                          as medio,
+      coalesce(nullif(utm->>'utm_campaign', ''), '—')                        as campana,
+      count(*)::int                                                          as visitas,
+      count(*) filter (where submitted_at is not null)::int                  as consultas,
+      coalesce(round(100.0 * count(*) filter (where submitted_at is not null)
+              / nullif(count(*), 0)), 0)                                     as conversion
+    from sessions
+    where firm_id = ${firmId}
+      ${s ? sql`and created_at > now() - ${s}::interval` : sql``}
+    group by 1, 2, 3
+    order by consultas desc, visitas desc
+    limit 40`;
 }
 
 /** Rendimiento por area de practica. */

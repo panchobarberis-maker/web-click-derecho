@@ -128,6 +128,19 @@ declare
   nombres text[] := array['Martín','Carla','Diego','Lucía','Javier','Ana','Nicolás','Sofía','Pablo','Valeria'];
   apellidos text[] := array['Ruiz','Gómez','Fernández','Paz','Sosa','Torres','Vega','Ledesma','Ibarra','Cabrera'];
   fuentes text[] := array['organic','google','instagram','whatsapp','referral','direct','facebook'];
+  v_utm  jsonb;
+  -- Pauta de mentira, para que la tabla de campañas del panel muestre algo
+  -- parecido a lo que se ve con trafico real. El resto queda sin utm, como
+  -- pasa con lo organico y lo directo.
+  campanas jsonb[] := array[
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"laboral-despidos","utm_content":"search-marca"}',
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"laboral-despidos","utm_content":"search-generico"}',
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"sucesiones-caba"}',
+    '{"utm_source":"instagram","utm_medium":"paid_social","utm_campaign":"reels-familia","utm_content":"video-15s"}',
+    '{"utm_source":"instagram","utm_medium":"paid_social","utm_campaign":"reels-familia","utm_content":"carrusel"}',
+    '{"utm_source":"facebook","utm_medium":"paid_social","utm_campaign":"remarketing-30d"}',
+    '{"utm_source":"newsletter","utm_medium":"email","utm_campaign":"septiembre"}'
+  ]::jsonb[];
 begin
   select id into v_firm from firms where slug = ${lit(firm.slug)};
   delete from sessions where firm_id = v_firm and data->>'_demo' = '1';
@@ -145,10 +158,16 @@ begin
       sup := case when random() < 0.7 then 'page'
                   when random() < 0.5 then 'popup' else 'clip' end;
 
-      insert into sessions (firm_id, funnel_id, workflow_id, source, surface, created_at, updated_at, data)
+      -- 55% viene de pauta: de ahi salen los utm y la fuente.
+      v_utm := case when random() < 0.55
+                    then campanas[1 + floor(random() * array_length(campanas, 1))::int]
+                    else '{}'::jsonb end;
+
+      insert into sessions (firm_id, funnel_id, workflow_id, source, surface, utm, created_at, updated_at, data)
       values (v_firm, v_wf.funnel_id, v_wf.wid,
-              fuentes[1 + floor(random() * array_length(fuentes, 1))::int],
-              sup, cuando, cuando, '{"_demo":"1"}'::jsonb)
+              coalesce(v_utm->>'utm_source',
+                       fuentes[1 + floor(random() * array_length(fuentes, 1))::int]),
+              sup, v_utm, cuando, cuando, '{"_demo":"1"}'::jsonb)
       returning id into v_ses;
 
       insert into events (session_id, firm_id, funnel_id, workflow_id, type, surface, created_at)

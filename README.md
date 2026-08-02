@@ -257,6 +257,23 @@ La landing se configura por estudio desde *Ajustes del estudio*: `logo_url`,
 `hero_url` (la foto de la columna izquierda), `accent` y `intro` (el texto de
 privacidad).
 
+## De dónde vienen las consultas
+
+*Analytics* lo muestra en dos niveles. **De dónde vienen** agrupa por origen
+resuelto (Google, Instagram, referidos, directo) y sirve para mirar de reojo.
+**Campañas** abre por `utm_source` / `utm_medium` / `utm_campaign` con visitas,
+consultas y conversión de cada una: eso es lo que permite decidir qué pauta
+sostener y cuál cortar, porque dos campañas del mismo origen pueden rendir muy
+distinto y en la vista gruesa se ven iguales.
+
+Las visitas sin `utm_` no se descartan: caen bajo su origen resuelto, así la
+suma cierra con el total. Cada consulta guarda además su `utm_content`,
+`gclid`, referrer y landing page, visibles en el detalle de la consulta.
+
+Nada de esto necesita Google Analytics: la atribución la resuelve la app. GA
+tiene sentido por otra razón —que la conversión llegue a Google Ads para
+optimizar campañas— y eso todavía no está hecho.
+
 ## Atribución del origen
 
 Este es el punto donde es fácil equivocarse. El formulario corre dentro de un

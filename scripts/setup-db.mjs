@@ -196,6 +196,19 @@ if (demo) {
   const superficies = ["page", "popup", "clip"];
   const rnd = (a) => a[Math.floor(Math.random() * a.length)];
 
+  // Pauta de mentira, para que la tabla de campanas del panel muestre algo
+  // parecido a lo que se ve con trafico real. El resto de las visitas queda
+  // sin utm, como pasa con lo organico y lo directo.
+  const campanas = [
+    { utm_source: "google", utm_medium: "cpc", utm_campaign: "laboral-despidos", utm_content: "search-marca" },
+    { utm_source: "google", utm_medium: "cpc", utm_campaign: "laboral-despidos", utm_content: "search-generico" },
+    { utm_source: "google", utm_medium: "cpc", utm_campaign: "sucesiones-caba" },
+    { utm_source: "instagram", utm_medium: "paid_social", utm_campaign: "reels-familia", utm_content: "video-15s" },
+    { utm_source: "instagram", utm_medium: "paid_social", utm_campaign: "reels-familia", utm_content: "carrusel" },
+    { utm_source: "facebook", utm_medium: "paid_social", utm_campaign: "remarketing-30d" },
+    { utm_source: "newsletter", utm_medium: "email", utm_campaign: "septiembre" },
+  ];
+
   let visitas = 0, envios = 0, abandonos = 0;
   for (let d = 60; d >= 0; d--) {
     // mas trafico los dias habiles, con algo de ruido
@@ -208,9 +221,14 @@ if (demo) {
       const surface = Math.random() < 0.7 ? "page" : rnd(superficies);
       const at = new Date(base.getTime() + Math.random() * 864e5);
 
+      // 55% viene de pauta: de ahi salen los utm. El resto es organico o directo.
+      const camp = Math.random() < 0.55 ? rnd(campanas) : null;
+      const fuente = camp ? camp.utm_source : rnd(fuentes);
+
       const [s] = await sql`
-        insert into sessions (firm_id, funnel_id, workflow_id, source, surface, created_at, updated_at, data)
-        values (${f.id}, ${wf.funnel_id}, ${wf.workflow_id}, ${rnd(fuentes)}, ${surface}, ${at}, ${at}, ${sql.json({ _demo: "1" })})
+        insert into sessions (firm_id, funnel_id, workflow_id, source, surface, utm, created_at, updated_at, data)
+        values (${f.id}, ${wf.funnel_id}, ${wf.workflow_id}, ${fuente}, ${surface},
+                ${sql.json(camp ?? {})}, ${at}, ${at}, ${sql.json({ _demo: "1" })})
         returning id`;
       await sql`insert into events (session_id, firm_id, funnel_id, workflow_id, type, surface, created_at)
         values (${s.id}, ${f.id}, ${wf.funnel_id}, ${wf.workflow_id}, 'view', ${surface}, ${at})`;

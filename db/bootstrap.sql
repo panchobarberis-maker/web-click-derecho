@@ -390,11 +390,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$m+JyLIfMB+l9X/AplY3Wtw==$mNv7fz8/N3Os1tQrXKE/ivjOgitJHSw8ZgcIJknxBX7UOvks7TPnjlpcQUC1Nwq+qXTizEdU/pd1B+yK5unwsg==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$TxqoV6bOHOAkOoQiIPFZbg==$pTWTpeCiHlHrzVA+Ti/qQXprxabUDfbFKh+/m1joN39UGuoZIb0BsC3T4dG355XkY4idpcpzRLV3k13/usGa3A==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$lwSErWcmD8i1Pqr5zB+FVg==$WxAj1G7Uak/fRlGdVNr6cByUOS2OMatlLrhKd36ybtfxYwmB5C1svd3lbTcwpetyL4VCUm63XAdWYPZ4GLoRKw==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$+3Th3/fEZsdZcHb9jzvVAQ==$wAaLoH9c8n4mM7yphN9yxMVgK6k+mW0m60NlLjAyC9QaH1Pf1zqU2cCe/P9/agW4qyDTXsgtZ1Kzquv4YVBJjg==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)
@@ -425,6 +425,19 @@ declare
   nombres text[] := array['Martín','Carla','Diego','Lucía','Javier','Ana','Nicolás','Sofía','Pablo','Valeria'];
   apellidos text[] := array['Ruiz','Gómez','Fernández','Paz','Sosa','Torres','Vega','Ledesma','Ibarra','Cabrera'];
   fuentes text[] := array['organic','google','instagram','whatsapp','referral','direct','facebook'];
+  v_utm  jsonb;
+  -- Pauta de mentira, para que la tabla de campañas del panel muestre algo
+  -- parecido a lo que se ve con trafico real. El resto queda sin utm, como
+  -- pasa con lo organico y lo directo.
+  campanas jsonb[] := array[
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"laboral-despidos","utm_content":"search-marca"}',
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"laboral-despidos","utm_content":"search-generico"}',
+    '{"utm_source":"google","utm_medium":"cpc","utm_campaign":"sucesiones-caba"}',
+    '{"utm_source":"instagram","utm_medium":"paid_social","utm_campaign":"reels-familia","utm_content":"video-15s"}',
+    '{"utm_source":"instagram","utm_medium":"paid_social","utm_campaign":"reels-familia","utm_content":"carrusel"}',
+    '{"utm_source":"facebook","utm_medium":"paid_social","utm_campaign":"remarketing-30d"}',
+    '{"utm_source":"newsletter","utm_medium":"email","utm_campaign":"septiembre"}'
+  ]::jsonb[];
 begin
   select id into v_firm from firms where slug = 'alzogaray-serrano';
   delete from sessions where firm_id = v_firm and data->>'_demo' = '1';
@@ -442,10 +455,16 @@ begin
       sup := case when random() < 0.7 then 'page'
                   when random() < 0.5 then 'popup' else 'clip' end;
 
-      insert into sessions (firm_id, funnel_id, workflow_id, source, surface, created_at, updated_at, data)
+      -- 55% viene de pauta: de ahi salen los utm y la fuente.
+      v_utm := case when random() < 0.55
+                    then campanas[1 + floor(random() * array_length(campanas, 1))::int]
+                    else '{}'::jsonb end;
+
+      insert into sessions (firm_id, funnel_id, workflow_id, source, surface, utm, created_at, updated_at, data)
       values (v_firm, v_wf.funnel_id, v_wf.wid,
-              fuentes[1 + floor(random() * array_length(fuentes, 1))::int],
-              sup, cuando, cuando, '{"_demo":"1"}'::jsonb)
+              coalesce(v_utm->>'utm_source',
+                       fuentes[1 + floor(random() * array_length(fuentes, 1))::int]),
+              sup, v_utm, cuando, cuando, '{"_demo":"1"}'::jsonb)
       returning id into v_ses;
 
       insert into events (session_id, firm_id, funnel_id, workflow_id, type, surface, created_at)
