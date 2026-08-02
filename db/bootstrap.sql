@@ -262,6 +262,41 @@ begin
   end loop;
 end $rls$;
 
+-- ---------------------------------------------------------------------------
+-- Recuperar la contrasena, y frenar la fuerza bruta
+--
+-- Sin esto, una persona del estudio que se olvida la contrasena depende de que
+-- alguien le toque la base a mano, que es justo lo que no queremos.
+-- ---------------------------------------------------------------------------
+
+create table if not exists password_resets (
+  id         uuid primary key default gen_random_uuid(),
+  token_hash text not null unique,
+  user_id    uuid not null references users(id) on delete cascade,
+  expires_at timestamptz not null,
+  used_at    timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_password_resets_user on password_resets (user_id) where used_at is null;
+
+-- Un intento fallido por fila. La clave es el email o la IP: se limita por las
+-- dos, porque limitar solo por email deja probar una contrasena comun contra
+-- muchas cuentas, y limitar solo por IP deja hacerlo desde muchas.
+create table if not exists login_attempts (
+  id    bigserial primary key,
+  clave text not null,
+  at    timestamptz not null default now()
+);
+create index if not exists idx_login_attempts on login_attempts (clave, at);
+
+do $rls2$
+declare t text;
+begin
+  foreach t in array array['password_resets', 'login_attempts'] loop
+    execute format('alter table %I enable row level security', t);
+  end loop;
+end $rls2$;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -355,11 +390,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$cYYuYoeb5PSr4M/UOIPgxA==$cqfZVq4EnWXul2PtlEVA2fmQoTkSHMAKE95zRNEUkv4W/NvcOxoSAtEQWLE86CErVGxD7vRClEZLHR+uWN1caQ==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$m+JyLIfMB+l9X/AplY3Wtw==$mNv7fz8/N3Os1tQrXKE/ivjOgitJHSw8ZgcIJknxBX7UOvks7TPnjlpcQUC1Nwq+qXTizEdU/pd1B+yK5unwsg==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$tCQVvzOTTDZCgUsLMo4bqA==$Z14U9NDX+HjBgHNuTJIeSc7NmmLDeqeh4XWwJ/9Us67LCKiJ8S39hOdOyl0qfBxsDAsUhJE3yeJfslzFqJn3Fw==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$lwSErWcmD8i1Pqr5zB+FVg==$WxAj1G7Uak/fRlGdVNr6cByUOS2OMatlLrhKd36ybtfxYwmB5C1svd3lbTcwpetyL4VCUm63XAdWYPZ4GLoRKw==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

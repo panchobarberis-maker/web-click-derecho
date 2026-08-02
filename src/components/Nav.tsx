@@ -18,6 +18,7 @@ const items: Item[] = [
   { href: "/clips", label: "Clips" },
   { href: "/embed", label: "Instalación" },
   { sep: true },
+  { href: "/cuenta", label: "Mi cuenta" },
   { href: "/ajustes", label: "Ajustes del estudio", ownerOnly: true },
   { href: "/equipo", label: "Equipo", ownerOnly: true },
   { href: "/estudios", label: "Estudios", staffOnly: true },

@@ -241,3 +241,38 @@ begin
     execute format('alter table %I enable row level security', t);
   end loop;
 end $rls$;
+
+-- ---------------------------------------------------------------------------
+-- Recuperar la contrasena, y frenar la fuerza bruta
+--
+-- Sin esto, una persona del estudio que se olvida la contrasena depende de que
+-- alguien le toque la base a mano, que es justo lo que no queremos.
+-- ---------------------------------------------------------------------------
+
+create table if not exists password_resets (
+  id         uuid primary key default gen_random_uuid(),
+  token_hash text not null unique,
+  user_id    uuid not null references users(id) on delete cascade,
+  expires_at timestamptz not null,
+  used_at    timestamptz,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_password_resets_user on password_resets (user_id) where used_at is null;
+
+-- Un intento fallido por fila. La clave es el email o la IP: se limita por las
+-- dos, porque limitar solo por email deja probar una contrasena comun contra
+-- muchas cuentas, y limitar solo por IP deja hacerlo desde muchas.
+create table if not exists login_attempts (
+  id    bigserial primary key,
+  clave text not null,
+  at    timestamptz not null default now()
+);
+create index if not exists idx_login_attempts on login_attempts (clave, at);
+
+do $rls2$
+declare t text;
+begin
+  foreach t in array array['password_resets', 'login_attempts'] loop
+    execute format('alter table %I enable row level security', t);
+  end loop;
+end $rls2$;

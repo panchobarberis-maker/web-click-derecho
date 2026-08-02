@@ -85,3 +85,17 @@
 }
 
 .auth-hint { font-size: .82rem; color: var(--muted); text-align: center; margin-bottom: 1.5rem; line-height: 1.55; }
+
+.auth-ok {
+  background: #e9f5ee;
+  color: #1c6b3f;
+  border-radius: 8px;
+  padding: .7rem .9rem;
+  font-size: .86rem;
+  line-height: 1.45;
+  margin-bottom: 1.25rem;
+}
+
+.auth-link { text-align: center; margin-top: 1.1rem; font-size: .84rem; }
+.auth-link a { color: var(--muted); }
+.auth-link a:hover { color: var(--accent); }

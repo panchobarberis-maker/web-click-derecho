@@ -1,7 +1,11 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { sql } from "@/lib/db";
-import { createSession, currentUser, fakeVerify, verifyPassword } from "@/lib/auth";
+import {
+  createSession, currentUser, esperaPorIntentos, fakeVerify,
+  limpiarIntentos, registrarIntentoFallido, verifyPassword,
+} from "@/lib/auth";
+import { clientIp } from "@/lib/ip";
 import { googleEnabled } from "@/lib/google";
 import "./login.css";
 
@@ -15,6 +19,7 @@ const ERRORES: Record<string, string> = {
   email_no_verificado: "Tu cuenta de Google no tiene el email verificado.",
   sin_invitacion: "Ese email no tiene acceso. Pedile una invitación al estudio.",
   db: "No se pudo conectar con la base de datos. Abrí /api/health para ver qué está fallando.",
+  cambiada: "Listo, ya podés entrar con tu contraseña nueva.",
 };
 
 async function login(formData: FormData) {
@@ -24,32 +29,54 @@ async function login(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   if (!email || !password) redirect("/login?e=cred");
 
+  const cabeceras = await headers();
+  const ip = clientIp(cabeceras);
+
   // Si la base no responde, el server action moriria sin decir nada y el
   // boton pareceria no hacer nada. Preferimos mandar al login con un motivo.
   let user: { id: string; password_hash: string | null } | undefined;
+  let espera = 0;
   try {
-    [user] = await sql<{ id: string; password_hash: string | null }[]>`
-      select id, password_hash from users where lower(email) = ${email}`;
+    espera = await esperaPorIntentos(email, ip);
+    if (espera === 0) {
+      [user] = await sql<{ id: string; password_hash: string | null }[]>`
+        select id, password_hash from users where lower(email) = ${email}`;
+    }
   } catch (e) {
     console.error("login: la base no respondió:", e);
     redirect("/login?e=db");
   }
 
+  // Frenamos antes de verificar: cada intento cuesta ~100ms de scrypt, así que
+  // sin esto una lista de contraseñas comunes se prueba sola.
+  if (espera > 0) redirect(`/login?e=freno&m=${espera}`);
+
   // El usuario inexistente también paga el costo del hash: si no, el tiempo de
   // respuesta delata qué emails están registrados.
   if (!user) {
     await fakeVerify();
+    await registrarIntentoFallido(email, ip);
     redirect("/login?e=cred");
   }
-  if (!(await verifyPassword(password, user.password_hash))) redirect("/login?e=cred");
+  if (!(await verifyPassword(password, user.password_hash))) {
+    await registrarIntentoFallido(email, ip);
+    redirect("/login?e=cred");
+  }
 
-  await createSession(user.id, (await headers()).get("user-agent"));
+  await limpiarIntentos(email, ip);
+  await createSession(user.id, cabeceras.get("user-agent"));
   redirect("/");
 }
 
-export default async function Login({ searchParams }: { searchParams: Promise<{ e?: string }> }) {
+export default async function Login({ searchParams }: { searchParams: Promise<{ e?: string; m?: string }> }) {
   if (await currentUser()) redirect("/");
-  const error = ERRORES[(await searchParams).e ?? ""];
+  const { e, m } = await searchParams;
+
+  const minutos = Math.max(1, Number(m) || 1);
+  const error =
+    e === "freno"
+      ? `Demasiados intentos fallidos. Probá de nuevo en ${minutos} ${minutos === 1 ? "minuto" : "minutos"}.`
+      : ERRORES[e ?? ""];
 
   return (
     <div className="auth">
@@ -60,9 +87,9 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
         </div>
 
         {error && (
-          <p className="auth-error">
+          <p className={e === "cambiada" ? "auth-ok" : "auth-error"}>
             {error}
-            {(await searchParams).e === "db" && (
+            {e === "db" && (
               <>
                 {" "}
                 <a href="/api/health" style={{ color: "inherit", fontWeight: 600 }}>Ver el diagnóstico</a>
@@ -95,6 +122,10 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
 
           <button type="submit">Entrar</button>
         </form>
+
+        <p className="auth-link">
+          <a href="/recuperar">¿Olvidaste tu contraseña?</a>
+        </p>
 
         <p className="auth-foot">
           El acceso es por invitación. Si tu estudio trabaja con nosotros y todavía no entrás,

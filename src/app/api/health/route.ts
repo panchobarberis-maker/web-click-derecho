@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 const TABLAS = [
   "firms", "funnels", "workflows", "sessions", "events",
   "users", "memberships", "oauth_accounts", "auth_sessions", "invitations",
-  "popups", "clips",
+  "popups", "clips", "password_resets", "login_attempts",
 ] as const;
 
 export async function GET() {

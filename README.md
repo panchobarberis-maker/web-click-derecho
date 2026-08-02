@@ -76,11 +76,22 @@ desaparece solo cuando está todo hecho. *Ajustes del estudio* deja cambiar
 después la marca y a dónde llegan las consultas; la dirección pública solo la
 cambia la agencia, porque rompe los links ya publicados.
 
+Cada uno cambia su contraseña desde *Mi cuenta*, y quien se la olvida la
+recupera solo desde el link del login: le llega un mail con un token de un uso
+que vale una hora. En los dos casos se cierran las sesiones abiertas en otros
+dispositivos, que es lo que hace útil el cambio cuando la contraseña se filtró.
+
 Cómo funciona por dentro:
 
 - **Contraseñas** con scrypt (`N=2^15`), sal aleatoria por usuario y
   comparación en tiempo constante. Un email inexistente igual paga el costo del
   hash, para que el tiempo de respuesta no delate qué cuentas existen.
+- **Freno a la fuerza bruta**: 8 intentos fallidos por cuenta y 25 por IP cada
+  15 minutos. El conteo vive en `login_attempts` y no en memoria, porque en
+  Vercel cada request puede caer en una instancia distinta y un contador en
+  memoria no frena nada. Entrar bien lo borra.
+- **Recuperación** sin filtrar nada: `/recuperar` responde lo mismo exista o no
+  la cuenta, y en `password_resets` se guarda solo el hash del token.
 - **Sesiones** opacas: token aleatorio de 32 bytes en cookie `httpOnly` +
   `SameSite=Lax`, y en la base solo su SHA-256. Se pueden revocar de a una.
 - **Google** por authorization code flow con `state` en cookie contra CSRF de

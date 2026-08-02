@@ -99,6 +99,105 @@ export async function currentUser(): Promise<SessionUser | null> {
   return row ?? null;
 }
 
+/** Cierra todas las sesiones de una cuenta. Se usa al cambiar la contraseña. */
+export async function destroyAllSessions(userId: string): Promise<void> {
+  await sql`delete from auth_sessions where user_id = ${userId}`;
+}
+
+// ------------------------------------------------------- recuperar contraseña
+
+/**
+ * Devuelve el token en claro, que va en el link del mail. En la base queda
+ * solo el hash: quien lea la tabla no puede armar el link.
+ */
+export async function createPasswordReset(userId: string): Promise<string> {
+  const token = randomBytes(32).toString("base64url");
+
+  // Un pedido pendiente por cuenta: el link viejo deja de servir apenas se
+  // pide uno nuevo.
+  await sql`delete from password_resets where user_id = ${userId} and used_at is null`;
+  await sql`
+    insert into password_resets (token_hash, user_id, expires_at)
+    values (${hashToken(token)}, ${userId}, now() + interval '1 hour')`;
+
+  return token;
+}
+
+export type Reset = { id: string; user_id: string; email: string; name: string | null };
+
+export async function findPasswordReset(token: string): Promise<Reset | null> {
+  const [row] = await sql<Reset[]>`
+    select p.id, p.user_id, u.email, u.name
+    from password_resets p join users u on u.id = p.user_id
+    where p.token_hash = ${hashToken(token)}
+      and p.used_at is null and p.expires_at > now()`;
+  return row ?? null;
+}
+
+/**
+ * Aplica la contraseña nueva y cierra todas las sesiones abiertas.
+ *
+ * Lo segundo importa: si alguien recupera la cuenta porque se la tomaron, el
+ * que estaba adentro tiene que quedar afuera.
+ */
+export async function applyPasswordReset(reset: Reset, nueva: string): Promise<void> {
+  const hash = await hashPassword(nueva);
+  await sql`update users set password_hash = ${hash} where id = ${reset.user_id}`;
+  await sql`update password_resets set used_at = now() where id = ${reset.id}`;
+  await destroyAllSessions(reset.user_id);
+}
+
+/** Reglas mínimas de la contraseña. Devuelve el problema, o null si está bien. */
+export function revisarContrasena(nueva: string, repetida: string): string | null {
+  if (nueva.length < 10) return "La contraseña tiene que tener al menos 10 caracteres.";
+  if (nueva !== repetida) return "Las dos contraseñas no coinciden.";
+  return null;
+}
+
+// -------------------------------------------------------- freno a los intentos
+
+const VENTANA_MIN = 15;
+const TOPE = { email: 8, ip: 25 } as const;
+
+/**
+ * Cuántos minutos hay que esperar antes de volver a probar, o 0 si se puede.
+ *
+ * El conteo vive en la base y no en memoria a propósito: en Vercel cada
+ * request puede caer en una instancia distinta, así que un contador en memoria
+ * no frena nada.
+ */
+export async function esperaPorIntentos(email: string, ip: string | null): Promise<number> {
+  const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
+
+  const filas = await sql<{ clave: string; n: number; primero: Date }[]>`
+    select clave, count(*)::int as n, min(at) as primero
+    from login_attempts
+    where clave in ${sql(claves)} and at > now() - ${`${VENTANA_MIN} minutes`}::interval
+    group by clave`;
+
+  let espera = 0;
+  for (const f of filas) {
+    const tope = f.clave.startsWith("email:") ? TOPE.email : TOPE.ip;
+    if (f.n < tope) continue;
+    const libre = new Date(f.primero).getTime() + VENTANA_MIN * 60_000;
+    espera = Math.max(espera, Math.ceil((libre - Date.now()) / 60_000));
+  }
+  return Math.max(espera, 0);
+}
+
+export async function registrarIntentoFallido(email: string, ip: string | null): Promise<void> {
+  const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
+  await sql`insert into login_attempts ${sql(claves.map((clave) => ({ clave })))}`;
+  // Los intentos viejos no sirven para nada; se limpian acá porque fallar es
+  // raro y así no hace falta un trabajo programado solo para esto.
+  await sql`delete from login_attempts where at < now() - interval '1 hour'`;
+}
+
+export async function limpiarIntentos(email: string, ip: string | null): Promise<void> {
+  const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
+  await sql`delete from login_attempts where clave in ${sql(claves)}`;
+}
+
 // ----------------------------------------------------------------- invitaciones
 
 /** Devuelve el token en claro (va en el link del mail) y guarda solo el hash. */

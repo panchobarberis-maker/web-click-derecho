@@ -67,6 +67,27 @@ export function recoveryEmail(o: { name: string | null; firm: string; accent: st
   };
 }
 
+/** Link para elegir una contraseña nueva. Al panel, no a un estudio. */
+export function resetEmail(o: { name: string | null; url: string }) {
+  return {
+    subject: "Recuperar el acceso al panel",
+    html: wrap(
+      `<p>Hola${o.name ? ` ${o.name.split(" ")[0]}` : ""},</p>
+       <p>Pediste volver a entrar al panel. Este link te deja elegir una contraseña nueva
+       y <strong>vence en una hora</strong>.</p>
+       <p style="margin:1.75rem 0">
+         <a href="${o.url}" style="background:#2d0a4e;color:#fff;padding:12px 26px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
+           Elegir una contraseña nueva
+         </a>
+       </p>
+       <p>Si no lo pediste vos, no hace falta que hagas nada: tu contraseña actual sigue
+       funcionando y este link se vence solo.</p>
+       <p style="margin-top:1.5rem">— Click Derecho</p>`,
+      "Si no pediste recuperar el acceso, ignorá este mail.",
+    ),
+  };
+}
+
 const esc = (v: string) =>
   v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
