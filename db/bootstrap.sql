@@ -297,6 +297,14 @@ begin
   end loop;
 end $rls2$;
 
+-- Que estudios se listan en la home publica.
+--
+-- Sin esto, dar de alta un estudio lo publica en la home sin que nadie lo
+-- decida: un cliente puede no querer que se sepa con quien trabaja, y el
+-- estudio de ejemplo del seed figuraba como si fuera un cliente real.
+-- Arranca en true para no cambiar lo que ya se ve; se destilda por estudio.
+alter table firms add column if not exists show_on_home boolean not null default true;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -396,11 +404,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$5g2sU2n49EFKm1+QOPc1Lw==$xZpM1AAv5QLxegT0CzvJ1UizxrnHRMBhsmi6Gw7P/87hzH59pc72bJ6aL/+NQFskbxA0oyUcyPMMKcyxV1DxDw==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$w7LgCmkUCeEztqZ2nWKF0g==$0Y8BI8u7M2PYQHaqfBh5qedpzNTDf9mngDADxpJ6wFT7qtcLv9OlE+IYOvm4t5E3XK6IQbIcpbMzdZAIR1FQCw==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$B/fuumXaC6Q+SJPb6FoHLQ==$n8/DHc6PrYzJo3rLVj197zWXtMzoDZOZ/xFjryLhVAf3CdPPW/k+enIhJmBx0Mjov6Pz7pZwGsbyrpi4NcctxQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$aHRv0/AgQBMubRjAh24t2w==$8X6NFul1FiF/1w+Xk650Z2RzoMzKu3qNxmf2PkPeR+aQDRFOzscS1YKkmj8KcKHU5rdxFpuCoHZR0Yn8t0McGA==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

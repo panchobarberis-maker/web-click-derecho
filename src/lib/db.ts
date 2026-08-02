@@ -46,6 +46,8 @@ export type Firm = {
   logo_url: string | null;
   hero_url: string | null;
   intro: string | null;
+  /** Si figura en la cinta de estudios de la home publica. */
+  show_on_home: boolean;
 };
 
 export type Funnel = {

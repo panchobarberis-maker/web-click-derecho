@@ -62,6 +62,17 @@ async function abrir(formData: FormData) {
   redirect("/panel");
 }
 
+/** Muestra o esconde el estudio en la cinta de la home publica. */
+async function alternarHome(formData: FormData) {
+  "use server";
+  await requireStaff();
+  await sql`
+    update firms set show_on_home = not show_on_home
+    where id = ${String(formData.get("id"))}`;
+  revalidatePath("/estudios");
+  revalidatePath("/");
+}
+
 async function borrar(formData: FormData) {
   "use server";
   await requireStaff();
@@ -143,6 +154,14 @@ export default async function Estudios() {
                     {completo ? "En marcha" : `Puesta en marcha: ${listos} de ${pasos.length}`}
                   </span>
                   <span style={{ display: "flex", gap: ".5rem", flex: "none" }}>
+                    <form action={alternarHome}>
+                      <input type="hidden" name="id" value={f.id} />
+                      <button type="submit" className="btn ghost"
+                              style={{ padding: ".4rem 1rem", fontSize: ".82rem" }}
+                              title="Aparecer o no en la cinta de estudios de la home pública">
+                        {f.show_on_home ? "Ocultar de la home" : "Mostrar en la home"}
+                      </button>
+                    </form>
                     <Link href={`/f/${f.slug}`} className="btn ghost" target="_blank"
                           style={{ padding: ".4rem 1rem", fontSize: ".82rem" }}>
                       Ver página

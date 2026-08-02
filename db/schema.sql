@@ -276,3 +276,11 @@ begin
     execute format('alter table %I enable row level security', t);
   end loop;
 end $rls2$;
+
+-- Que estudios se listan en la home publica.
+--
+-- Sin esto, dar de alta un estudio lo publica en la home sin que nadie lo
+-- decida: un cliente puede no querer que se sepa con quien trabaja, y el
+-- estudio de ejemplo del seed figuraba como si fuera un cliente real.
+-- Arranca en true para no cambiar lo que ya se ve; se destilda por estudio.
+alter table firms add column if not exists show_on_home boolean not null default true;

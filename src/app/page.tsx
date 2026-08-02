@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
  */
 async function estudios(): Promise<string[]> {
   try {
-    const filas = await sql<{ name: string }[]>`select name from firms order by created_at`;
+    const filas = await sql<{ name: string }[]>`
+      select name from firms where show_on_home order by created_at`;
     return filas.map((f) => f.name);
   } catch {
     // Una home que no abre porque la base no responde es peor que una home sin
