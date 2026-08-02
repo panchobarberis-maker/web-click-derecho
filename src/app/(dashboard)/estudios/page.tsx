@@ -51,7 +51,7 @@ async function crear(formData: FormData) {
   // crearlo: lo que sigue es cargarle las áreas.
   await elegir(firm.id);
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/panel");
 }
 
 async function abrir(formData: FormData) {
@@ -59,7 +59,7 @@ async function abrir(formData: FormData) {
   await requireStaff();
   await elegir(String(formData.get("id")));
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/panel");
 }
 
 async function borrar(formData: FormData) {

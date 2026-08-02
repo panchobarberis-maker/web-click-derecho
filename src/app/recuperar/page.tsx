@@ -43,7 +43,7 @@ async function pedir(formData: FormData) {
 }
 
 export default async function Recuperar({ searchParams }: { searchParams: Promise<{ listo?: string }> }) {
-  if (await currentUser()) redirect("/");
+  if (await currentUser()) redirect("/panel");
   const listo = (await searchParams).listo === "1";
 
   return (

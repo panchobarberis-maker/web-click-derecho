@@ -42,7 +42,7 @@ export async function GET(req: Request) {
     where provider = 'google' and provider_account_id = ${g.sub}`;
   if (vinculada) {
     await createSession(vinculada.user_id, req.headers.get("user-agent"));
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/panel", req.url));
   }
 
   // 2. Ya tiene usuario con ese mail (entraba con contraseña): vinculamos.
@@ -56,7 +56,7 @@ export async function GET(req: Request) {
       name = coalesce(name, ${g.name ?? null}), image = coalesce(image, ${g.picture ?? null})
       where id = ${existente.id}`;
     await createSession(existente.id, req.headers.get("user-agent"));
-    return NextResponse.redirect(new URL("/", req.url));
+    return NextResponse.redirect(new URL("/panel", req.url));
   }
 
   // 3. No tiene usuario: solo entra si alguien lo invitó. No hay registro abierto.
@@ -76,5 +76,5 @@ export async function GET(req: Request) {
   await acceptInvitation(inv, nuevo.id);
 
   await createSession(nuevo.id, req.headers.get("user-agent"));
-  return NextResponse.redirect(new URL("/", req.url));
+  return NextResponse.redirect(new URL("/panel", req.url));
 }

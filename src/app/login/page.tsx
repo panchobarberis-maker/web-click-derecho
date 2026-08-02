@@ -65,11 +65,11 @@ async function login(formData: FormData) {
 
   await limpiarIntentos(email, ip);
   await createSession(user.id, cabeceras.get("user-agent"));
-  redirect("/");
+  redirect("/panel");
 }
 
 export default async function Login({ searchParams }: { searchParams: Promise<{ e?: string; m?: string }> }) {
-  if (await currentUser()) redirect("/");
+  if (await currentUser()) redirect("/panel");
   const { e, m } = await searchParams;
 
   const minutos = Math.max(1, Number(m) || 1);

@@ -31,7 +31,7 @@ async function aceptar(formData: FormData) {
 
   await acceptInvitation(inv, user.id);
   await createSession(user.id, (await headers()).get("user-agent"));
-  redirect("/");
+  redirect("/panel");
 }
 
 export default async function Invite({
@@ -58,7 +58,7 @@ export default async function Invite({
   const user = await currentUser();
   if (user && user.email.toLowerCase() === inv.email.toLowerCase()) {
     await acceptInvitation(inv, user.id);
-    redirect("/");
+    redirect("/panel");
   }
 
   const corta = (await searchParams).e === "corta";

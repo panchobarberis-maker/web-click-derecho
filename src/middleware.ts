@@ -10,6 +10,10 @@ import { SESSION_COOKIE } from "@/lib/cookie-names";
  * `activeFirm()` contra Postgres en cada pantalla.
  */
 export function middleware(req: NextRequest) {
+  // La home es publica. Va acá y no en el matcher porque la ruta raiz deja el
+  // grupo capturado vacio y no hay forma limpia de excluirla con la negacion.
+  if (req.nextUrl.pathname === "/") return NextResponse.next();
+
   if (req.cookies.get(SESSION_COOKIE)) return NextResponse.next();
 
   const login = new URL("/login", req.url);

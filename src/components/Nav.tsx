@@ -23,7 +23,7 @@ type Firm = { id: string; name: string; role: string };
 type Item = { href?: string; label?: string; sep?: boolean; ownerOnly?: boolean; staffOnly?: boolean };
 
 const items: Item[] = [
-  { href: "/", label: "Inicio" },
+  { href: "/panel", label: "Inicio" },
   { href: "/responses", label: "Consultas" },
   { href: "/analytics", label: "Analytics" },
   { sep: true },

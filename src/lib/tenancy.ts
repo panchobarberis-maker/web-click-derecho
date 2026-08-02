@@ -54,13 +54,13 @@ export const activeFirm = cache(async function activeFirm(): Promise<{
  */
 export async function requireStaff(): Promise<SessionUser> {
   const user = await requireUser();
-  if (!user.is_staff) redirect("/");
+  if (!user.is_staff) redirect("/panel");
   return user;
 }
 
 /** Para acciones que solo puede hacer quien administra el estudio. */
 export async function requireOwner(): Promise<{ user: SessionUser; firm: FirmAccess }> {
   const { user, firm } = await activeFirm();
-  if (firm.role === "member") redirect("/");
+  if (firm.role === "member") redirect("/panel");
   return { user, firm };
 }

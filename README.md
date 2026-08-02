@@ -33,6 +33,23 @@ un cuestionario único para todos.
 | **Atribución de origen** | De dónde vino cada consulta, incluso embebida en un iframe en el sitio del estudio |
 | **Landing partida** | Foto del estudio + áreas de práctica como botones, con logo y texto de privacidad propios |
 
+## Las tres caras de la app
+
+| | Quién la ve | Qué es |
+|---|---|---|
+| `/` | Cualquiera | La home de Click Derecho: qué es, cómo funciona, y el botón de ingresar |
+| `/f/<estudio>` | Cualquiera | El formulario de consultas de cada estudio, con su marca |
+| `/panel` y el resto | Con sesión | El panel del estudio |
+
+La home es lo único público del dominio raíz. El panel vive en `/panel`: el
+middleware protege todo salvo la lista explícita de rutas públicas, así que una
+pantalla nueva del panel queda protegida por omisión y no al revés.
+
+La cinta de estudios de la home sale de la tabla `firms`, no de una lista
+escrita a mano: poner nombres inventados sería decir que hay clientes que no
+hay, y una lista a mano se desactualiza con el segundo cliente. El estudio de
+ejemplo que carga el seed aparece ahí hasta que se lo borra.
+
 ## Acceso
 
 **No hay registro abierto.** Al panel se entra solo por invitación, con Google

@@ -1,0 +1,155 @@
+/* Home publica de Click Derecho. Vive aparte del panel: el panel es una
+   herramienta de trabajo y esto es una pagina de venta, con otro ritmo. */
+
+.home {
+  --tinta: #2a2118;
+  --tinta-2: #4c4237;
+  --suave: #4a4237;
+  --linea: #e9e2d7;
+  --marca: #5a4630;
+  --crema: #faf7f2;
+  --arena: #f2ebdd;
+  color: var(--tinta);
+  background: var(--crema);
+}
+
+/* ---------- barra de arriba ---------- */
+.home-top {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+  padding: 1rem 2.5rem;
+  background: rgba(250, 247, 242, .88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linea);
+}
+.home-marca {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.4rem; font-weight: 700; color: var(--marca); text-decoration: none;
+  letter-spacing: -.01em;
+}
+.home-links { display: flex; align-items: center; gap: .4rem; }
+.home-links a {
+  padding: .5rem .9rem; border-radius: 99px; text-decoration: none;
+  color: var(--tinta-2); font-size: .9rem; font-weight: 500;
+}
+.home-links a:hover { background: var(--arena); }
+.home-acceso { display: flex; align-items: center; gap: .6rem; }
+.home-btn {
+  display: inline-block; padding: .6rem 1.3rem; border-radius: 99px;
+  text-decoration: none; font-size: .9rem; font-weight: 500;
+  background: var(--marca); color: #fff; border: 1px solid var(--marca);
+}
+.home-btn:hover { opacity: .9; }
+.home-btn.claro { background: #fff; color: var(--marca); border-color: var(--linea); }
+.home-btn.claro:hover { border-color: var(--marca); opacity: 1; }
+
+@media (max-width: 820px) {
+  .home-top { padding: .8rem 1.1rem; flex-wrap: wrap; }
+  .home-links { display: none; }
+}
+
+/* ---------- hero ---------- */
+.home-hero { padding: 5rem 2rem 3.5rem; text-align: center; }
+.home-hero h1 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(2.2rem, 5.2vw, 3.9rem); line-height: 1.08; letter-spacing: -.02em;
+  color: var(--marca); max-width: 18ch; margin: 0 auto;
+}
+.home-hero h1 em { font-style: normal; color: #b3701a; }
+.home-hero .bajada {
+  margin: 1.4rem auto 0; max-width: 56ch;
+  font-size: 1.12rem; line-height: 1.6; color: var(--suave);
+}
+.home-cta { display: flex; gap: .7rem; justify-content: center; margin-top: 2.2rem; flex-wrap: wrap; }
+.home-cta .home-btn { padding: .8rem 1.8rem; font-size: .98rem; }
+
+/* ---------- cinta de estudios ---------- */
+.home-cinta { padding: 2.5rem 0 4rem; overflow: hidden; }
+.home-cinta .rotulo {
+  text-align: center; font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--suave); margin-bottom: 1.4rem;
+}
+.cinta-marco {
+  position: relative; overflow: hidden;
+  /* difumina las puntas para que la cinta no “corte” contra el borde */
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.cinta-pista {
+  display: flex; width: max-content;
+  animation: correr 38s linear infinite;
+}
+.cinta-marco:hover .cinta-pista { animation-play-state: paused; }
+.cinta-grupo { display: flex; align-items: center; gap: 3.5rem; padding-right: 3.5rem; }
+.cinta-grupo span {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.35rem; color: var(--marca); opacity: .55; white-space: nowrap;
+}
+/* De izquierda a derecha: la pista arranca corrida y vuelve a cero. */
+@keyframes correr { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .cinta-pista { animation: none; transform: none; }
+  .cinta-marco { mask-image: none; -webkit-mask-image: none; }
+}
+
+/* ---------- secciones ---------- */
+.home-seccion { padding: 4.5rem 2rem; max-width: 1120px; margin: 0 auto; }
+.home-seccion.arena { background: var(--arena); max-width: none; }
+.home-seccion .adentro { max-width: 1120px; margin: 0 auto; }
+.home-seccion h2 {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1.15; color: var(--marca);
+  max-width: 22ch; letter-spacing: -.01em;
+}
+.home-seccion .intro { margin-top: .9rem; max-width: 62ch; color: var(--suave); line-height: 1.65; }
+
+.home-grid { display: grid; gap: 1rem; margin-top: 2.5rem; }
+.home-grid.tres { grid-template-columns: repeat(3, 1fr); }
+.home-grid.dos { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 900px) { .home-grid.tres, .home-grid.dos { grid-template-columns: 1fr; } }
+
+.home-card {
+  background: #fff; border: 1px solid var(--linea); border-radius: 14px; padding: 1.6rem 1.7rem;
+}
+.home-card h3 { font-size: 1.05rem; margin-bottom: .6rem; color: var(--tinta); }
+.home-card p { font-size: .93rem; line-height: 1.6; color: var(--suave); }
+.home-card .paso {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; background: var(--arena);
+  color: var(--marca); font-size: .82rem; font-weight: 700; margin-bottom: .9rem;
+}
+.home-seccion.arena .home-card .paso { background: var(--crema); }
+
+/* ---------- numeros ---------- */
+.home-numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2.5rem; }
+@media (max-width: 900px) { .home-numeros { grid-template-columns: 1fr; } }
+.home-numeros div { text-align: center; padding: 1.6rem 1rem; }
+.home-numeros strong {
+  display: block; font-family: var(--font-serif), Georgia, serif;
+  font-size: 2.6rem; color: var(--marca); line-height: 1;
+}
+.home-numeros span { display: block; margin-top: .6rem; font-size: .9rem; color: var(--suave); line-height: 1.5; }
+
+/* ---------- preguntas ---------- */
+.home-faq { margin-top: 2.2rem; border-top: 1px solid var(--linea); }
+.home-faq details { border-bottom: 1px solid var(--linea); }
+.home-faq summary {
+  cursor: pointer; padding: 1.1rem 0; font-weight: 500; font-size: 1rem;
+  list-style: none; display: flex; justify-content: space-between; gap: 1rem;
+}
+.home-faq summary::-webkit-details-marker { display: none; }
+.home-faq summary::after { content: "+"; color: var(--marca); font-size: 1.3rem; line-height: 1; }
+.home-faq details[open] summary::after { content: "−"; }
+.home-faq p { padding: 0 0 1.2rem; color: var(--suave); line-height: 1.65; max-width: 68ch; font-size: .95rem; }
+
+/* ---------- cierre y pie ---------- */
+.home-cierre { text-align: center; padding: 5rem 2rem; }
+.home-cierre h2 { margin: 0 auto; }
+.home-cierre .intro { margin: .9rem auto 0; }
+
+.home-pie {
+  border-top: 1px solid var(--linea); padding: 2rem 2.5rem;
+  display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  font-size: .86rem; color: var(--suave);
+}
+.home-pie a { color: var(--suave); }
