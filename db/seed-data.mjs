@@ -22,6 +22,67 @@ const contacto = {
   ],
 };
 
+// Ultimo paso de todos los formularios. Va al final y no en el paso 1 a
+// proposito: son preguntas de coordinacion, y meterlas al principio alarga el
+// paso que decide si la persona empieza o se va.
+//
+// La urgencia y el "ya tenes abogado" no son burocracia: son lo que le permite
+// al estudio decidir a quien llama primero y detectar un conflicto de interes
+// antes de sentarse a escuchar el caso.
+const coordinar = {
+  title: "Para coordinar",
+  subtitle: "Lo último: cómo y cuándo te viene bien que te contactemos.",
+  fields: [
+    {
+      key: "urgencia",
+      label: "¿Qué tan urgente es?",
+      type: "radio",
+      required: true,
+      options: [
+        "Es urgente, tengo un plazo venciendo",
+        "Quiero resolverlo este mes",
+        "Estoy averiguando, sin apuro",
+      ],
+    },
+    {
+      key: "contacto_pref",
+      label: "¿Cómo preferís que te contactemos?",
+      type: "radio",
+      required: true,
+      options: [
+        "Llamada telefónica",
+        "WhatsApp",
+        "Videollamada (Zoom o Meet)",
+        "Reunión presencial en el estudio",
+      ],
+    },
+    {
+      key: "franja",
+      label: "¿En qué horario?",
+      type: "select",
+      required: false,
+      options: ["Mañana (9 a 13)", "Tarde (13 a 18)", "Indistinto"],
+    },
+    {
+      key: "otro_abogado",
+      label: "¿Ya consultaste este caso con otro abogado?",
+      type: "radio",
+      required: false,
+      options: ["No", "Sí, hice una consulta", "Sí, tengo abogado en el caso"],
+    },
+  ],
+};
+
+// Empleado o empleador cambia todo: el encuadre, los plazos y hasta si el
+// estudio toma el caso. Va en los formularios laborales.
+const rolLaboral = {
+  key: "rol",
+  label: "¿Consultás como...?",
+  type: "radio",
+  required: true,
+  options: ["Empleado/a", "Empleador/a o empresa"],
+};
+
 export const firm = {
   name: "Alzogaray & Serrano",
   slug: "alzogaray-serrano",
@@ -34,7 +95,7 @@ export const firm = {
     "Tu privacidad nos importa. Todo lo que compartas en este formulario es estrictamente confidencial y se usa únicamente para evaluar tu caso. Nunca compartimos tu información con terceros sin tu consentimiento.",
 };
 
-export const funnels = [
+const AREAS = [
   {
     name: "Derecho Laboral",
     slug: "laboral",
@@ -48,6 +109,7 @@ export const funnels = [
           {
             title: "Sobre tu trabajo",
             fields: [
+              rolLaboral,
               { key: "empresa", label: "Empresa donde trabajabas", type: "text", required: true },
               {
                 key: "antiguedad",
@@ -84,7 +146,7 @@ export const funnels = [
             fields: [
               { key: "detalle", label: "¿Qué pasó?", type: "textarea", required: false },
               {
-                key: "urgencia",
+                key: "hace_cuanto",
                 label: "¿Hace cuánto ocurrió?",
                 type: "select",
                 required: true,
@@ -102,6 +164,7 @@ export const funnels = [
           {
             title: "Sobre la relación laboral",
             fields: [
+              rolLaboral,
               { key: "empresa", label: "Empresa o empleador", type: "text", required: true },
               { key: "tarea", label: "¿Qué tareas hacías?", type: "text", required: true },
               {
@@ -146,6 +209,40 @@ export const funnels = [
             fields: [
               { key: "alta", label: "¿Te dieron el alta médica?", type: "radio", required: true, options: ["Sí", "No", "Todavía en tratamiento"] },
               { key: "secuelas", label: "¿Te quedaron secuelas?", type: "textarea", required: false },
+            ],
+          },
+        ],
+      },
+      // Sin esto, el que tiene un tema laboral que no entra en los tres de
+      // arriba —licencias, acoso, diferencias salariales, un convenio— cierra
+      // la pagina y se pierde. Es la consulta mas barata de capturar.
+      {
+        name: "Otro tema laboral",
+        slug: "otro-tema-laboral",
+        steps: [
+          contacto,
+          {
+            title: "Contanos tu situación",
+            fields: [
+              rolLaboral,
+              {
+                key: "tema",
+                label: "¿De qué se trata?",
+                type: "select",
+                required: true,
+                options: [
+                  "Licencias o vacaciones",
+                  "Acoso o maltrato laboral",
+                  "Diferencias salariales",
+                  "Cambio de tareas u horario",
+                  "Renuncia o acuerdo de desvinculación",
+                  "Encuadre en el convenio",
+                  "Otro",
+                ],
+              },
+              { key: "empresa", label: "Empresa o empleador", type: "text", required: false },
+              { key: "detalle", label: "Contanos qué pasó", type: "textarea", required: true },
+              { key: "vinculo_actual", label: "¿Seguís trabajando ahí?", type: "radio", required: true, options: ["Sí", "No"] },
             ],
           },
         ],
@@ -294,3 +391,15 @@ export const funnels = [
     ],
   },
 ];
+
+/**
+ * Todos los formularios terminan igual.
+ *
+ * El paso de coordinacion se agrega aca y no copiado en cada uno: son once
+ * formularios, y once copias de lo mismo se desincronizan la primera vez que
+ * alguien cambia una opcion.
+ */
+export const funnels = AREAS.map((area) => ({
+  ...area,
+  workflows: area.workflows.map((w) => ({ ...w, steps: [...w.steps, coordinar] })),
+}));

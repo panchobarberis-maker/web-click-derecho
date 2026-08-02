@@ -18,6 +18,15 @@ export const dynamic = "force-dynamic";
  * recien al abrir la pantalla que las usa. Nombrar cual falta es la diferencia
  * entre un diagnostico y una adivinanza.
  */
+/** Solo el host, nunca el usuario ni la contraseña. */
+function hostDeLaBase(): string {
+  try {
+    return new URL(process.env.DATABASE_URL ?? "").host;
+  } catch {
+    return "—";
+  }
+}
+
 const TABLAS = [
   "firms", "funnels", "workflows", "sessions", "events",
   "users", "memberships", "oauth_accounts", "auth_sessions", "invitations",
@@ -35,6 +44,13 @@ export async function GET() {
   }
 
   try {
+    // Una consulta trivial primero: mide la ida y vuelta hasta la base sin
+    // que se mezcle con el costo de leer nada. Si esto ya da 300ms, el
+    // problema no es la consulta, es la distancia.
+    const t1 = Date.now();
+    await sql`select 1`;
+    const ida = Date.now() - t1;
+
     const presentes = await sql<{ table_name: string }[]>`
       select table_name from information_schema.tables
       where table_schema = 'public' and table_name in ${sql(TABLAS)}`;
@@ -71,6 +87,11 @@ export async function GET() {
       problema: faltan.length
         ? `${faltan.join("; ")}. Volvé a correr db/bootstrap.sql en el SQL Editor de Supabase: es idempotente, no duplica lo que ya está.`
         : null,
+      // Para diagnosticar lentitud: si ida_ms es alto, la base esta lejos de
+      // donde corre la app y hay que igualar las regiones.
+      region: process.env.VERCEL_REGION ?? "local",
+      base_host: hostDeLaBase(),
+      ida_ms: ida,
       ms: Date.now() - t0,
     });
   } catch (e) {

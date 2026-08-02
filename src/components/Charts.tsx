@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 
-const S1 = "#6b4fbb"; // visitas
-const S2 = "#b8860b"; // consultas
+const S1 = "#1a6fa8"; // visitas
+const S2 = "#b3701a"; // consultas
 
 export type Point = { label: string; visits: number; responses: number };
 

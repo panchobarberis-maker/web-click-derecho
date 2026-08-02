@@ -1,5 +1,6 @@
 import { randomBytes, scrypt as scryptCb, timingSafeEqual, createHash } from "node:crypto";
 import { promisify } from "node:util";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { sql } from "./db";
 import { SESSION_COOKIE } from "./cookie-names";
@@ -87,8 +88,15 @@ export type SessionUser = {
   is_staff: boolean;
 };
 
-/** El usuario logueado, o null. No redirige: para eso está requireUser(). */
-export async function currentUser(): Promise<SessionUser | null> {
+/**
+ * El usuario logueado, o null. No redirige: para eso está requireUser().
+ *
+ * Va con cache() de React porque en cada pantalla se pregunta dos veces —una
+ * en el layout, para la barra lateral, y otra en la pantalla misma— y contra
+ * una base que esta lejos cada ida y vuelta se nota. cache() dura lo que dura
+ * el render de un request, asi que no arrastra sesiones entre visitantes.
+ */
+export const currentUser = cache(async function currentUser(): Promise<SessionUser | null> {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return null;
 
@@ -97,7 +105,7 @@ export async function currentUser(): Promise<SessionUser | null> {
     from auth_sessions s join users u on u.id = s.user_id
     where s.token_hash = ${hashToken(token)} and s.expires_at > now()`;
   return row ?? null;
-}
+});
 
 /** Cierra todas las sesiones de una cuenta. Se usa al cambiar la contraseña. */
 export async function destroyAllSessions(userId: string): Promise<void> {

@@ -1,8 +1,22 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+
+/**
+ * Señal de que el click se registró y la pantalla está viniendo.
+ *
+ * Va acá y no en un loading.tsx a propósito: un loading.tsx mete un límite de
+ * Suspense en el segmento, y con eso la pantalla dejaba de refrescarse después
+ * de un server action la mitad de las veces —el pop-up quedaba guardado pero
+ * no aparecía en la lista—. Esto es solo un punto al lado del ítem del menú:
+ * no toca el árbol de render, así que no puede romper nada.
+ */
+function Pendiente() {
+  const { pending } = useLinkStatus();
+  return pending ? <i className="latido" aria-hidden="true" /> : null;
+}
 
 type Firm = { id: string; name: string; role: string };
 
@@ -85,6 +99,7 @@ export function Nav({
               aria-current={path === it.href || (it.href !== "/" && path.startsWith(it.href!)) ? "page" : undefined}
             >
               {it.label}
+              <Pendiente />
             </Link>
           ),
         )}

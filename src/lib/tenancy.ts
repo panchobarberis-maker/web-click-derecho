@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { sql, type Firm } from "./db";
@@ -32,7 +33,11 @@ export async function firmsFor(user: SessionUser): Promise<FirmAccess[]> {
  * La cookie solo elige entre los estudios a los que el usuario ya tiene acceso:
  * el permiso se resuelve siempre contra la base, nunca contra la cookie.
  */
-export async function activeFirm(): Promise<{ user: SessionUser; firm: FirmAccess; firms: FirmAccess[] }> {
+export const activeFirm = cache(async function activeFirm(): Promise<{
+  user: SessionUser;
+  firm: FirmAccess;
+  firms: FirmAccess[];
+}> {
   const user = await requireUser();
   const firms = await firmsFor(user);
   if (firms.length === 0) redirect("/sin-acceso");
@@ -40,7 +45,7 @@ export async function activeFirm(): Promise<{ user: SessionUser; firm: FirmAcces
   const elegido = (await cookies()).get(FIRM_COOKIE)?.value;
   const firm = firms.find((f) => f.id === elegido) ?? firms[0];
   return { user, firm, firms };
-}
+});
 
 /**
  * Para lo que es de la agencia y no del estudio: crear estudios nuevos,

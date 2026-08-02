@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { Field, Step } from "@/lib/db";
-import { CON_OPCIONES, TIPOS, slugify, validarFormulario } from "@/lib/forms";
+import { CON_OPCIONES, TIPOS, pasoDeCoordinacion, slugify, validarFormulario } from "@/lib/forms";
 
 type Guardar = (steps: Step[]) => Promise<{ ok: boolean; problemas?: string[] }>;
 
@@ -22,6 +22,10 @@ export function FormEditor({
   const [problemas, setProblemas] = useState<string[]>([]);
   const [guardado, setGuardado] = useState(false);
   const [pendiente, empezar] = useTransition();
+
+  // Un solo bloque de coordinación por formulario: sus claves son fijas y
+  // dos copias chocarían al validar.
+  const tieneCoordinacion = steps.some((p) => p.fields.some((f) => f.key === "contacto_pref"));
 
   /** Cambia el arreglo sin mutarlo y marca que hay cambios sin guardar. */
   function actualizar(fn: (copia: Step[]) => void) {
@@ -186,9 +190,23 @@ export function FormEditor({
         </section>
       ))}
 
-      <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(nuevoPaso(s.length + 1)))}>
-        + Agregar paso
-      </button>
+      <div className="pasos-nuevos">
+        <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(nuevoPaso(s.length + 1)))}>
+          + Agregar paso
+        </button>
+
+        {/*
+          El bloque de coordinación se ofrece en vez de venir puesto: si viniera
+          puesto, cada paso que se agregue después cae detrás de él y el
+          formulario termina preguntando cómo coordinar antes de saber el caso.
+          Así lo agrega el que arma el formulario cuando ya cargó el resto.
+        */}
+        {!tieneCoordinacion && (
+          <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(pasoDeCoordinacion()))}>
+            + Agregar paso de coordinación
+          </button>
+        )}
+      </div>
 
       {problemas.length > 0 && (
         <div className="problemas">

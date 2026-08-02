@@ -27,13 +27,13 @@ async function invitar(formData: FormData) {
     to: email,
     subject: `Te invitaron al panel de ${firm.name}`,
     html: `
-      <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:520px;margin:0 auto;color:#1c1230;line-height:1.6">
+      <div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:520px;margin:0 auto;color:#2a2118;line-height:1.6">
         <p>Hola,</p>
         <p><strong>${user.name ?? user.email}</strong> te dio acceso al panel de consultas de
            <strong>${firm.name}</strong>. Ahí ves las consultas que entran, quién dejó el formulario
            a medias y de dónde viene cada una.</p>
         <p style="margin:1.75rem 0">
-          <a href="${link}" style="background:#2d0a4e;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
+          <a href="${link}" style="background:#5a4630;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
             Activar mi acceso
           </a>
         </p>
@@ -168,7 +168,7 @@ export default async function Equipo() {
               placeholder="socio@estudio.com.ar"
               style={{
                 width: "100%", padding: ".7rem .85rem", marginBottom: "1rem",
-                border: "1px solid #ddd8e4", borderRadius: 10, fontFamily: "inherit", fontSize: ".92rem",
+                border: "1px solid #ded5c6", borderRadius: 10, fontFamily: "inherit", fontSize: ".92rem",
               }}
             />
 
@@ -181,7 +181,7 @@ export default async function Equipo() {
               defaultValue="member"
               style={{
                 width: "100%", padding: ".7rem .85rem", marginBottom: "1.25rem",
-                border: "1px solid #ddd8e4", borderRadius: 10, fontFamily: "inherit", fontSize: ".92rem", background: "#fff",
+                border: "1px solid #ded5c6", borderRadius: 10, fontFamily: "inherit", fontSize: ".92rem", background: "#fff",
               }}
             >
               <option value="member">Ve las consultas</option>

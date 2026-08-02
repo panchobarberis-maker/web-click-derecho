@@ -42,7 +42,7 @@ async function crear(formData: FormData) {
   const [firm] = await sql<{ id: string }[]>`
     insert into firms (name, slug, notify_email, accent, logo_url, intro)
     values (${name}, ${slug}, ${notify || null},
-            ${String(formData.get("accent") ?? "#2d0a4e")},
+            ${String(formData.get("accent") ?? "#5a4630")},
             ${String(formData.get("logo_url") ?? "").trim() || null},
             ${String(formData.get("intro") ?? "").trim() || null})
     returning id`;
@@ -183,7 +183,7 @@ export default async function Estudios() {
             <input id="notify_email" name="notify_email" type="email" placeholder="consultas@estudio.com.ar" />
 
             <label className="lbl" htmlFor="accent">Color principal</label>
-            <input id="accent" name="accent" type="color" defaultValue="#2d0a4e" />
+            <input id="accent" name="accent" type="color" defaultValue="#5a4630" />
 
             <label className="lbl" htmlFor="logo_url">Logo (URL)</label>
             <input id="logo_url" name="logo_url" placeholder="https://…/logo.png" />

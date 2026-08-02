@@ -131,9 +131,12 @@ try {
 }
 
 if (reset) {
-  // users tambien: no tiene FK a firms, asi que sin nombrarla explicitamente
-  // las cuentas sobreviven al reset y ensucian la corrida siguiente.
-  await sql`truncate events, sessions, workflows, funnels, firms, users
+  // users y login_attempts tambien: ninguna tiene FK a firms, asi que sin
+  // nombrarlas explicitamente sobreviven al reset y ensucian la corrida
+  // siguiente. Con login_attempts el sintoma es peor que ensuciar: los
+  // intentos fallidos de la corrida anterior dejan el login frenado y la
+  // siguiente no puede entrar ni con la contrasena correcta.
+  await sql`truncate events, sessions, workflows, funnels, firms, users, login_attempts
             restart identity cascade`;
   console.log("datos borrados");
 }

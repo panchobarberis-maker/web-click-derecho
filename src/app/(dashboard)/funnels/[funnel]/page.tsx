@@ -65,6 +65,8 @@ async function crearCaso(formData: FormData) {
 
   // Arranca con el paso de contacto ya armado: es el que habilita recuperar
   // los abandonos, y dejarlo librado a que se acuerden es pedir problemas.
+  // El de coordinación se agrega desde el editor, con un botón, para que caiga
+  // al final y no en el medio de los pasos del caso.
   await sql`
     insert into workflows (funnel_id, name, slug, steps, sort_order)
     values (${funnel.id}, ${name}, ${slug}, ${sql.json({ steps: [pasoDeContacto()] })}, ${n})`;

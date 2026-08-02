@@ -33,7 +33,7 @@ async function guardar(formData: FormData) {
       name         = ${name},
       slug         = ${slug},
       notify_email = ${String(formData.get("notify_email") ?? "").trim().toLowerCase() || null},
-      accent       = ${String(formData.get("accent") ?? "#2d0a4e")},
+      accent       = ${String(formData.get("accent") ?? "#5a4630")},
       logo_url     = ${String(formData.get("logo_url") ?? "").trim() || null},
       hero_url     = ${String(formData.get("hero_url") ?? "").trim() || null},
       intro        = ${String(formData.get("intro") ?? "").trim() || null}

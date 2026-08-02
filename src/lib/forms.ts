@@ -82,6 +82,59 @@ export function validarFormulario(steps: Step[]): string[] {
   return problemas;
 }
 
+/**
+ * Paso de cierre sugerido: como y cuando contactar, y con cuanta urgencia.
+ *
+ * Va al final y no en el paso 1 a proposito. El paso 1 decide si la persona
+ * empieza o se va, asi que cuanto mas corto mejor; estas preguntas se
+ * responden bien cuando ya conto el caso y esta invertida.
+ */
+export function pasoDeCoordinacion(): Step {
+  return {
+    title: "Para coordinar",
+    subtitle: "Lo último: cómo y cuándo te viene bien que te contactemos.",
+    fields: [
+      {
+        key: "urgencia",
+        label: "¿Qué tan urgente es?",
+        type: "radio",
+        required: true,
+        options: [
+          "Es urgente, tengo un plazo venciendo",
+          "Quiero resolverlo este mes",
+          "Estoy averiguando, sin apuro",
+        ],
+      },
+      {
+        key: "contacto_pref",
+        label: "¿Cómo preferís que te contactemos?",
+        type: "radio",
+        required: true,
+        options: [
+          "Llamada telefónica",
+          "WhatsApp",
+          "Videollamada (Zoom o Meet)",
+          "Reunión presencial en el estudio",
+        ],
+      },
+      {
+        key: "franja",
+        label: "¿En qué horario?",
+        type: "select",
+        required: false,
+        options: ["Mañana (9 a 13)", "Tarde (13 a 18)", "Indistinto"],
+      },
+      {
+        key: "otro_abogado",
+        label: "¿Ya consultaste este caso con otro abogado?",
+        type: "radio",
+        required: false,
+        options: ["No", "Sí, hice una consulta", "Sí, tengo abogado en el caso"],
+      },
+    ],
+  };
+}
+
 /** Paso de contacto sugerido al crear un formulario nuevo. */
 export function pasoDeContacto(): Step {
   return {
