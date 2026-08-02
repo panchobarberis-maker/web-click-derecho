@@ -22,6 +22,10 @@ export function ViewTracker({
   search: Record<string, string | undefined>;
 }) {
   useEffect(() => {
+    // Vista previa del panel: mirar cómo queda un pop-up no puede contar
+    // como una visita ni ensuciarle las estadísticas al estudio.
+    if (search.preview === "1") return;
+
     const key = sessionKey(firmSlug);
 
     fetch("/api/track", {

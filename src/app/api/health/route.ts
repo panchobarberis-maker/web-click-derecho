@@ -28,6 +28,21 @@ const TABLAS = [
 ] as const;
 
 /**
+ * Columnas agregadas despues del esquema inicial.
+ *
+ * Chequear solo las tablas no alcanza: una base creada con una version
+ * anterior tiene las 14 tablas y le faltan columnas, y entonces el
+ * diagnostico dice que esta todo bien mientras la pantalla que usa esa
+ * columna se cae. Cada vez que se agrega una columna va acá.
+ */
+const COLUMNAS: [tabla: string, columna: string][] = [
+  ["sessions", "surface_id"],
+  ["firms", "show_on_home"],
+  ["popups", "paginas"],
+  ["clips", "paginas"],
+];
+
+/**
  * Diagnostico desde el navegador: /api/health
  *
  * Cuando algo no anda en un deploy la pregunta es siempre la misma —¿llega a
@@ -77,14 +92,25 @@ export async function GET() {
         (select count(*)::int from users)     as usuarios,
         (select count(*)::int from sessions)  as consultas`;
 
+    const cols = await sql<{ table_name: string; column_name: string }[]>`
+      select table_name, column_name from information_schema.columns
+      where table_schema = 'public'
+        and table_name in ${sql([...new Set(COLUMNAS.map(([t]) => t))])}`;
+    const hayCol = new Set(cols.map((c) => `${c.table_name}.${c.column_name}`));
+    const sinColumna = COLUMNAS
+      .filter(([t, c]) => hay.has(t) && !hayCol.has(`${t}.${c}`))
+      .map(([t, c]) => `${t}.${c}`);
+
     const faltan: string[] = [];
     if (sinTabla.length) faltan.push(`faltan tablas: ${sinTabla.join(", ")}`);
+    if (sinColumna.length) faltan.push(`faltan columnas: ${sinColumna.join(", ")}`);
     if (c.estudios === 0) faltan.push("no hay ningún estudio cargado");
     if (c.usuarios === 0) faltan.push("no hay usuarios: no vas a poder entrar");
 
     return NextResponse.json({
       base: "conecta",
       tablas: `${hay.size} de ${TABLAS.length}`,
+      columnas: `${COLUMNAS.length - sinColumna.length} de ${COLUMNAS.length}`,
       ...c,
       problema: faltan.length
         ? `${faltan.join("; ")}. Volvé a correr db/bootstrap.sql en el SQL Editor de Supabase: es idempotente, no duplica lo que ya está.`

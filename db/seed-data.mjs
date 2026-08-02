@@ -11,6 +11,10 @@ const contacto = {
     { key: "last_name", label: "Apellido", type: "text", required: true },
     { key: "email", label: "Email", type: "email", required: true },
     { key: "phone", label: "Teléfono / WhatsApp", type: "tel", required: false },
+    // En Argentina el procedimiento cambia por provincia, y hay estudios que
+    // solo litigan en algunas: saberlo temprano evita una entrevista al pedo.
+    { key: "provincia", label: "¿En qué provincia?", type: "select", required: true,
+      options: ["Ciudad Autónoma de Buenos Aires", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"] },
     // Opt-in explicito. No bloquea el envio: responder la consulta ya esta
     // cubierto por la finalidad con la que dejo el dato.
     {
@@ -30,9 +34,12 @@ const contacto = {
 // al estudio decidir a quien llama primero y detectar un conflicto de interes
 // antes de sentarse a escuchar el caso.
 const coordinar = {
-  title: "Para coordinar",
-  subtitle: "Lo último: cómo y cuándo te viene bien que te contactemos.",
+  title: "Contanos y coordinamos",
+  subtitle: "Lo último: tu caso en tus palabras, y cómo te viene bien que te contactemos.",
   fields: [
+    // Va al final a proposito: cuando la persona ya respondio lo concreto,
+    // escribe mejor y con menos miedo que si fuera lo primero que se le pide.
+    { key: "relato", label: "Contanos de qué se trata", type: "textarea", required: false },
     {
       key: "urgencia",
       label: "¿Qué tan urgente es?",
@@ -52,6 +59,7 @@ const coordinar = {
       options: [
         "Llamada telefónica",
         "WhatsApp",
+        "Email",
         "Videollamada (Zoom o Meet)",
         "Reunión presencial en el estudio",
       ],
@@ -144,7 +152,6 @@ const AREAS = [
           {
             title: "Contanos el caso",
             fields: [
-              { key: "detalle", label: "¿Qué pasó?", type: "textarea", required: false },
               {
                 key: "hace_cuanto",
                 label: "¿Hace cuánto ocurrió?",
@@ -241,7 +248,6 @@ const AREAS = [
                 ],
               },
               { key: "empresa", label: "Empresa o empleador", type: "text", required: false },
-              { key: "detalle", label: "Contanos qué pasó", type: "textarea", required: true },
               { key: "vinculo_actual", label: "¿Seguís trabajando ahí?", type: "radio", required: true, options: ["Sí", "No"] },
             ],
           },

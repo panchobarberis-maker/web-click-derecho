@@ -16,12 +16,13 @@ async function crear(formData: FormData) {
   if (!name || !video) return;
 
   await sql`
-    insert into clips (firm_id, name, video_url, poster_url, cta, funnel_id, paginas)
+    insert into clips (firm_id, name, video_url, poster_url, cta, funnel_id, paginas, autoplay)
     values (${firm.id}, ${name}, ${video},
             ${String(formData.get("poster_url") ?? "").trim() || null},
             ${String(formData.get("cta") ?? "").trim() || "Empezar"},
             ${String(formData.get("funnel_id") ?? "") || null},
-            ${String(formData.get("paginas") ?? "").trim() || null})`;
+            ${String(formData.get("paginas") ?? "").trim() || null},
+            ${formData.get("autoplay") !== null})`;
   revalidatePath("/clips");
 }
 
@@ -36,6 +37,7 @@ async function guardar(formData: FormData) {
       cta        = ${String(formData.get("cta") ?? "").trim() || "Empezar"},
       funnel_id  = ${String(formData.get("funnel_id") ?? "") || null},
       paginas    = ${String(formData.get("paginas") ?? "").trim() || null},
+      autoplay   = ${formData.get("autoplay") === "on"},
       active     = ${formData.get("active") === "on"}
     where id = ${String(formData.get("id"))} and firm_id = ${firm.id}`;
   revalidatePath("/clips");
@@ -50,7 +52,7 @@ async function borrar(formData: FormData) {
 
 type Clip = {
   id: string; name: string; video_url: string; poster_url: string | null;
-  cta: string; funnel_id: string | null; active: boolean; paginas: string | null;
+  cta: string; funnel_id: string | null; active: boolean; paginas: string | null; autoplay: boolean;
 };
 
 export default async function Clips({ searchParams }: { searchParams: Promise<{ r?: string }> }) {
@@ -59,7 +61,7 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
   const puedeEditar = firm.role !== "member";
 
   const [clips, areas, stats] = await Promise.all([
-    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas from clips
+    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas, autoplay from clips
                 where firm_id = ${firm.id} order by created_at desc`,
     sql<{ id: string; name: string }[]>`select id, name from funnels where firm_id = ${firm.id} order by sort_order`,
     porWidget(firm.id, "clips", range),
@@ -107,6 +109,11 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
 
                 <Snippet code={`<script src="${base}/w.js?clip=${c.id}"></script>`} />
 
+                <a href={`/preview/clip/${c.id}`} target="_blank" className="btn ghost"
+                   style={{ marginTop: ".9rem", padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
+                  Ver cómo queda
+                </a>
+
                 {puedeEditar && (
                   <details className="ajuste">
                     <summary>Ajustes</summary>
@@ -138,6 +145,15 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                         Una dirección por línea. <code>*</code> vale por cualquier cosa
                         (<code>/blog/*</code>). Una línea que empieza con <code>!</code> la excluye
                         (<code>!/contacto</code>). Si lo dejás vacío, aparece en todo el sitio.
+                      </p>
+
+                      <label className="check">
+                        <input type="checkbox" name="autoplay" defaultChecked={c.autoplay} />
+                        Arranca solo, en silencio
+                      </label>
+                      <p className="muted" style={{ fontSize: ".76rem", marginTop: "-.2rem", lineHeight: 1.5 }}>
+                        Sin esto se ve la portada con un botón de play. Llama menos la atención, pero
+                        el video solo se descarga si lo tocan.
                       </p>
 
                       <label className="check">

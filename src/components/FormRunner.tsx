@@ -32,8 +32,14 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
 
   const storeKey = sessionKey(firm.slug);
 
+  // Vista previa: el formulario se puede recorrer entero pero no escribe
+  // nada. Sin esto, cada vez que alguien mira cómo quedó un pop-up le entra
+  // una consulta de mentira al estudio.
+  const vistaPrevia = search.preview === "1";
+
   // Abrir (o retomar) la sesion y registrar la visita.
   useEffect(() => {
+    if (vistaPrevia) return;
     let cancelled = false;
 
     (async () => {
@@ -146,6 +152,13 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
       setStep(step + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       window.parent?.postMessage({ type: "intake:step", step: step + 1 }, "*");
+      return;
+    }
+
+    // En vista previa se llega hasta la pantalla de confirmación, pero no se
+    // manda nada: no entra una consulta ni le llega un mail al estudio.
+    if (vistaPrevia) {
+      setDone(true);
       return;
     }
 

@@ -293,3 +293,9 @@ alter table firms add column if not exists show_on_home boolean not null default
 -- no se rompe si alguien pega algo raro.
 alter table popups add column if not exists paginas text;
 alter table clips  add column if not exists paginas text;
+
+-- Si el clip arranca solo. Siempre en silencio: los navegadores no dejan
+-- autoreproducir con sonido, y un video que suena sin permiso espanta.
+-- Apagarlo muestra la portada con un boton de play, y ademas ahorra ancho de
+-- banda: solo se descarga el video de quien lo toca.
+alter table clips add column if not exists autoplay boolean not null default true;

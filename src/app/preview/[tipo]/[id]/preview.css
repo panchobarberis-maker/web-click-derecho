@@ -1,0 +1,53 @@
+/* Decorado de la vista previa: un sitio de estudio cualquiera, deliberadamente
+   distinto del panel para que se entienda que es el sitio del cliente y no
+   nuestra aplicación. */
+
+.pv { min-height: 100vh; }
+
+.pv-barra {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding: .85rem 1.5rem; background: var(--accent); color: #fff;
+}
+.pv-barra strong { display: block; font-size: .95rem; }
+.pv-barra span { font-size: .8rem; opacity: .8; }
+.pv-acciones { display: flex; align-items: center; gap: 1rem; }
+.pv-acciones a { color: #fff; font-size: .86rem; text-decoration: none; opacity: .9; white-space: nowrap; }
+.pv-acciones a:hover { opacity: 1; text-decoration: underline; }
+.pv-pausado {
+  background: rgba(255, 255, 255, .16); border-radius: 99px;
+  padding: .25rem .8rem; font-size: .76rem !important; opacity: 1 !important;
+}
+
+.pv-sitio {
+  min-height: 100vh; background: #fff; color: #1f2933;
+  font-family: Georgia, "Times New Roman", serif;
+}
+.pv-sitio header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.4rem 3rem; border-bottom: 1px solid #e6e8eb;
+}
+.pv-logo { font-size: 1.3rem; font-weight: 700; letter-spacing: .02em; color: #1b3a5c; }
+.pv-sitio nav { display: flex; gap: 1.6rem; font-size: .88rem; color: #52616b; font-family: system-ui, sans-serif; }
+
+.pv-hero { padding: 5rem 3rem; background: #f4f6f8; }
+.pv-hero h1 { font-size: 2.8rem; color: #1b3a5c; font-family: inherit; max-width: 16ch; line-height: 1.1; }
+.pv-hero p { margin-top: 1rem; max-width: 52ch; color: #52616b; line-height: 1.6; font-size: 1.05rem; }
+.pv-btn {
+  display: inline-block; margin-top: 1.8rem; background: #1b3a5c; color: #fff;
+  padding: .75rem 1.7rem; border-radius: 4px; font-family: system-ui, sans-serif; font-size: .92rem;
+}
+
+.pv-areas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; padding: 3.5rem 3rem; }
+@media (max-width: 900px) { .pv-areas { grid-template-columns: 1fr 1fr; } }
+.pv-areas h3 { font-family: inherit; font-size: 1.1rem; color: #1b3a5c; margin-bottom: .5rem; }
+.pv-areas p { font-size: .88rem; color: #52616b; line-height: 1.55; font-family: system-ui, sans-serif; }
+
+.pv-texto { padding: 0 3rem 5rem; max-width: 70ch; }
+.pv-texto h2 { font-family: inherit; font-size: 1.7rem; color: #1b3a5c; margin-bottom: 1rem; }
+.pv-texto p { color: #52616b; line-height: 1.75; margin-bottom: 1rem; }
+
+.pv-sitio footer {
+  padding: 2rem 3rem; border-top: 1px solid #e6e8eb;
+  font-family: system-ui, sans-serif; font-size: .84rem; color: #7b8794;
+}

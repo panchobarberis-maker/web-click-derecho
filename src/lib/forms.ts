@@ -83,6 +83,15 @@ export function validarFormulario(steps: Step[]): string[] {
 }
 
 /**
+ * Las 24 jurisdicciones del pais.
+ *
+ * En Argentina el procedimiento y los plazos cambian por provincia, y hay
+ * estudios que solo litigan en algunas. Preguntarlo en el paso 1 evita que el
+ * estudio invierta una entrevista en un caso que no puede tomar.
+ */
+export const PROVINCIAS = ["Ciudad Autónoma de Buenos Aires", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"] as const;
+
+/**
  * Paso de cierre sugerido: como y cuando contactar, y con cuanta urgencia.
  *
  * Va al final y no en el paso 1 a proposito. El paso 1 decide si la persona
@@ -91,9 +100,15 @@ export function validarFormulario(steps: Step[]): string[] {
  */
 export function pasoDeCoordinacion(): Step {
   return {
-    title: "Para coordinar",
-    subtitle: "Lo último: cómo y cuándo te viene bien que te contactemos.",
+    title: "Contanos y coordinamos",
+    subtitle: "Lo último: tu caso en tus palabras, y cómo te viene bien que te contactemos.",
     fields: [
+      {
+        key: "relato",
+        label: "Contanos de qué se trata",
+        type: "textarea",
+        required: false,
+      },
       {
         key: "urgencia",
         label: "¿Qué tan urgente es?",
@@ -113,6 +128,7 @@ export function pasoDeCoordinacion(): Step {
         options: [
           "Llamada telefónica",
           "WhatsApp",
+          "Email",
           "Videollamada (Zoom o Meet)",
           "Reunión presencial en el estudio",
         ],
@@ -145,6 +161,7 @@ export function pasoDeContacto(): Step {
       { key: "last_name", label: "Apellido", type: "text", required: true },
       { key: "email", label: "Email", type: "email", required: true },
       { key: "phone", label: "Teléfono / WhatsApp", type: "tel", required: false },
+      { key: "provincia", label: "¿En qué provincia?", type: "select", required: true, options: [...PROVINCIAS] },
       {
         key: "consent",
         label: "Quiero que me contacten por email y WhatsApp sobre mi consulta",

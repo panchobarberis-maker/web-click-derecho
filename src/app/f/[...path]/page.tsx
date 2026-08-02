@@ -10,6 +10,27 @@ type Params = { path: string[] };
 type Search = { [k: string]: string | undefined };
 
 /**
+ * Conserva los parametros al navegar entre las pantallas del formulario.
+ *
+ * El widget pone en la URL del iframe de donde viene la visita —surface, sid,
+ * los utm_, el referrer y la pagina madre— y hasta ahora un click en un area
+ * los tiraba: la pantalla siguiente arrancaba sin contexto. Se sostenia porque
+ * la sesion ya estaba abierta y guardada en el navegador, pero cualquier cosa
+ * que bloquee el almacenamiento local rompia la atribucion en silencio.
+ *
+ * `retomar` no se propaga a proposito: es de un solo uso, para volver desde el
+ * link del mail, y arrastrarlo reabriria la misma sesion en cada pantalla.
+ */
+function conParams(href: string, search: Search): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(search)) {
+    if (v && k !== "retomar") q.set(k, v);
+  }
+  const cola = q.toString();
+  return cola ? `${href}?${cola}` : href;
+}
+
+/**
  * Landing partida: foto a la izquierda, contenido del estudio a la derecha.
  * Dentro del iframe del pop-up la foto se oculta y queda solo la columna de
  * contenido, sin necesidad de una plantilla aparte.
@@ -72,7 +93,7 @@ export default async function PublicForm({
           <p className="land-ask">Tocá la opción que mejor describa tu caso:</p>
           <div className="land-pills">
             {funnels.map((f) => (
-              <Link key={f.id} className="pill-btn" href={`/f/${firm.slug}/${f.slug}`}>
+              <Link key={f.id} className="pill-btn" href={conParams(`/f/${firm.slug}/${f.slug}`, qs)}>
                 {f.name}
               </Link>
             ))}
@@ -106,7 +127,7 @@ export default async function PublicForm({
         <Landing
           firm={firm}
           back={
-            <Link className="fback" href={`/f/${firm.slug}`}>
+            <Link className="fback" href={conParams(`/f/${firm.slug}`, qs)}>
               ← Volver
             </Link>
           }
@@ -116,7 +137,7 @@ export default async function PublicForm({
           <p className="land-ask">Elegí la opción más parecida a tu caso. Así te preguntamos solo lo que hace falta.</p>
           <div className="land-pills">
             {workflows.map((w) => (
-              <Link key={w.id} className="pill-btn" href={`/f/${firm.slug}/${funnel.slug}/${w.slug}`}>
+              <Link key={w.id} className="pill-btn" href={conParams(`/f/${firm.slug}/${funnel.slug}/${w.slug}`, qs)}>
                 {w.name}
               </Link>
             ))}

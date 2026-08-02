@@ -114,6 +114,11 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
 
                 <Snippet code={`<script src="${base}/w.js?popup=${p.id}"></script>`} />
 
+                <a href={`/preview/popup/${p.id}`} target="_blank" className="btn ghost"
+                   style={{ marginTop: ".9rem", padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
+                  Ver cómo queda
+                </a>
+
                 {puedeEditar && (
                   <details className="ajuste">
                     <summary>Ajustes</summary>

@@ -7,9 +7,11 @@ type Cfg = {
   firm: string; mode: string; funnel: string; workflow: string;
   trigger: string; cta: string; accent: string; video: string; poster: string; id: string;
   paginas: string;
+  autoplay: boolean;
+  preview: boolean;
 };
 
-const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "" };
+const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "", autoplay: true, preview: false };
 
 /**
  * Configuracion guardada de un pop-up o un clip.
@@ -30,7 +32,7 @@ async function cargarCfg(url: URL): Promise<Cfg> {
   const [row] = await sql<
     { name: string; cta: string; active: boolean; accent: string; firm: string;
       funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string;
-      paginas?: string | null }[]
+      paginas?: string | null; autoplay?: boolean }[]
   >`
     select w.*, fi.slug as firm, fi.accent,
            f.slug as funnel, wf.slug as workflow
@@ -53,6 +55,8 @@ async function cargarCfg(url: URL): Promise<Cfg> {
     video: row.video_url ?? "",
     poster: row.poster_url ?? "",
     paginas: row.paginas ?? "",
+    autoplay: row.autoplay !== false,
+    preview: url.searchParams.get("preview") === "1",
     id,
   };
 }
@@ -101,6 +105,10 @@ export async function GET(req: Request) {
   var wid     = CFG.id || "";
   var once    = s.getAttribute("data-once") !== "false";
   var paginas = CFG.paginas || "";
+  var arranca = s.getAttribute("data-autoplay") !== "false" && CFG.autoplay !== false;
+  // En la vista previa del panel el formulario no registra visitas: si no,
+  // probar un pop-up le ensuciaria las estadisticas al estudio.
+  var vistaPrevia = CFG.preview === true;
 
   /**
    * En que paginas del sitio del estudio corresponde mostrarse.
@@ -200,6 +208,7 @@ export async function GET(req: Request) {
     var q = new URLSearchParams();
     q.set("surface", surface);
     if (wid) q.set("sid", wid);
+    if (vistaPrevia) q.set("preview", "1");
     for (var k in a.utm) if (Object.prototype.hasOwnProperty.call(a.utm, k)) q.set(k, a.utm[k]);
     if (a.ref) q.set("ref", a.ref);
     if (a.lp) q.set("lp", a.lp);
@@ -296,11 +305,23 @@ export async function GET(req: Request) {
     var v = document.createElement("video");
     v.src = video;
     if (poster) v.poster = poster;
-    v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true;
+    // Siempre silenciado: ningun navegador deja autoreproducir con sonido, y
+    // un video que suena sin permiso hace cerrar la pestaña.
+    v.muted = true; v.loop = true; v.playsInline = true;
     v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
     v.style.cssText = "width:100%;height:306px;object-fit:cover;display:block;cursor:pointer";
     v.onclick = function () { open("clip"); };
-    v.play().catch(function () { /* si el navegador bloquea el autoplay queda el poster */ });
+
+    if (arranca) {
+      v.autoplay = true;
+      v.play().catch(function () { /* si el navegador lo bloquea queda el poster */ });
+    } else {
+      // Sin autoplay no se baja el video hasta que lo tocan: se ve la portada
+      // y recien al darle play empieza la descarga. Es la diferencia entre
+      // pagar ancho de banda por cada visita o solo por quien se interesa.
+      v.preload = "none";
+      v.setAttribute("preload", "none");
+    }
 
     var bar = document.createElement("div");
     bar.style.cssText = "position:absolute;top:8px;left:8px;right:8px;display:flex;gap:6px;align-items:center";
