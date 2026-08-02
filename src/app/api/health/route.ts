@@ -1,23 +1,9 @@
 import { NextResponse } from "next/server";
 import { dbConfigError, sql } from "@/lib/db";
+import { googleEnabled, redirectUri } from "@/lib/google";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Diagnostico desde el navegador: /api/health
- *
- * Cuando algo no anda en un deploy, la pregunta es siempre la misma —¿llega a
- * la base y estan cargados los datos?— y sin esto hay que ir a leer los logs
- * de funciones de Vercel. No expone nada sensible: solo conteos.
- */
-/**
- * Todas las tablas del esquema, no solo las del principio.
- *
- * Una base que se creo con una version anterior de bootstrap.sql conecta,
- * responde y parece sana, pero le faltan las tablas nuevas y la app se cae
- * recien al abrir la pantalla que las usa. Nombrar cual falta es la diferencia
- * entre un diagnostico y una adivinanza.
- */
 /** Solo el host, nunca el usuario ni la contraseña. */
 function hostDeLaBase(): string {
   try {
@@ -27,12 +13,28 @@ function hostDeLaBase(): string {
   }
 }
 
+/**
+ * Todas las tablas del esquema, no solo las del principio.
+ *
+ * Una base que se creo con una version anterior de bootstrap.sql conecta,
+ * responde y parece sana, pero le faltan las tablas nuevas y la app se cae
+ * recien al abrir la pantalla que las usa. Nombrar cual falta es la diferencia
+ * entre un diagnostico y una adivinanza.
+ */
 const TABLAS = [
   "firms", "funnels", "workflows", "sessions", "events",
   "users", "memberships", "oauth_accounts", "auth_sessions", "invitations",
   "popups", "clips", "password_resets", "login_attempts",
 ] as const;
 
+/**
+ * Diagnostico desde el navegador: /api/health
+ *
+ * Cuando algo no anda en un deploy la pregunta es siempre la misma —¿llega a
+ * la base, estan cargados los datos, que falta configurar?— y sin esto hay que
+ * ir a leer los logs de funciones de Vercel. No expone nada sensible: conteos,
+ * el host de la base sin credenciales, y si cada integracion esta puesta o no.
+ */
 export async function GET() {
   const t0 = Date.now();
 
@@ -93,6 +95,16 @@ export async function GET() {
       base_host: hostDeLaBase(),
       ida_ms: ida,
       ms: Date.now() - t0,
+
+      // El boton de Google se esconde solo cuando no esta configurado, asi que
+      // desde afuera no se distingue de un boton roto. Aca se ve por que falta
+      // y con que URL exacta darlo de alta en Google Cloud: escribirla de
+      // memoria es el error que hace fallar el primer intento.
+      google: googleEnabled() ? "configurado" : "falta GOOGLE_CLIENT_ID y/o GOOGLE_CLIENT_SECRET",
+      google_redirect_uri: redirectUri(),
+      mails: process.env.RESEND_API_KEY
+        ? "configurado"
+        : "falta RESEND_API_KEY: las consultas se guardan pero no se avisa por mail",
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
