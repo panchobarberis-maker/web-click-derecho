@@ -166,7 +166,31 @@ const TOPE = { email: 8, ip: 25 } as const;
  * request puede caer en una instancia distinta, así que un contador en memoria
  * no frena nada.
  */
+/**
+ * Un fallo de estas consultas no puede dejar a nadie afuera del panel.
+ *
+ * El caso concreto es el despliegue: el codigo nuevo sale antes de que la
+ * tabla exista en la base y, sin esto, nadie entra hasta correr el SQL. Solo
+ * se ignora "esa tabla no existe" (42P01), que es una base desactualizada;
+ * cualquier otro error se propaga como siempre.
+ */
+async function sinFrenar<T>(fn: () => Promise<T>, porDefecto: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (e) {
+    if ((e as { code?: string })?.code === "42P01") {
+      console.warn("login_attempts todavía no existe: corré db/schema.sql en la base.");
+      return porDefecto;
+    }
+    throw e;
+  }
+}
+
 export async function esperaPorIntentos(email: string, ip: string | null): Promise<number> {
+  return sinFrenar(() => contarIntentos(email, ip), 0);
+}
+
+async function contarIntentos(email: string, ip: string | null): Promise<number> {
   const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
 
   const filas = await sql<{ clave: string; n: number; primero: Date }[]>`
@@ -187,15 +211,20 @@ export async function esperaPorIntentos(email: string, ip: string | null): Promi
 
 export async function registrarIntentoFallido(email: string, ip: string | null): Promise<void> {
   const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
-  await sql`insert into login_attempts ${sql(claves.map((clave) => ({ clave })))}`;
-  // Los intentos viejos no sirven para nada; se limpian acá porque fallar es
-  // raro y así no hace falta un trabajo programado solo para esto.
-  await sql`delete from login_attempts where at < now() - interval '1 hour'`;
+  await sinFrenar(async () => {
+    await sql`insert into login_attempts ${sql(claves.map((clave) => ({ clave })))}`;
+    // Los intentos viejos no sirven para nada; se limpian acá porque fallar es
+    // raro y así no hace falta un trabajo programado solo para esto.
+    await sql`delete from login_attempts where at < now() - interval '1 hour'`;
+  }, undefined);
 }
 
 export async function limpiarIntentos(email: string, ip: string | null): Promise<void> {
   const claves = [`email:${email}`, ...(ip ? [`ip:${ip}`] : [])];
-  await sql`delete from login_attempts where clave in ${sql(claves)}`;
+  await sinFrenar(
+    () => sql`delete from login_attempts where clave in ${sql(claves)}`.then(() => undefined),
+    undefined,
+  );
 }
 
 // ----------------------------------------------------------------- invitaciones
