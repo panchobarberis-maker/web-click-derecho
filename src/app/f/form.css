@@ -99,6 +99,10 @@
 .land-logo { position: absolute; top: 2.5rem; right: 3.5rem; max-height: 46px; max-width: 190px; object-fit: contain; }
 
 .land-eyebrow { font-size: .78rem; text-transform: uppercase; letter-spacing: .09em; color: #8b8397; font-weight: 500; margin-bottom: .5rem; }
+.land-marca {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.15rem; color: var(--accent); margin-bottom: .9rem; opacity: .85;
+}
 .land-title {
   font-family: var(--font-serif), Georgia, serif;
   font-size: clamp(2rem, 4.4vw, 3.4rem);
@@ -106,7 +110,7 @@
 }
 .land-title.sm { font-size: clamp(1.7rem, 3vw, 2.4rem); }
 
-.land-intro { color: #5b5468; font-size: 1rem; line-height: 1.65; margin-top: 1.5rem; max-width: 56ch; }
+.land-intro { color: #6b6478; font-size: .88rem; line-height: 1.6; margin-top: 2.25rem; max-width: 56ch; }
 .land-ask { color: #2a2338; font-size: 1rem; margin-top: 1.75rem; }
 
 .land-pills { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
@@ -121,13 +125,35 @@
   transform: translateY(-1px); box-shadow: 0 6px 18px rgba(42, 33, 24, .10);
 }
 
-/* Dentro de un widget no entra la foto: queda solo el contenido, centrado y
-   sin el respiro de arriba, que en un panel de 760px de alto es todo. */
-.land.embebido { grid-template-columns: 1fr; }
+/* Dentro de un widget no entra la foto: queda la banda con el color del
+   estudio arriba y el contenido centrado en lo que sobra del panel. */
+.land.embebido { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
 .land.embebido .land-hero { display: none; }
-.land.embebido .land-body { padding: 3.5rem 3rem; align-items: center; }
-.land.embebido .land-logo { position: static; display: block; margin-bottom: 1.75rem; }
+.land.embebido .land-body {
+  padding: 2.5rem 3rem 3rem; align-items: center;
+  /* Un lavado del color del estudio: el blanco puro dejaba el pop-up muerto. */
+  background: color-mix(in srgb, var(--accent) 10%, #fff);
+}
 .land.embebido .land-inner { max-width: 44rem; }
+
+.land-banda {
+  background: var(--accent); color: var(--sobre-acento, #fff);
+  padding: 1.15rem 3rem; display: flex; align-items: center;
+}
+.land-banda-marca {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.3rem; line-height: 1.2;
+}
+
+/* Con fondo de color las opciones necesitan mas cuerpo para despegarse. */
+.land.embebido .pill-btn {
+  border-color: color-mix(in srgb, var(--accent) 30%, #fff);
+  box-shadow: 0 2px 6px rgba(42, 33, 24, .07);
+}
+.land.embebido .pill-btn:hover {
+  background: color-mix(in srgb, var(--accent) 9%, #fff);
+  border-color: var(--accent);
+}
 
 @media (max-width: 900px) {
   .land { grid-template-columns: 1fr; }
