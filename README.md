@@ -384,13 +384,30 @@ Lo que quedó afuera del MVP, en orden de valor:
   no se registra cuántas veces se mostraron sin que los abrieran. Sin este
   número no se puede decir "el clip se mostró 4.000 veces y trajo 30
   consultas", que es lo que justifica el servicio ante el estudio.
-- **Triage de la consulta con Claude.** Leer el relato y las respuestas para
-  marcar dos cosas: **urgencia** —un plazo que corre (los 30 días para impugnar
-  un despido, una prescripción, una audiencia con fecha) o un tema sensible que
-  no puede esperar— y **potencial** del caso. El estudio abre el panel a la
-  mañana con diez consultas y hoy las lee en orden de llegada; el orden correcto
-  es otro. Va como una anotación al costado, nunca reemplazando el criterio del
-  abogado, y el mail de aviso debería llevar el mismo semáforo.
+- **Triage de la consulta con Claude, y resumen periódico por mail.** Dos
+  piezas de la misma idea.
+
+  *Triage:* al entrar la consulta, leer el relato y las respuestas para marcar
+  **urgencia** —un plazo que corre (los 30 días para impugnar un despido, una
+  prescripción, una audiencia con fecha) o un tema sensible que no puede
+  esperar— y **potencial** del caso. Se corre una sola vez, cuando entra, y se
+  guarda en la consulta: así el semáforo sirve igual en el panel, en el mail de
+  aviso y en el resumen, sin volver a pagar el análisis.
+
+  *Resumen:* un mail por Resend a cada estudio, con la frecuencia que elija
+  —diario, semanal o mensual—. El diario abre con lo que hay que atender hoy:
+  las consultas con plazo corriendo primero, después las que quedaron sin leer,
+  después las abandonadas a mitad. El semanal agrega la tendencia contra la
+  semana anterior. El mensual es el informe que la agencia usa para renovar:
+  consultas, conversión, campañas y comparación con el mes previo.
+
+  **Sobre los plazos, la regla es no afirmar.** El sistema no puede declarar un
+  plazo vencido: no conoce la fecha real del hecho, solo lo que la persona
+  escribió, y un "vencido" equivocado hace que el estudio descarte un caso
+  bueno. Lo que corresponde es señalar: "menciona que el despido fue el 3/7; si
+  es correcto, el plazo de impugnación estaría corriendo — verificar". Y ninguna
+  consulta se omite del resumen por parecer poco urgente: se listan todas,
+  ordenadas.
 - **Secuencia de recuperación.** Hoy es un solo mail. Lo normal son 2 o 3.
 - **Aviso por WhatsApp al estudio**, además del mail.
 - **Landing pages** propias por área, para campañas donde el estudio no tiene
