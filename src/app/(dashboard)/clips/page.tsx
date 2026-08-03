@@ -24,7 +24,7 @@ async function crear(formData: FormData) {
             ${String(formData.get("cta") ?? "").trim() || "Empezar"},
             ${String(formData.get("funnel_id") ?? "") || null},
             ${String(formData.get("paginas") ?? "").trim() || null},
-            ${formData.get("autoplay") !== null})`;
+            ${formData.get("autoplay") === "on"})`;
   revalidatePath("/clips");
 }
 
@@ -156,8 +156,8 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                         Arranca solo, en silencio
                       </label>
                       <p className="muted" style={{ fontSize: ".76rem", marginTop: "-.2rem", lineHeight: 1.5 }}>
-                        Sin esto se ve la portada con un botón de play. Llama menos la atención, pero
-                        el video solo se descarga si lo tocan.
+                        Así se ve el video andando apenas entran, que es para lo que sirve.
+                        Destildalo solo si preferís que quede quieto con un botón de play.
                       </p>
 
                       <label className="check">
@@ -205,6 +205,11 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
               <label className="lbl">¿En qué páginas aparece?</label>
               <textarea name="paginas" rows={3}
                         placeholder={"Vacío = en todo el sitio\n/laboral\n!/contacto"} />
+
+              <label className="check">
+                <input type="checkbox" name="autoplay" defaultChecked />
+                Arranca solo, en silencio
+              </label>
 
               <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Crear</button>
             </form>
