@@ -380,15 +380,23 @@ desde el de la agencia: llegan mejor y es lo que la persona espera.
 
 Lo que quedó afuera del MVP, en orden de valor:
 
-- **Recuperar contraseña.** Hoy si alguien la olvida hay que reinvitarlo.
-- **Alta de estudios desde el panel.** Se crean en `seed-data.mjs`; debería
-  poder hacerlo la agencia desde la interfaz.
-- **Límite de intentos de login.** Falta frenar el fuerza bruta por IP y por
-  cuenta. scrypt ya lo hace caro, pero no lo reemplaza.
 - **Impresiones de pop-up y clip.** Se cuentan desde que se abre el formulario;
-  no se registra cuántas veces se mostraron sin que los abrieran.
+  no se registra cuántas veces se mostraron sin que los abrieran. Sin este
+  número no se puede decir "el clip se mostró 4.000 veces y trajo 30
+  consultas", que es lo que justifica el servicio ante el estudio.
+- **Triage de la consulta con Claude.** Leer el relato y las respuestas para
+  marcar dos cosas: **urgencia** —un plazo que corre (los 30 días para impugnar
+  un despido, una prescripción, una audiencia con fecha) o un tema sensible que
+  no puede esperar— y **potencial** del caso. El estudio abre el panel a la
+  mañana con diez consultas y hoy las lee en orden de llegada; el orden correcto
+  es otro. Va como una anotación al costado, nunca reemplazando el criterio del
+  abogado, y el mail de aviso debería llevar el mismo semáforo.
 - **Secuencia de recuperación.** Hoy es un solo mail. Lo normal son 2 o 3.
-- **Scoring del lead** y aviso por WhatsApp al estudio.
+- **Aviso por WhatsApp al estudio**, además del mail.
+- **Landing pages** propias por área, para campañas donde el estudio no tiene
+  sitio o el sitio no sirve.
+- **Exportar conversiones a Google Ads / GA4**, para que la campaña optimice
+  contra consultas reales y no contra clics.
 
 ## Nota sobre datos personales
 
