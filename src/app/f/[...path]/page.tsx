@@ -32,20 +32,25 @@ function conParams(href: string, search: Search): string {
 
 /**
  * Landing partida: foto a la izquierda, contenido del estudio a la derecha.
- * Dentro del iframe del pop-up la foto se oculta y queda solo la columna de
- * contenido, sin necesidad de una plantilla aparte.
+ *
+ * Dentro de un widget la foto no va: en el pop-up se comeria un cuarto del
+ * ancho. Se decide por la superficie y no por el ancho de la ventana —antes
+ * dependia de una media query de 900px y el panel del pop-up mide 920, asi que
+ * la foto aparecia igual—.
  */
 function Landing({
   firm,
+  embebido,
   children,
   back,
 }: {
   firm: Firm;
+  embebido?: boolean;
   children: React.ReactNode;
   back?: React.ReactNode;
 }) {
   return (
-    <div className="land">
+    <div className={embebido ? "land embebido" : "land"}>
       <div className="land-hero" style={firm.hero_url ? { backgroundImage: `url(${firm.hero_url})` } : undefined} />
       <div className="land-body">
         {firm.logo_url ? (
@@ -77,6 +82,10 @@ export default async function PublicForm({
 
   const accent = { "--accent": firm.accent } as React.CSSProperties;
 
+  // Sin surface es la pagina suelta que abre la gente por su cuenta; con
+  // surface viene dentro de un pop-up, un clip o un bloque embebido.
+  const embebido = Boolean(qs.surface) && qs.surface !== "page";
+
   // Nivel 1: elegir area de practica.
   if (!funnelSlug) {
     const funnels = await sql<Funnel[]>`
@@ -87,7 +96,7 @@ export default async function PublicForm({
     return (
       <div style={accent}>
         <ViewTracker firmSlug={firm.slug} search={qs} />
-        <Landing firm={firm}>
+        <Landing firm={firm} embebido={embebido}>
           <h1 className="land-title">{firm.name}</h1>
           {firm.intro && <p className="land-intro">{firm.intro}</p>}
           <p className="land-ask">Tocá la opción que mejor describa tu caso:</p>
@@ -126,6 +135,7 @@ export default async function PublicForm({
         <ViewTracker firmSlug={firm.slug} funnelId={funnel.id} search={qs} />
         <Landing
           firm={firm}
+          embebido={embebido}
           back={
             <Link className="fback" href={conParams(`/f/${firm.slug}`, qs)}>
               ← Volver

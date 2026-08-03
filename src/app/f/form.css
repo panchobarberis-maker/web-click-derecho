@@ -121,7 +121,14 @@
   transform: translateY(-1px); box-shadow: 0 6px 18px rgba(42, 33, 24, .10);
 }
 
-/* Dentro del iframe del pop-up no entra la foto: queda solo el contenido. */
+/* Dentro de un widget no entra la foto: queda solo el contenido, centrado y
+   sin el respiro de arriba, que en un panel de 760px de alto es todo. */
+.land.embebido { grid-template-columns: 1fr; }
+.land.embebido .land-hero { display: none; }
+.land.embebido .land-body { padding: 3.5rem 3rem; align-items: center; }
+.land.embebido .land-logo { position: static; display: block; margin-bottom: 1.75rem; }
+.land.embebido .land-inner { max-width: 44rem; }
+
 @media (max-width: 900px) {
   .land { grid-template-columns: 1fr; }
   .land-hero { display: none; }
@@ -134,6 +141,9 @@
 }
 
 /* ---------- checkbox de consentimiento ---------- */
+/* La primera mitad del selector es para ganarle a `.ffield > label`, que si no
+   lo pisa con display:block y deja el cuadradito pegado al texto. */
+.ffield > label.fcheck,
 .fcheck {
   display: flex; gap: .7rem; align-items: flex-start; cursor: pointer;
   font-size: .88rem; line-height: 1.5; color: #4a4358;
