@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { sql, type Firm, type Funnel, type Workflow } from "@/lib/db";
 import { FormRunner } from "@/components/FormRunner";
 import { ViewTracker } from "@/components/ViewTracker";
+import { sobreElColor } from "@/lib/color";
 
 export const dynamic = "force-dynamic";
 
@@ -52,8 +53,18 @@ function Landing({
   return (
     <div className={embebido ? "land embebido" : "land"}>
       <div className="land-hero" style={firm.hero_url ? { backgroundImage: `url(${firm.hero_url})` } : undefined} />
+
+      {/* Sin la foto lateral el pop-up quedaba todo blanco. La banda le pone el
+          color del estudio y ademas dice de quien es el formulario, que es lo
+          que hacia la foto. */}
+      {embebido && (
+        <div className="land-banda">
+          <span className="land-banda-marca">{firm.name}</span>
+        </div>
+      )}
+
       <div className="land-body">
-        {firm.logo_url ? (
+        {!embebido && firm.logo_url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img className="land-logo" src={firm.logo_url} alt={firm.name} />
         ) : null}
@@ -62,6 +73,35 @@ function Landing({
           {children}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Los pasos del formulario, con la misma banda que la portada.
+ *
+ * Sin esto el pop-up arrancaba con el color del estudio y al tocar un area se
+ * volvia blanco, como si hubiera cambiado de sitio.
+ */
+function Paso({
+  firm,
+  embebido,
+  accent,
+  children,
+}: {
+  firm: Firm;
+  embebido?: boolean;
+  accent: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  return (
+    <div style={accent}>
+      {embebido && (
+        <div className="land-banda">
+          <span className="land-banda-marca">{firm.name}</span>
+        </div>
+      )}
+      <div className="fwrap">{children}</div>
     </div>
   );
 }
@@ -80,7 +120,10 @@ export default async function PublicForm({
   const [firm] = await sql<Firm[]>`select * from firms where slug = ${firmSlug}`;
   if (!firm) notFound();
 
-  const accent = { "--accent": firm.accent } as React.CSSProperties;
+  const accent = {
+    "--accent": firm.accent,
+    "--sobre-acento": sobreElColor(firm.accent),
+  } as React.CSSProperties;
 
   // Sin surface es la pagina suelta que abre la gente por su cuenta; con
   // surface viene dentro de un pop-up, un clip o un bloque embebido.
@@ -97,9 +140,10 @@ export default async function PublicForm({
       <div style={accent}>
         <ViewTracker firmSlug={firm.slug} search={qs} />
         <Landing firm={firm} embebido={embebido}>
-          <h1 className="land-title">{firm.name}</h1>
-          {firm.intro && <p className="land-intro">{firm.intro}</p>}
-          <p className="land-ask">Tocá la opción que mejor describa tu caso:</p>
+          {/* El nombre del estudio ya lo dice la banda cuando esta embebido. */}
+          {!embebido && <p className="land-marca">{firm.name}</p>}
+          <h1 className="land-title">¿Cómo podemos ayudarte?</h1>
+          <p className="land-ask">Contanos tu caso. Tocá la opción que mejor lo describa:</p>
           <div className="land-pills">
             {funnels.map((f) => (
               <Link key={f.id} className="pill-btn" href={conParams(`/f/${firm.slug}/${f.slug}`, qs)}>
@@ -107,6 +151,9 @@ export default async function PublicForm({
               </Link>
             ))}
           </div>
+          {/* La privacidad va despues de las opciones: es lo que tranquiliza al
+              que duda, no lo primero que hay que leer para empezar. */}
+          {firm.intro && <p className="land-intro">{firm.intro}</p>}
         </Landing>
       </div>
     );
@@ -124,9 +171,9 @@ export default async function PublicForm({
     // Con un solo caso no tiene sentido hacer elegir: se muestra el form directo.
     if (workflows.length === 1) {
       return (
-        <div className="fwrap" style={accent}>
+        <Paso firm={firm} embebido={embebido} accent={accent}>
           <FormRunner firm={firm} funnel={funnel} workflow={workflows[0]} search={qs} />
-        </div>
+        </Paso>
       );
     }
 
@@ -163,8 +210,8 @@ export default async function PublicForm({
   if (!workflow) notFound();
 
   return (
-    <div className="fwrap" style={accent}>
+    <Paso firm={firm} embebido={embebido} accent={accent}>
       <FormRunner firm={firm} funnel={funnel} workflow={workflow} search={qs} />
-    </div>
+    </Paso>
   );
 }
