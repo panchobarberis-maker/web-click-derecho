@@ -5,6 +5,8 @@ import { sql, type Firm } from "@/lib/db";
 import { requireOwner } from "@/lib/tenancy";
 import { slugUrl } from "@/lib/forms";
 import { baseUrl } from "@/lib/base-url";
+import { SubirArchivo } from "@/components/Subir";
+import { almacenamientoListo, CLASES } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +51,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
 
   const [actual] = await sql<Firm[]>`select * from firms where id = ${firm.id}`;
   const base = baseUrl().replace(/^https?:\/\//, "");
+  const puedeSubir = almacenamientoListo();
 
   return (
     <>
@@ -97,13 +100,15 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             <label className="lbl" htmlFor="accent">Color principal</label>
             <input id="accent" name="accent" type="color" defaultValue={actual.accent} />
 
-            <label className="lbl" htmlFor="logo_url">Logo (URL)</label>
-            <input id="logo_url" name="logo_url" defaultValue={actual.logo_url ?? ""}
-                   placeholder="https://…/logo.png" />
+            <label className="lbl">Logo</label>
+            <SubirArchivo name="logo_url" clase="imagen" defaultValue={actual.logo_url ?? ""}
+                          habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
+                          ayuda="Se ve arriba del formulario. Fondo transparente (png o svg) queda mejor." />
 
-            <label className="lbl" htmlFor="hero_url">Imagen de la página pública (URL)</label>
-            <input id="hero_url" name="hero_url" defaultValue={actual.hero_url ?? ""}
-                   placeholder="https://…/foto-estudio.jpg" />
+            <label className="lbl">Imagen de la página pública</label>
+            <SubirArchivo name="hero_url" clase="imagen" defaultValue={actual.hero_url ?? ""}
+                          habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
+                          ayuda="La foto grande de la izquierda. Apaisada y de buena calidad; si no cargás ninguna queda el color del estudio." />
 
             <label className="lbl" htmlFor="intro">Texto de privacidad</label>
             <textarea id="intro" name="intro" rows={4} defaultValue={actual.intro ?? ""}

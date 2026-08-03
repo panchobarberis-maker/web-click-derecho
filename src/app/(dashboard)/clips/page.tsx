@@ -5,10 +5,15 @@ import { porWidget, type Range } from "@/lib/analytics";
 import { baseUrl } from "@/lib/base-url";
 import { RangePicker } from "@/components/RangePicker";
 import { Snippet } from "@/components/Snippet";
-import { SubirVideo } from "@/components/SubirVideo";
-import { almacenamientoListo, MAX_MB } from "@/lib/storage";
+import { SubirArchivo } from "@/components/Subir";
+import { almacenamientoListo, CLASES } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
+
+const AYUDA_VIDEO =
+  `Vertical, de 15 a 20 segundos, hasta ${CLASES.video.maxMb} MB. Cuanto más liviano, más rápido arranca en el sitio del estudio.`;
+const AYUDA_PORTADA =
+  `Es lo que se ve mientras el video carga. Vertical, hasta ${CLASES.imagen.maxMb} MB.`;
 
 async function crear(formData: FormData) {
   "use server";
@@ -127,11 +132,13 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                       <input name="name" defaultValue={c.name} required />
 
                       <label className="lbl">Video</label>
-                      <SubirVideo name="video_url" defaultValue={c.video_url}
-                                  habilitado={puedeSubir} maxMb={MAX_MB} />
+                      <SubirArchivo name="video_url" clase="video" defaultValue={c.video_url}
+                                    habilitado={puedeSubir} maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
 
                       <label className="lbl">Imagen de portada (opcional)</label>
-                      <input name="poster_url" defaultValue={c.poster_url ?? ""} />
+                      <SubirArchivo name="poster_url" clase="imagen" defaultValue={c.poster_url ?? ""}
+                                    habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb}
+                                    ayuda={AYUDA_PORTADA} vistaPrevia />
 
                       <label className="lbl">Texto del botón</label>
                       <input name="cta" defaultValue={c.cta} />
@@ -188,10 +195,12 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
               <input name="name" placeholder="Home — presentación" required />
 
               <label className="lbl">Video</label>
-              <SubirVideo name="video_url" habilitado={puedeSubir} maxMb={MAX_MB} />
+              <SubirArchivo name="video_url" clase="video" habilitado={puedeSubir}
+                            maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
 
               <label className="lbl">Imagen de portada (opcional)</label>
-              <input name="poster_url" placeholder="https://…/portada.jpg" />
+              <SubirArchivo name="poster_url" clase="imagen" habilitado={puedeSubir}
+                            maxMb={CLASES.imagen.maxMb} ayuda={AYUDA_PORTADA} vistaPrevia />
 
               <label className="lbl">Texto del botón</label>
               <input name="cta" placeholder="Empezar" />

@@ -387,8 +387,6 @@ Lo que quedó afuera del MVP, en orden de valor:
   cuenta. scrypt ya lo hace caro, pero no lo reemplaza.
 - **Impresiones de pop-up y clip.** Se cuentan desde que se abre el formulario;
   no se registra cuántas veces se mostraron sin que los abrieran.
-- **Subida de videos para los clips.** Hoy se pega la URL de un mp4 hospedado
-  en otro lado.
 - **Secuencia de recuperación.** Hoy es un solo mail. Lo normal son 2 o 3.
 - **Scoring del lead** y aviso por WhatsApp al estudio.
 
@@ -431,14 +429,21 @@ El checklist del Inicio va marcando esto solo, a medida que se completa:
 Los pasos 2 a 6 los puede hacer el estudio solo; en la práctica conviene
 dejarle los formularios armados y que después los ajuste.
 
-## Videos de los clips
+## Videos e imágenes
+
+Se sube desde el panel en cuatro lugares: el **video** y la **portada** de cada
+clip, y el **logo** y la **imagen de la página pública** del estudio.
 
 El navegador sube el archivo **directo a Supabase Storage**, no a través de la
 aplicación: en Vercel el cuerpo de un request está limitado a 4,5 MB y un video
 no entra. El servidor solo firma un permiso de subida de un solo uso —eso
 requiere la clave de servicio, que nunca sale al navegador— y el archivo viaja
-aparte. Cada estudio escribe en su propia carpeta, con la ruta armada por el
-servidor.
+aparte. Cada estudio escribe en su propia carpeta (`<firm_id>/video/…`,
+`<firm_id>/imagen/…`), con la ruta armada por el servidor.
+
+Los topes están en `src/lib/storage.ts`: 25 MB para video (mp4, webm, mov) y
+5 MB para imagen (png, jpg, webp, svg). Son distintos a propósito: un logo de
+25 MB no existe, es siempre un archivo mal exportado.
 
 Para habilitarlo:
 
@@ -449,8 +454,9 @@ Para habilitarlo:
    Settings → API Keys). `SUPABASE_URL` no hace falta: se deduce de
    `DATABASE_URL`, donde el usuario del pooler es `postgres.<ref>`.
 
-Sin configurar, los clips siguen aceptando la dirección de un video hospedado
-en cualquier otro lado: el botón de subir simplemente no aparece.
+Sin configurar, los campos siguen aceptando la dirección de un archivo
+hospedado en cualquier otro lado: el botón de subir simplemente no aparece.
+`/api/health` lo informa en `archivos`.
 
 **El costo del video es el egress, no el almacenamiento.** El clip se descarga
 en cada visita al sitio del estudio, y los 5 GB mensuales del plan gratis son

@@ -13,10 +13,33 @@
 
 export const BUCKET = "videos";
 
-/** Tope de tamaño. Un clip de 15-20s bien comprimido no llega a 5 MB. */
-export const MAX_MB = 25;
+/**
+ * Que se puede subir.
+ *
+ * Un logo de 25 MB no existe: es siempre un archivo mal exportado, y dejarlo
+ * pasar hace que la pagina del estudio cargue como si fuera 2005. Por eso cada
+ * clase tiene su tope, y no uno solo para todo.
+ *
+ * El SVG entra porque la mitad de los logos vienen en SVG. Se muestra siempre
+ * dentro de un <img> o como fondo CSS, y ahi el navegador no ejecuta scripts.
+ */
+export const CLASES = {
+  video: {
+    tipos: ["video/mp4", "video/webm", "video/quicktime"],
+    // Un clip de 15-20s bien comprimido no llega a 5 MB.
+    maxMb: 25,
+    que: "un video mp4, webm o mov",
+  },
+  imagen: {
+    tipos: ["image/png", "image/jpeg", "image/webp", "image/svg+xml"],
+    maxMb: 5,
+    que: "una imagen png, jpg, webp o svg",
+  },
+} as const;
 
-export const TIPOS_VIDEO = ["video/mp4", "video/webm", "video/quicktime"];
+export type Clase = keyof typeof CLASES;
+
+export const esClase = (v: unknown): v is Clase => v === "video" || v === "imagen";
 
 /**
  * El proyecto de Supabase.
@@ -43,13 +66,13 @@ export const almacenamientoListo = () =>
   Boolean(supabaseUrl() && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
 /** Nombre de archivo sin sorpresas: nada de rutas ni acentos. */
-export function nombreSeguro(original: string): string {
+export function nombreSeguro(original: string, porDefecto = "bin"): string {
   const punto = original.lastIndexOf(".");
-  const ext = (punto > 0 ? original.slice(punto + 1) : "mp4").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const ext = (punto > 0 ? original.slice(punto + 1) : porDefecto).toLowerCase().replace(/[^a-z0-9]/g, "");
   const base = (punto > 0 ? original.slice(0, punto) : original)
     .normalize("NFD").replace(/[̀-ͯ]/g, "")
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 50) || "video";
-  return `${base}-${Date.now().toString(36)}.${ext || "mp4"}`;
+  return `${base}-${Date.now().toString(36)}.${ext || porDefecto}`;
 }
 
 export type PermisoDeSubida = { subirA: string; token: string; publica: string };
