@@ -312,13 +312,44 @@ export async function GET(req: Request) {
     v.style.cssText = "width:100%;height:306px;object-fit:cover;display:block;cursor:pointer";
     v.onclick = function () { open("clip"); };
 
+    /**
+     * Insistir con la reproduccion hasta que el navegador la deje.
+     *
+     * Aun en silencio hay navegadores que bloquean el autoplay —modo de bajo
+     * consumo, ahorro de datos, alguna configuracion de privacidad— y ahi el
+     * clip queda como un cuadro quieto. El bloqueo se levanta con el primer
+     * gesto del visitante, asi que enganchamos uno cualquiera y reintentamos.
+     */
+    function insistir() {
+      var p = v.play();
+      if (!p || !p.catch) return;
+      p.catch(function () {
+        // Quedo quieto: que el boton lo diga en vez de ofrecer pausar algo
+        // que no esta andando.
+        if (play) pintar();
+        var eventos = ["pointerdown", "keydown", "touchstart", "scroll"];
+        function reintento() {
+          for (var i = 0; i < eventos.length; i++) document.removeEventListener(eventos[i], reintento);
+          v.play().catch(function () { /* si ni asi deja, queda la portada */ });
+        }
+        for (var j = 0; j < eventos.length; j++) {
+          document.addEventListener(eventos[j], reintento, { passive: true });
+        }
+      });
+    }
+
     if (arranca) {
+      // Que se vea andando, no que se baje recien al tocarlo: para eso esta el
+      // clip. preload auto para que arranque de una y no muestre el parpadeo
+      // de los primeros cuadros.
+      v.preload = "auto";
+      v.setAttribute("preload", "auto");
       v.autoplay = true;
-      v.play().catch(function () { /* si el navegador lo bloquea queda el poster */ });
+      v.setAttribute("autoplay", "");
+      insistir();
     } else {
-      // Sin autoplay no se baja el video hasta que lo tocan: se ve la portada
-      // y recien al darle play empieza la descarga. Es la diferencia entre
-      // pagar ancho de banda por cada visita o solo por quien se interesa.
+      // Apagado a proposito: se ve la portada con el boton de play y el video
+      // se baja recien si lo tocan.
       v.preload = "none";
       v.setAttribute("preload", "none");
     }
@@ -337,10 +368,18 @@ export async function GET(req: Request) {
       return btn;
     }
 
-    var play = chip("&#10073;&#10073;", "Pausar", function () {
-      if (v.paused) { v.play(); play.innerHTML = "&#10073;&#10073;"; play.setAttribute("aria-label", "Pausar"); }
-      else { v.pause(); play.innerHTML = "&#9654;"; play.setAttribute("aria-label", "Reproducir"); }
+    var play = chip(arranca ? "&#10073;&#10073;" : "&#9654;", arranca ? "Pausar" : "Reproducir", function () {
+      if (v.paused) v.play(); else v.pause();
     });
+
+    // El icono lo dicta el video, no el click: si el navegador bloqueo el
+    // autoplay o corto la reproduccion por su cuenta, el boton dice la verdad.
+    function pintar() {
+      play.innerHTML = v.paused ? "&#9654;" : "&#10073;&#10073;";
+      play.setAttribute("aria-label", v.paused ? "Reproducir" : "Pausar");
+    }
+    v.addEventListener("play", pintar);
+    v.addEventListener("pause", pintar);
     var sound = chip("&#128263;", "Activar sonido", function () {
       v.muted = !v.muted;
       sound.innerHTML = v.muted ? "&#128263;" : "&#128266;";

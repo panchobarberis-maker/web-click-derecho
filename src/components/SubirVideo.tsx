@@ -64,8 +64,6 @@ export function SubirVideo({
 
   return (
     <div className="subir">
-      <input type="hidden" name={name} value={url} />
-
       {habilitado && (
         <>
           <input
@@ -93,14 +91,17 @@ export function SubirVideo({
           {estado.fase === "error" && <p className="subir-error">{estado.msg}</p>}
 
           <p className="muted subir-ayuda">
-            Vertical, de 15 a 20 segundos, hasta {maxMb} MB. Cuanto más liviano, menos ancho de banda
-            consume en el sitio del estudio.
+            Vertical, de 15 a 20 segundos, hasta {maxMb} MB. Cuanto más liviano, más rápido
+            arranca en el sitio del estudio.
           </p>
         </>
       )}
 
+      {/* El campo que se manda es este, no uno oculto: asi lo que se ve escrito
+          es lo que se guarda, incluso si mandan el formulario antes de que la
+          pagina termine de cargar. La subida lo unico que hace es completarlo. */}
       <label className="lbl">{habilitado ? "…o pegá la dirección de un video" : "Dirección del video (mp4)"}</label>
-      <input aria-label="Dirección del video" value={url}
+      <input name={name} aria-label="Dirección del video" value={url}
              onChange={(e) => setUrl(e.target.value)} placeholder="https://…/clip.mp4" />
     </div>
   );
