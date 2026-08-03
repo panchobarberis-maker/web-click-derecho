@@ -282,3 +282,15 @@ details.ajuste[open] summary { margin-bottom: .75rem; }
 .subir-ok { font-size: .82rem; color: var(--good); margin-top: .5rem; }
 .subir-error { font-size: .82rem; color: #96271b; margin-top: .5rem; line-height: 1.5; }
 .subir-ayuda { font-size: .76rem; margin-top: .5rem; line-height: 1.5; }
+/* El damero se ve a traves de los png transparentes, que es como vienen casi
+   todos los logos: sin el, un logo blanco parecia no haberse cargado. */
+.subir-muestra {
+  display: block; max-height: 90px; max-width: 100%; margin-top: .6rem;
+  padding: .5rem; border: 1px solid var(--line); border-radius: 8px; object-fit: contain;
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%),
+    linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
+  background-size: 14px 14px;
+  background-position: 0 0, 7px 7px;
+}

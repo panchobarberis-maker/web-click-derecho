@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireOwner } from "@/lib/tenancy";
-import { almacenamientoListo, nombreSeguro, permisoDeSubida, MAX_MB, TIPOS_VIDEO } from "@/lib/storage";
+import { almacenamientoListo, nombreSeguro, permisoDeSubida, CLASES, esClase, type Clase } from "@/lib/storage";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
 
   if (!almacenamientoListo()) {
     return NextResponse.json(
-      { error: "La subida de videos no está configurada en este servidor. Podés pegar la dirección de un video hospedado en otro lado." },
+      { error: "La subida de archivos no está configurada en este servidor. Podés pegar la dirección de un archivo hospedado en otro lado." },
       { status: 503 },
     );
   }
@@ -29,21 +29,29 @@ export async function POST(req: Request) {
   const nombre = String(b?.nombre ?? "").trim();
   const tipo = String(b?.tipo ?? "");
   const bytes = Number(b?.bytes ?? 0);
+  // Sin clase asumimos video: es como venia funcionando antes de las imagenes.
+  const clase: Clase = esClase(b?.clase) ? b.clase : "video";
+  const regla = CLASES[clase];
 
   if (!nombre) return NextResponse.json({ error: "Falta el nombre del archivo." }, { status: 400 });
-  if (!TIPOS_VIDEO.includes(tipo)) {
-    return NextResponse.json({ error: "Tiene que ser un video mp4, webm o mov." }, { status: 400 });
+  if (!(regla.tipos as readonly string[]).includes(tipo)) {
+    return NextResponse.json({ error: `Tiene que ser ${regla.que}.` }, { status: 400 });
   }
-  if (!(bytes > 0) || bytes > MAX_MB * 1024 * 1024) {
+  if (!(bytes > 0) || bytes > regla.maxMb * 1024 * 1024) {
+    const comoAdelgazar = clase === "video"
+      ? "Bajale la calidad o recortalo: 15 a 20 segundos alcanzan."
+      : "Achicala antes de subirla: 1600 píxeles de ancho sobran para cualquier pantalla.";
     return NextResponse.json(
-      { error: `El video no puede pesar más de ${MAX_MB} MB. Bajale la calidad o recortalo: 15 a 20 segundos alcanzan.` },
+      { error: `El archivo no puede pesar más de ${regla.maxMb} MB. ${comoAdelgazar}` },
       { status: 400 },
     );
   }
 
   try {
-    // Cada estudio en su carpeta, y el nombre lo normaliza el servidor.
-    const permiso = await permisoDeSubida(`${firm.id}/${nombreSeguro(nombre)}`);
+    // Cada estudio en su carpeta, separando por clase, y el nombre lo normaliza
+    // el servidor.
+    const ext = clase === "video" ? "mp4" : "png";
+    const permiso = await permisoDeSubida(`${firm.id}/${clase}/${nombreSeguro(nombre, ext)}`);
     return NextResponse.json(permiso);
   } catch (e) {
     // fetch envuelve el error real en `cause`; sin eso, todo problema de red
