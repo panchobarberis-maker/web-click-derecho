@@ -23,23 +23,24 @@ export default async function Analytics({
   const range = ((params.r as Range) ?? "30d") satisfies Range;
   const { firm } = await activeFirm();
 
-  const workflows = await sql<{ id: string; name: string; funnel: string }[]>`
-    select w.id, w.name, f.name as funnel
-    from workflows w join funnels f on f.id = w.funnel_id
-    where f.firm_id = ${firm.id}
-    order by f.sort_order, w.sort_order`;
-
-  const wfId = params.wf || workflows[0]?.id;
-
-  const [t, s, attr, funnels, surfaces, camps, drop] = await Promise.all([
+  // Todo junto: el embudo ya resuelve solo cual es el formulario, asi que la
+  // lista no tiene que llegar antes y nada espera a nada.
+  const [workflows, t, s, attr, funnels, surfaces, camps, drop] = await Promise.all([
+    sql<{ id: string; name: string; funnel: string }[]>`
+      select w.id, w.name, f.name as funnel
+      from workflows w join funnels f on f.id = w.funnel_id
+      where f.firm_id = ${firm.id}
+      order by f.sort_order, w.sort_order`,
     totals(firm.id, range),
     series(firm.id, range),
     attribution(firm.id, range),
     byFunnel(firm.id, range),
     bySurface(firm.id, range),
     campanas(firm.id, range),
-    wfId ? dropoff(firm.id, wfId, range) : null,
+    dropoff(firm.id, params.wf || null, range),
   ]);
+
+  const wfId = params.wf || workflows[0]?.id;
 
   return (
     <>

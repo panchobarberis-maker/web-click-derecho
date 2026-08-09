@@ -52,7 +52,10 @@ export default async function Responses({ searchParams }: { searchParams: Promis
   const tab = (await searchParams).tab === "abandonadas" ? "abandonadas" : "enviadas";
   const { firm } = await activeFirm();
 
-  const rows = await sql<Row[]>`
+  // Las dos consultas no dependen entre si: encadenadas eran dos latencias
+  // contra Supabase por una pantalla que solo lista y cuenta.
+  const [rows, [counts]] = await Promise.all([
+    sql<Row[]>`
     select s.id, s.full_name, s.email, s.max_step, s.submitted_at, s.read_at,
            s.recovery_sent_at, s.created_at, s.updated_at,
            coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow
@@ -64,14 +67,15 @@ export default async function Responses({ searchParams }: { searchParams: Promis
         ? sql`and s.submitted_at is not null`
         : sql`and s.submitted_at is null and s.email is not null and s.email <> ''`}
     order by ${tab === "enviadas" ? sql`s.submitted_at` : sql`s.updated_at`} desc
-    limit 200`;
+    limit 200`,
 
-  const [counts] = await sql<{ enviadas: number; abandonadas: number; sin_leer: number }[]>`
-    select
-      count(*) filter (where submitted_at is not null) as enviadas,
-      count(*) filter (where submitted_at is null and email is not null and email <> '') as abandonadas,
-      count(*) filter (where submitted_at is not null and read_at is null) as sin_leer
-    from sessions where firm_id = ${firm.id}`;
+    sql<{ enviadas: number; abandonadas: number; sin_leer: number }[]>`
+      select
+        count(*) filter (where submitted_at is not null) as enviadas,
+        count(*) filter (where submitted_at is null and email is not null and email <> '') as abandonadas,
+        count(*) filter (where submitted_at is not null and read_at is null) as sin_leer
+      from sessions where firm_id = ${firm.id}`,
+  ]);
 
   return (
     <>

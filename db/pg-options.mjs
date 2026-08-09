@@ -45,8 +45,15 @@ export function pgConfig(url) {
       // Supabase rechaza conexiones sin cifrar.
       ...(local ? {} : { ssl: "require" }),
       ...(transactionPooler ? { prepare: false } : {}),
-      // El pooler comparte un cupo chico entre todas las instancias.
-      max: transactionPooler ? 3 : 10,
+      // Cuantas consultas en paralelo aguanta cada instancia.
+      //
+      // Estaba en 3 para el pooler, y eso convertia las consultas paralelas de
+      // una pantalla en varias tandas: Analytics lanza ocho a la vez y de a
+      // tres son tres latencias en fila en vez de una. El pooler de Supabase
+      // acepta 200 conexiones de cliente incluso en el plan gratis, asi que 8
+      // por instancia deja margen de sobra. Si alguna vez aparece "max client
+      // connections reached" en los logs de Supabase, bajarlo es lo primero.
+      max: transactionPooler ? 8 : 10,
       idle_timeout: 20,
       // Sin esto, una red que bloquea el puerto 5432 de salida deja el proceso
       // colgado sin decir nada. Mejor fallar y mostrar el motivo.

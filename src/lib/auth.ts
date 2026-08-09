@@ -97,14 +97,60 @@ export type SessionUser = {
  * el render de un request, asi que no arrastra sesiones entre visitantes.
  */
 export const currentUser = cache(async function currentUser(): Promise<SessionUser | null> {
-  const token = (await cookies()).get(COOKIE)?.value;
-  if (!token) return null;
+  // Sale de la misma consulta que trae los estudios. Tenerla aparte hacia que
+  // las pantallas que piden las dos cosas —el layout del panel y la pantalla
+  // de Mi cuenta, por ejemplo— fueran dos veces a la base por lo mismo.
+  const [p] = await sesionConEstudios();
+  if (!p) return null;
+  return { id: p.u_id, email: p.u_email, name: p.u_name, image: p.u_image, is_staff: p.u_is_staff };
+});
 
-  const [row] = await sql<SessionUser[]>`
-    select u.id, u.email, u.name, u.image, u.is_staff
-    from auth_sessions s join users u on u.id = s.user_id
-    where s.token_hash = ${hashToken(token)} and s.expires_at > now()`;
-  return row ?? null;
+/** Una fila por estudio; los datos del usuario se repiten en cada una. */
+export type SesionConEstudios = {
+  u_id: string;
+  u_email: string;
+  u_name: string | null;
+  u_image: string | null;
+  u_is_staff: boolean;
+  f_id: string | null;
+  role: "owner" | "member" | "staff" | null;
+} & Record<string, unknown>;
+
+/**
+ * La sesion y los estudios del usuario, en una sola ida a la base.
+ *
+ * Antes eran dos consultas encadenadas —primero quien sos, despues a que
+ * estudios entras— y la segunda no podia empezar hasta que volviera la
+ * primera. En local eso no se nota; contra Supabase son dos latencias
+ * completas antes de que la pantalla empiece a pedir lo suyo, en todas las
+ * pantallas del panel.
+ *
+ * El left join trae al usuario aunque no tenga ningun estudio: ahi viene una
+ * sola fila con f_id en null, que es lo que distingue "no tiene acceso" de
+ * "no hay sesion".
+ */
+export const sesionConEstudios = cache(async function sesionConEstudios(): Promise<SesionConEstudios[]> {
+  const token = (await cookies()).get(COOKIE)?.value;
+  if (!token) return [];
+
+  return sql<SesionConEstudios[]>`
+    select u.id           as u_id,
+           u.email        as u_email,
+           u.name         as u_name,
+           u.image        as u_image,
+           u.is_staff     as u_is_staff,
+           f.id           as f_id,
+           f.name, f.slug, f.notify_email, f.accent,
+           f.logo_url, f.hero_url, f.intro, f.show_on_home,
+           case when u.is_staff then 'staff' else m.role end as role
+    from auth_sessions s
+    join users u on u.id = s.user_id
+    left join firms f
+      on u.is_staff
+      or exists (select 1 from memberships mm where mm.user_id = u.id and mm.firm_id = f.id)
+    left join memberships m on m.user_id = u.id and m.firm_id = f.id
+    where s.token_hash = ${hashToken(token)} and s.expires_at > now()
+    order by f.name`;
 });
 
 /** Cierra todas las sesiones de una cuenta. Se usa al cambiar la contraseña. */

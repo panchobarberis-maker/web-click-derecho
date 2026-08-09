@@ -135,26 +135,51 @@ export async function bySurface(firmId: string, range: Range) {
  * Donde se cae la gente, paso por paso. Es la vista que dice que arreglar:
  * si el 60% se cae en el paso 3, ese paso sobra o esta mal preguntado.
  */
-export async function dropoff(firmId: string, workflowId: string, range: Range) {
+/**
+ * En que paso se cae la gente.
+ *
+ * Una sola ida a la base: resuelve cual es el formulario, cuantos pasos tiene
+ * y cuanta gente llego a cada uno. Antes eran dos consultas encadenadas —el
+ * formulario primero, los pasos despues— y ademas la pantalla tenia que pedir
+ * la lista de formularios antes de poder llamar a esta funcion, con lo cual
+ * Analytics arrancaba con cuatro latencias en fila contra Supabase.
+ *
+ * Con workflowId en null toma el primero del estudio, que es lo que la
+ * pantalla muestra por defecto.
+ */
+export async function dropoff(firmId: string, workflowId: string | null, range: Range) {
   const s = since(range);
-  const [wf] = await sql<{ name: string; steps: { steps: { title: string }[] } }[]>`
-    select name, steps from workflows where id = ${workflowId}`;
-  if (!wf) return null;
 
-  const rows = await sql<{ step: number; reached: number }[]>`
-    select gs.step, count(s.id) as reached
-    from generate_series(0, ${wf.steps.steps.length}) as gs(step)
+  const filas = await sql<
+    { name: string; steps: { steps: { title: string }[] }; step: number; reached: string }[]
+  >`
+    with wf as (
+      select w.id, w.name, w.steps
+      from workflows w join funnels f on f.id = w.funnel_id
+      where f.firm_id = ${firmId}
+        and (${workflowId}::uuid is null or w.id = ${workflowId}::uuid)
+      order by f.sort_order, w.sort_order
+      limit 1
+    )
+    select wf.name, wf.steps, gs.step, count(s.id) as reached
+    from wf
+    cross join lateral
+      generate_series(0, coalesce(jsonb_array_length(wf.steps -> 'steps'), 0)) as gs(step)
     left join sessions s
-      on s.workflow_id = ${workflowId} and s.firm_id = ${firmId} and s.max_step >= gs.step
+      on s.workflow_id = wf.id and s.firm_id = ${firmId} and s.max_step >= gs.step
       ${s ? sql`and s.created_at > now() - ${s}::interval` : sql``}
-    group by gs.step order by gs.step`;
+    group by wf.name, wf.steps, gs.step
+    order by gs.step`;
 
-  const top = Number(rows[0]?.reached ?? 0);
+  if (filas.length === 0) return null;
+
+  const titulos = filas[0].steps?.steps ?? [];
+  const top = Number(filas[0].reached ?? 0);
   return {
-    name: wf.name,
-    steps: rows.map((r) => ({
+    name: filas[0].name,
+    steps: filas.map((r) => ({
       step: r.step,
-      title: r.step === 0 ? "Abrió el formulario" : wf.steps.steps[r.step - 1]?.title ?? `Paso ${r.step}`,
+      title: r.step === 0 ? "Abrió el formulario" : titulos[r.step - 1]?.title ?? `Paso ${r.step}`,
       reached: Number(r.reached),
       pct: top ? Math.round((Number(r.reached) / top) * 100) : 0,
     })),

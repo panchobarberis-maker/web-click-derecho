@@ -131,12 +131,11 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                       <label className="lbl">Nombre</label>
                       <input name="name" defaultValue={c.name} required />
 
-                      <label className="lbl">Video</label>
-                      <SubirArchivo name="video_url" clase="video" defaultValue={c.video_url}
+                      <SubirArchivo name="video_url" clase="video" etiqueta="Video" defaultValue={c.video_url}
                                     habilitado={puedeSubir} maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
 
-                      <label className="lbl">Imagen de portada (opcional)</label>
-                      <SubirArchivo name="poster_url" clase="imagen" defaultValue={c.poster_url ?? ""}
+                      <SubirArchivo name="poster_url" clase="imagen" etiqueta="Imagen de portada (opcional)"
+                                    defaultValue={c.poster_url ?? ""}
                                     habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb}
                                     ayuda={AYUDA_PORTADA} vistaPrevia />
 
@@ -194,12 +193,11 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
               <label className="lbl">Nombre</label>
               <input name="name" placeholder="Home — presentación" required />
 
-              <label className="lbl">Video</label>
-              <SubirArchivo name="video_url" clase="video" habilitado={puedeSubir}
+              <SubirArchivo name="video_url" clase="video" etiqueta="Video" habilitado={puedeSubir}
                             maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
 
-              <label className="lbl">Imagen de portada (opcional)</label>
-              <SubirArchivo name="poster_url" clase="imagen" habilitado={puedeSubir}
+              <SubirArchivo name="poster_url" clase="imagen" etiqueta="Imagen de portada (opcional)"
+                            habilitado={puedeSubir}
                             maxMb={CLASES.imagen.maxMb} ayuda={AYUDA_PORTADA} vistaPrevia />
 
               <label className="lbl">Texto del botón</label>

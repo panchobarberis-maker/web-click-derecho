@@ -100,13 +100,12 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             <label className="lbl" htmlFor="accent">Color principal</label>
             <input id="accent" name="accent" type="color" defaultValue={actual.accent} />
 
-            <label className="lbl">Logo</label>
-            <SubirArchivo name="logo_url" clase="imagen" defaultValue={actual.logo_url ?? ""}
+            <SubirArchivo name="logo_url" clase="imagen" etiqueta="Logo" defaultValue={actual.logo_url ?? ""}
                           habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
                           ayuda="Se ve arriba del formulario. Fondo transparente (png o svg) queda mejor." />
 
-            <label className="lbl">Imagen de la página pública</label>
-            <SubirArchivo name="hero_url" clase="imagen" defaultValue={actual.hero_url ?? ""}
+            <SubirArchivo name="hero_url" clase="imagen" etiqueta="Imagen de la página pública"
+                          defaultValue={actual.hero_url ?? ""}
                           habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
                           ayuda="La foto grande de la izquierda. Apaisada y de buena calidad; si no cargás ninguna queda el color del estudio." />
 
