@@ -36,6 +36,7 @@ const TEXTOS: Record<Clase, { boton: string; hecho: string; pegar: string; solo:
 export function SubirArchivo({
   name,
   clase,
+  etiqueta,
   defaultValue = "",
   habilitado,
   maxMb,
@@ -44,6 +45,9 @@ export function SubirArchivo({
 }: {
   name: string;
   clase: Clase;
+  /** Como se llama el campo. Lo pone el componente, no la pantalla: si no,
+      quedaban dos etiquetas encimadas ("Logo" y "Dirección de la imagen"). */
+  etiqueta: string;
   defaultValue?: string;
   habilitado: boolean;
   maxMb: number;
@@ -91,6 +95,8 @@ export function SubirArchivo({
 
   return (
     <div className="subir">
+      <label className="lbl" htmlFor={habilitado ? undefined : id}>{etiqueta}</label>
+
       {habilitado && (
         <>
           <input
@@ -116,23 +122,25 @@ export function SubirArchivo({
           )}
           {estado.fase === "listo" && <p className="subir-ok">{t.hecho}</p>}
           {estado.fase === "error" && <p className="subir-error">{estado.msg}</p>}
-
-          <p className="muted subir-ayuda">{ayuda ?? `Hasta ${maxMb} MB.`}</p>
         </>
       )}
 
       {/* El campo que se manda es este, no uno oculto: asi lo que se ve escrito
           es lo que se guarda, incluso si mandan el formulario antes de que la
           pagina termine de cargar. La subida lo unico que hace es completarlo. */}
-      {/* La etiqueta va asociada por id y sin aria-label encima: si no, el
-          lector de pantalla dice una cosa y la pantalla otra. */}
-      <label className="lbl" htmlFor={id}>{habilitado ? t.pegar : t.solo}</label>
+      {/* Con la subida disponible este campo es la alternativa, y lo dice; sin
+          ella es el campo principal y ya lo etiqueta el titulo de arriba. */}
+      {habilitado && <label className="lbl" htmlFor={id}>{t.pegar}</label>}
       <input id={id} name={name} value={url}
              onChange={(e) => setUrl(e.target.value)}
              placeholder={clase === "video" ? "https://…/clip.mp4" : "https://…/logo.png"} />
 
       {/* Ver lo cargado evita el caso mas comun: una direccion que ya no existe
           y un logo roto en el formulario del estudio sin que nadie se entere. */}
+      {/* La ayuda va siempre, no solo cuando se puede subir: quien tiene que
+          pegar una direccion es el que mas necesita saber que va ahi. */}
+      <p className="muted subir-ayuda">{ayuda ?? `Hasta ${maxMb} MB.`}</p>
+
       {vistaPrevia && url ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img className="subir-muestra" src={url} alt="" />

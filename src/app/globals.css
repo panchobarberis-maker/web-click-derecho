@@ -36,11 +36,19 @@ h3 { font-size: 1.1rem; font-family: var(--font-sans), sans-serif; font-weight: 
 a { color: inherit; }
 
 /* ---------- shell ---------- */
-.shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
+/* El fondo de la columna izquierda lo pinta la grilla, no la barra: la barra
+   es sticky de 100vh y en una pagina larga dejaba media columna en beige, con
+   un corte a mitad de camino que parecia un error de carga. */
+.shell {
+  display: grid; grid-template-columns: 232px 1fr; min-height: 100vh;
+  background:
+    /* el borde: una franja de 1px justo en el corte, no toda la columna */
+    linear-gradient(to right, transparent 231px, var(--line) 231px 232px, transparent 232px),
+    linear-gradient(to right, var(--card) 0 232px, transparent 232px);
+}
 
 .sidebar {
-  background: var(--card);
-  border-right: 1px solid var(--line);
+  background: transparent;
   padding: 1.5rem 1rem;
   display: flex; flex-direction: column; gap: 1.5rem;
   position: sticky; top: 0; height: 100vh;
@@ -65,19 +73,26 @@ a { color: inherit; }
 .grid { display: grid; gap: 1rem; }
 .cols-3 { grid-template-columns: repeat(3, 1fr); }
 .cols-4 { grid-template-columns: repeat(4, 1fr); }
-.cols-2-1 { grid-template-columns: 2fr 1fr; }
+.cols-2-1 {
+  grid-template-columns: 2fr 1fr;
+  /* Cada columna con su alto: si no, una tarjeta vacia se estira para igualar
+     al formulario de al lado y queda un cuadro blanco enorme con una linea de
+     texto flotando en el medio. */
+  align-items: start;
+}
 @media (max-width: 1100px) { .cols-3, .cols-4, .cols-2-1 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 700px) { .shell { grid-template-columns: 1fr; } .sidebar { position: static; height: auto; } .main { padding: 1.5rem; } .cols-3, .cols-4, .cols-2-1 { grid-template-columns: 1fr; } }
 
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.25rem 1.4rem; }
 .card > h3 { margin-bottom: 1rem; }
 
+.tile { display: flex; flex-direction: column; }
 .tile .label { font-size: .85rem; color: var(--muted); font-weight: 500; }
 .tile .value { font-size: 2.6rem; font-weight: 700; line-height: 1.1; margin-top: .3rem; font-variant-numeric: tabular-nums; }
-.tile .sub { font-size: .82rem; color: var(--muted); margin-top: .35rem; }
+.tile .sub { font-size: .82rem; color: var(--muted); margin-top: auto; padding-top: .35rem; }
 
 /* medidor lineal: un solo porcentaje no justifica un donut */
-.meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: .75rem; }
+.meter { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-top: auto; }
 .meter > span { display: block; height: 100%; border-radius: 3px; background: var(--s2); }
 
 /* ---------- tablas ---------- */
@@ -293,4 +308,40 @@ details.ajuste[open] summary { margin-bottom: .75rem; }
     linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%);
   background-size: 14px 14px;
   background-position: 0 0, 7px 7px;
+}
+
+/* ---------- pulido: foco visible, respuesta al puntero ---------- */
+
+/* Antes el foco solo se veia con el anillo por defecto del navegador, que
+   sobre beige es casi invisible. Quien navega con teclado necesita saber
+   siempre donde esta parado. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Una tabla de consultas es una lista de cosas para abrir: la fila entera
+   tiene que responder, no solo el nombre. */
+tbody tr { transition: background-color .12s ease; }
+tbody tr:hover { background: color-mix(in srgb, var(--accent) 4%, transparent); }
+
+.nav a, .ranges a, .tabs a, .btn { transition: background-color .12s ease, color .12s ease, border-color .12s ease; }
+.btn:hover { opacity: 1; background: color-mix(in srgb, var(--accent) 88%, #000); }
+.btn.ghost:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
+
+/* Las tarjetas que llevan a algun lado se levantan; las que solo muestran
+   datos, no. Que se mueva algo que no es clickeable confunde. */
+a.card, .card.clickable { transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease; }
+a.card:hover, .card.clickable:hover {
+  border-color: #d8ccb9;
+  box-shadow: 0 8px 22px rgba(42, 33, 24, .07);
+  transform: translateY(-1px);
+}
+
+/* Los numeros de una columna tienen que alinearse por la coma. */
+.tile .value, .num, td.num, th.num { font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
