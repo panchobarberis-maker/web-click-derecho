@@ -109,11 +109,20 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                     <span className={c.active ? "pill good" : "pill"}>{c.active ? "Activo" : "Pausado"}</span>
                   </div>
                   <div className="widget-stats">
+                    <div><strong>{(s?.impresiones ?? 0).toLocaleString("es-AR")}</strong><span>se mostró</span></div>
                     <div><strong>{s?.clicks ?? 0}</strong><span>aperturas</span></div>
                     <div><strong>{s?.responses ?? 0}</strong><span>consultas</span></div>
-                    <div><strong>{s?.conversion ?? 0}%</strong><span>conversión</span></div>
+                    <div className="tasa"><strong>{s?.apertura ?? 0}%</strong><span>abre</span></div>
+                    <div className="tasa"><strong>{s?.conversion ?? 0}%</strong><span>convierte</span></div>
                   </div>
                 </div>
+
+                {(s?.impresiones ?? 0) > 0 && (
+                  <p className="resumen-widget">
+                    De cada 100 personas que vieron este clip,{" "}
+                    <strong>{Math.round((100 * (s?.responses ?? 0)) / (s?.impresiones || 1))} dejaron una consulta</strong>.
+                  </p>
+                )}
 
                 <Snippet code={`<script src="${base}/w.js?clip=${c.id}"></script>`} />
 

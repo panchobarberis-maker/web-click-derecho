@@ -215,6 +215,32 @@ export async function GET(req: Request) {
     return ORIGIN + p + "?" + q.toString();
   }
 
+  /**
+   * Avisa que el widget se mostro.
+   *
+   * Se manda cuando el visitante lo ve de verdad —el pop-up al abrirse, el
+   * clip al aparecer en la esquina—, no cuando carga el script: un pop-up con
+   * doce segundos de espera que nadie llego a ver no es una impresion.
+   *
+   * sendBeacon porque la pagina puede irse en el mismo instante y el navegador
+   * igual lo entrega; el cuerpo va como texto plano a proposito, asi el pedido
+   * es "simple" y no dispara la consulta de permisos previa, que agregaria una
+   * ida y vuelta al sitio del estudio por cada visita.
+   */
+  var yaContada = false;
+  function contarImpresion(surface) {
+    if (yaContada || vistaPrevia || !wid) return;
+    yaContada = true;
+    var cuerpo = JSON.stringify({ surface: surface, id: wid, lp: location.href });
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon(ORIGIN + "/api/impression", cuerpo)) return;
+    } catch (e) {}
+    try {
+      fetch(ORIGIN + "/api/impression", { method: "POST", body: cuerpo, keepalive: true, mode: "cors" })
+        .catch(function () {});
+    } catch (e) {}
+  }
+
   function frame(surface) {
     var f = document.createElement("iframe");
     f.src = url(surface);
@@ -232,6 +258,7 @@ export async function GET(req: Request) {
     box.appendChild(frame("page"));
     if (host) host.appendChild(box);
     else s.parentNode.insertBefore(box, s);
+    contarImpresion("page");
     return;
   }
 
@@ -275,6 +302,8 @@ export async function GET(req: Request) {
       overlay.style.opacity = "1";
       panel.style.transform = "translateY(0)";
     });
+
+    contarImpresion(surfaceActual);
   }
 
   function shut() {
@@ -404,6 +433,7 @@ export async function GET(req: Request) {
     card.appendChild(bar);
     card.appendChild(go);
     document.body.appendChild(card);
+    contarImpresion("clip");
     return;
   }
 

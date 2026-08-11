@@ -299,3 +299,20 @@ alter table clips  add column if not exists paginas text;
 -- Apagarlo muestra la portada con un boton de play, y ademas ahorra ancho de
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
+
+-- Cuantas veces se mostro cada pop-up y cada clip.
+--
+-- Hasta ahora se medía desde que se abría el formulario, o sea el escalón de
+-- abajo del embudo. Sin las impresiones no se puede decir "el clip se mostró
+-- 4.000 veces y trajo 30 consultas", que es el número con el que la agencia
+-- justifica el trabajo, ni distinguir un widget que nadie ve de uno que se ve
+-- mucho y no convierte: dos problemas opuestos que hoy se ven iguales.
+--
+-- Van en events, con el mismo surface_id que ya usan las sesiones, así el
+-- embudo entero —mostrado, abierto, enviado— sale de dos tablas y no de tres.
+-- Es la fila que más va a crecer: una por vista de página con el widget
+-- puesto, de ahí el índice propio.
+alter table events add column if not exists surface_id uuid;
+create index if not exists idx_events_surface
+  on events (firm_id, surface, surface_id, created_at desc)
+  where surface_id is not null;

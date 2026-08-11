@@ -320,6 +320,23 @@ alter table clips  add column if not exists paginas text;
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
 
+-- Cuantas veces se mostro cada pop-up y cada clip.
+--
+-- Hasta ahora se medía desde que se abría el formulario, o sea el escalón de
+-- abajo del embudo. Sin las impresiones no se puede decir "el clip se mostró
+-- 4.000 veces y trajo 30 consultas", que es el número con el que la agencia
+-- justifica el trabajo, ni distinguir un widget que nadie ve de uno que se ve
+-- mucho y no convierte: dos problemas opuestos que hoy se ven iguales.
+--
+-- Van en events, con el mismo surface_id que ya usan las sesiones, así el
+-- embudo entero —mostrado, abierto, enviado— sale de dos tablas y no de tres.
+-- Es la fila que más va a crecer: una por vista de página con el widget
+-- puesto, de ahí el índice propio.
+alter table events add column if not exists surface_id uuid;
+create index if not exists idx_events_surface
+  on events (firm_id, surface, surface_id, created_at desc)
+  where surface_id is not null;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -419,11 +436,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$bGEc4Rh75bzK567C8tcznQ==$WLrofKpPm5RzXVQLYaKgM/Eak3jTg8aZceEZXZfza8pN+lMMLQyoGTOMqsrBNYulO8eoMh0/RuKcu5JwN8uUgw==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$qZIQjRNMh5jY9sts7AS1/Q==$AWzyOIzf+e67dBNSZk4Qxlr3RimSMbEiGuzpN5ak0LDYLDDeByhbJ3NMt0YaAS05y1nnmZFPQCr6wSvMn3CezA==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$r4cp0zCWSsNiK8BMar7dAQ==$TdLWfQvz7hQQQ2FgIPZVniZx55ZikVL76EO6pjyCc+qpcr+4a5A6gvxFWRbSYpc8mU9n6Rr7QoZtW99q6xRbUQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$+QfzfhcZdlW6LtjRr1pjbA==$vAS3rJcgYf4rg3Ea7FGtNXV80uZaKucjwdKAEOruNgiJkhNRsn85C43A9msCacU7/5T4nYgtdYCmU+145wcL2A==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)
