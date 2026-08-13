@@ -1,9 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "crons": [
-    {
-      "path": "/api/cron/recover",
-      "schedule": "0 12 * * *"
-    }
-  ]
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false
 }
