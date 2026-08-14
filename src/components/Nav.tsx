@@ -3,6 +3,7 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { t, type Lang } from "@/lib/i18n";
 
 /**
  * Señal de que el click se registró y la pantalla está viniendo.
@@ -22,32 +23,35 @@ type Firm = { id: string; name: string; role: string };
 
 type Item = { href?: string; label?: string; sep?: boolean; ownerOnly?: boolean; staffOnly?: boolean };
 
-const items: Item[] = [
-  { href: "/panel", label: "Inicio" },
-  { href: "/responses", label: "Consultas" },
-  { href: "/analytics", label: "Analytics" },
+const menu = (n: ReturnType<typeof t>["nav"]): Item[] => [
+  { href: "/panel", label: n.inicio },
+  { href: "/responses", label: n.consultas },
+  { href: "/analytics", label: n.analytics },
   { sep: true },
-  { href: "/funnels", label: "Áreas y formularios" },
-  { href: "/popups", label: "Pop-ups" },
-  { href: "/clips", label: "Clips" },
-  { href: "/embed", label: "Instalación" },
+  { href: "/funnels", label: n.areas },
+  { href: "/popups", label: n.popups },
+  { href: "/clips", label: n.clips },
+  { href: "/embed", label: n.instalacion },
   { sep: true },
-  { href: "/cuenta", label: "Mi cuenta" },
-  { href: "/ajustes", label: "Ajustes del estudio", ownerOnly: true },
-  { href: "/equipo", label: "Equipo", ownerOnly: true },
-  { href: "/estudios", label: "Estudios", staffOnly: true },
-  { href: "/base", label: "Base de datos", staffOnly: true },
+  { href: "/cuenta", label: n.cuenta },
+  { href: "/ajustes", label: n.ajustes, ownerOnly: true },
+  { href: "/equipo", label: n.equipo, ownerOnly: true },
+  { href: "/estudios", label: n.estudios, staffOnly: true },
+  { href: "/base", label: n.base, staffOnly: true },
 ];
 
 export function Nav({
   firm,
   firms,
   user,
+  lang,
 }: {
   firm: Firm;
   firms: Firm[];
   user: { name: string | null; email: string; is_staff: boolean };
+  lang: Lang;
 }) {
+  const n = t(lang).nav;
   const path = usePathname();
   const router = useRouter();
   const [abierto, setAbierto] = useState(false);
@@ -68,7 +72,7 @@ export function Nav({
 
         {firms.length > 1 ? (
           <div className="switch">
-            <button onClick={() => setAbierto(!abierto)} aria-expanded={abierto}>
+            <button onClick={() => setAbierto(!abierto)} aria-expanded={abierto} aria-label={n.cambiarEstudio}>
               <span>{firm.name}</span>
               <span aria-hidden="true">{abierto ? "▴" : "▾"}</span>
             </button>
@@ -90,7 +94,7 @@ export function Nav({
       </div>
 
       <div className="nav">
-        {items.map((it, i) =>
+        {menu(n).map((it, i) =>
           it.sep ? (
             <div className="sep" key={i} />
           ) : (it.ownerOnly && !esOwner) || (it.staffOnly && !user.is_staff) ? null : (
@@ -109,10 +113,10 @@ export function Nav({
       <footer>
         <div className="who">
           <strong>{user.name ?? user.email}</strong>
-          {user.is_staff && <span className="pill" style={{ fontSize: ".68rem" }}>Agencia</span>}
+          {user.is_staff && <span className="pill" style={{ fontSize: ".68rem" }}>{n.agencia}</span>}
         </div>
         <form action="/api/auth/logout" method="post">
-          <button type="submit" className="linkish">Cerrar sesión</button>
+          <button type="submit" className="linkish">{n.salir}</button>
         </form>
       </footer>
     </nav>

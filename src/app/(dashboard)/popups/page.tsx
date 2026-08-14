@@ -5,29 +5,26 @@ import { porWidget, type Range } from "@/lib/analytics";
 import { baseUrl } from "@/lib/base-url";
 import { RangePicker } from "@/components/RangePicker";
 import { Snippet } from "@/components/Snippet";
+import { fmtNum } from "@/lib/format";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
-const DISPARADORES: { value: string; label: string }[] = [
-  { value: "delay:12", label: "A los 12 segundos" },
-  { value: "delay:30", label: "A los 30 segundos" },
-  { value: "scroll:50", label: "A la mitad de la página" },
-  { value: "exit", label: "Cuando se va a ir (exit intent)" },
-  { value: "now", label: "Apenas carga la página" },
-  { value: "button", label: "Botón flotante (no se abre solo)" },
-];
+/** El orden en que se ofrecen; el texto de cada uno lo pone el diccionario. */
+const DISPARADORES = ["delay:12", "delay:30", "scroll:50", "exit", "now", "button"];
 
 async function crear(formData: FormData) {
   "use server";
   const { firm } = await requireOwner();
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
+  const cta = textos(firm.lang).widgets.ctaPopupDefecto;
 
   await sql`
     insert into popups (firm_id, name, trigger, cta, funnel_id, paginas)
     values (${firm.id}, ${name},
             ${String(formData.get("trigger") ?? "delay:12")},
-            ${String(formData.get("cta") ?? "").trim() || "Consultá tu caso"},
+            ${String(formData.get("cta") ?? "").trim() || cta},
             ${String(formData.get("funnel_id") ?? "") || null},
             ${String(formData.get("paginas") ?? "").trim() || null})`;
   revalidatePath("/popups");
@@ -36,11 +33,12 @@ async function crear(formData: FormData) {
 async function guardar(formData: FormData) {
   "use server";
   const { firm } = await requireOwner();
+  const cta = textos(firm.lang).widgets.ctaPopupDefecto;
   await sql`
     update popups set
       name      = ${String(formData.get("name") ?? "").trim()},
       trigger   = ${String(formData.get("trigger") ?? "delay:12")},
-      cta       = ${String(formData.get("cta") ?? "").trim() || "Consultá tu caso"},
+      cta       = ${String(formData.get("cta") ?? "").trim() || cta},
       funnel_id = ${String(formData.get("funnel_id") ?? "") || null},
       paginas   = ${String(formData.get("paginas") ?? "").trim() || null},
       active    = ${formData.get("active") === "on"}
@@ -64,6 +62,7 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
   const range = (((await searchParams).r as Range) ?? "30d") satisfies Range;
   const { firm } = await activeFirm();
   const puedeEditar = firm.role !== "member";
+  const x = textos(firm.lang).widgets;
 
   const [popups, areas, stats] = await Promise.all([
     sql<Popup[]>`select id, name, trigger, cta, funnel_id, active, paginas from popups
@@ -79,20 +78,17 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
     <>
       <div className="head">
         <div>
-          <h1>Pop-ups</h1>
-          <p>
-            El formulario apareciendo sobre el sitio del estudio. Cada pop-up tiene su propio código y sus
-            propias métricas, así podés comparar cuál funciona mejor.
-          </p>
+          <h1>{x.popups}</h1>
+          <p>{x.popupsBajada}</p>
         </div>
-        <RangePicker current={range} />
+        <RangePicker current={range} lang={firm.lang} />
       </div>
 
       <div className="grid cols-2-1">
         <div style={{ display: "grid", gap: "1rem" }}>
           {popups.length === 0 && (
             <div className="card">
-              <p className="empty">Todavía no hay pop-ups. Creá el primero acá al lado.</p>
+              <p className="empty">{x.sinPopups}</p>
             </div>
           )}
 
@@ -103,75 +99,70 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
                 <div className="widget-head">
                   <div>
                     <h3>{p.name}</h3>
-                    <span className={p.active ? "pill good" : "pill"}>{p.active ? "Activo" : "Pausado"}</span>
+                    <span className={p.active ? "pill good" : "pill"}>{p.active ? x.activo : x.pausado}</span>
                   </div>
                   <div className="widget-stats">
-                    <div><strong>{(s?.impresiones ?? 0).toLocaleString("es-AR")}</strong><span>se mostró</span></div>
-                    <div><strong>{s?.clicks ?? 0}</strong><span>aperturas</span></div>
-                    <div><strong>{s?.responses ?? 0}</strong><span>consultas</span></div>
-                    <div className="tasa"><strong>{s?.apertura ?? 0}%</strong><span>abre</span></div>
-                    <div className="tasa"><strong>{s?.conversion ?? 0}%</strong><span>convierte</span></div>
+                    <div><strong>{fmtNum(s?.impresiones ?? 0, firm.lang)}</strong><span>{x.seMostro}</span></div>
+                    <div><strong>{s?.clicks ?? 0}</strong><span>{x.aperturas}</span></div>
+                    <div><strong>{s?.responses ?? 0}</strong><span>{x.consultas}</span></div>
+                    <div className="tasa"><strong>{s?.apertura ?? 0}%</strong><span>{x.abre}</span></div>
+                    <div className="tasa"><strong>{s?.conversion ?? 0}%</strong><span>{x.convierte}</span></div>
                   </div>
                 </div>
 
                 {(s?.impresiones ?? 0) > 0 && (
-                  <p className="resumen-widget">
-                    De cada 100 personas que vieron este pop-up,{" "}
-                    <strong>{Math.round((100 * (s?.responses ?? 0)) / (s?.impresiones || 1))} dejaron una consulta</strong>.
-                  </p>
+                  <p className="resumen-widget">{x.resumen(Math.round((100 * (s?.responses ?? 0)) / (s?.impresiones || 1)), x.unPopup)}</p>
                 )}
 
-                <Snippet code={`<script src="${base}/w.js?popup=${p.id}"></script>`} />
+                <Snippet code={`<script src="${base}/w.js?popup=${p.id}"></script>`} lang={firm.lang} />
 
                 <a href={`/preview/popup/${p.id}`} target="_blank" className="btn ghost"
                    style={{ marginTop: ".9rem", padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
-                  Ver cómo queda
+                  {x.verComoQueda}
                 </a>
 
                 {puedeEditar && (
                   <details className="ajuste">
-                    <summary>Ajustes</summary>
+                    <summary>{x.ajustes}</summary>
                     <form action={guardar} className="ajustes">
                       <input type="hidden" name="id" value={p.id} />
 
-                      <label className="lbl">Nombre</label>
+                      <label className="lbl">{x.nombre}</label>
                       <input name="name" defaultValue={p.name} required />
 
-                      <label className="lbl">Cuándo aparece</label>
+                      <label className="lbl">{x.cuandoAparece}</label>
                       <select name="trigger" defaultValue={p.trigger}>
-                        {DISPARADORES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                        {DISPARADORES.map((d) => <option key={d} value={d}>{x.disparadores[d]}</option>)}
                       </select>
 
-                      <label className="lbl">Texto del botón</label>
+                      <label className="lbl">{x.textoBoton}</label>
                       <input name="cta" defaultValue={p.cta} />
 
-                      <label className="lbl">Abre directo en</label>
+                      <label className="lbl">{x.abreDirectoEn}</label>
                       <select name="funnel_id" defaultValue={p.funnel_id ?? ""}>
-                        <option value="">Todas las áreas (menú)</option>
+                        <option value="">{x.todasLasAreas}</option>
                         {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                       </select>
 
-                      <label className="lbl">¿En qué páginas aparece?</label>
+                      <label className="lbl">{x.enQuePaginas}</label>
                       <textarea name="paginas" rows={4} defaultValue={p.paginas ?? ""}
-                                placeholder={"Vacío = en todo el sitio\n/laboral\n/servicios/*\n!/contacto"} />
+                                placeholder={x.ejemploPaginas} />
                       <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
-                        Una dirección por línea. <code>*</code> vale por cualquier cosa
-                        (<code>/blog/*</code>). Una línea que empieza con <code>!</code> la excluye
-                        (<code>!/contacto</code>). Si lo dejás vacío, aparece en todo el sitio.
+                        {x.reglasAyuda} <code>*</code> {x.reglasComodin} (<code>/blog/*</code>). {x.reglasExcluye} <code>!</code> {x.reglasExcluye2} (<code>!/contacto</code>). {x.reglasVacio}
                       </p>
 
                       <label className="check">
-                        <input type="checkbox" name="active" defaultChecked={p.active} /> Activo
+                        <input type="checkbox" name="active" defaultChecked={p.active} /> {x.activoCheck}
                       </label>
 
                       <div className="fila-alta" style={{ marginTop: ".5rem" }}>
-                        <button type="submit" className="btn">Guardar</button>
+                        <button type="submit" className="btn">{x.guardar}</button>
                       </div>
                     </form>
 
                     <form action={borrar} style={{ marginTop: ".75rem" }}>
                       <input type="hidden" name="id" value={p.id} />
-                      <button type="submit" className="btn ghost" style={{ fontSize: ".8rem" }}>Borrar</button>
+                      <button type="submit" className="btn ghost" style={{ fontSize: ".8rem" }}>{x.borrar}</button>
                     </form>
                   </details>
                 )}
@@ -182,35 +173,34 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
 
         {puedeEditar && (
           <div className="card">
-            <h3>Nuevo pop-up</h3>
+            <h3>{x.nuevoPopup}</h3>
             <form action={crear} className="ajustes">
-              <label className="lbl">Nombre</label>
-              <input name="name" placeholder="Home — salida" required />
+              <label className="lbl">{x.nombre}</label>
+              <input name="name" placeholder={x.ejemploNombrePopup} required />
 
-              <label className="lbl">Cuándo aparece</label>
+              <label className="lbl">{x.cuandoAparece}</label>
               <select name="trigger" defaultValue="delay:12">
-                {DISPARADORES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
+                {DISPARADORES.map((d) => <option key={d} value={d}>{x.disparadores[d]}</option>)}
               </select>
 
-              <label className="lbl">Texto del botón</label>
-              <input name="cta" placeholder="Consultá tu caso" />
+              <label className="lbl">{x.textoBoton}</label>
+              <input name="cta" placeholder={x.ctaPopupDefecto} />
 
-              <label className="lbl">Abre directo en</label>
+              <label className="lbl">{x.abreDirectoEn}</label>
               <select name="funnel_id" defaultValue="">
-                <option value="">Todas las áreas (menú)</option>
+                <option value="">{x.todasLasAreas}</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
 
-              <label className="lbl">¿En qué páginas aparece?</label>
+              <label className="lbl">{x.enQuePaginas}</label>
               <textarea name="paginas" rows={3}
-                        placeholder={"Vacío = en todo el sitio\n/laboral\n!/contacto"} />
+                        placeholder={x.ejemploPaginasCorto} />
 
-              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Crear</button>
+              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>{x.crear}</button>
             </form>
 
             <p className="muted" style={{ fontSize: ".8rem", marginTop: "1rem", lineHeight: 1.55 }}>
-              El código se pega una vez en el sitio del estudio. Después podés cambiar el disparador o el texto
-              desde acá sin volver a tocarlo.
+              {x.piePopup}
             </p>
           </div>
         )}

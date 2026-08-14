@@ -7,20 +7,10 @@ import {
 } from "@/lib/auth";
 import { clientIp } from "@/lib/ip";
 import { googleEnabled } from "@/lib/google";
+import { langDeCabecera, t as textos } from "@/lib/i18n";
 import "./login.css";
 
 export const dynamic = "force-dynamic";
-
-const ERRORES: Record<string, string> = {
-  cred: "Email o contraseña incorrectos.",
-  state: "La sesión de Google expiró. Probá de nuevo.",
-  google: "No pudimos conectar con Google. Probá de nuevo en un minuto.",
-  google_off: "El acceso con Google no está configurado en este servidor.",
-  email_no_verificado: "Tu cuenta de Google no tiene el email verificado.",
-  sin_invitacion: "Ese email no tiene acceso. Pedile una invitación al estudio.",
-  db: "No se pudo conectar con la base de datos. Abrí /api/health para ver qué está fallando.",
-  cambiada: "Listo, ya podés entrar con tu contraseña nueva.",
-};
 
 async function login(formData: FormData) {
   "use server";
@@ -72,18 +62,18 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
   if (await currentUser()) redirect("/panel");
   const { e, m } = await searchParams;
 
+  // Antes de la sesion no hay estudio del cual sacar el idioma, asi que lo pide
+  // el navegador.
+  const x = textos(langDeCabecera((await headers()).get("accept-language"))).auth;
   const minutos = Math.max(1, Number(m) || 1);
-  const error =
-    e === "freno"
-      ? `Demasiados intentos fallidos. Probá de nuevo en ${minutos} ${minutos === 1 ? "minuto" : "minutos"}.`
-      : ERRORES[e ?? ""];
+  const error = e === "freno" ? x.freno(minutos) : x.errores[e ?? ""];
 
   return (
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
           Right Lead
-          <small>Panel de consultas</small>
+          <small>{x.panelDeConsultas}</small>
         </div>
 
         {error && (
@@ -92,7 +82,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
             {e === "db" && (
               <>
                 {" "}
-                <a href="/api/health" style={{ color: "inherit", fontWeight: 600 }}>Ver el diagnóstico</a>
+                <a href="/api/health" style={{ color: "inherit", fontWeight: 600 }}>{x.verDiagnostico}</a>
               </>
             )}
           </p>
@@ -107,29 +97,28 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
                 <path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8l3-2.3z" />
                 <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z" />
               </svg>
-              Entrar con Google
+              {x.entrarConGoogle}
             </a>
-            <div className="auth-or"><span>o</span></div>
+            <div className="auth-or"><span>{x.o}</span></div>
           </>
         )}
 
         <form action={login}>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{x.email}</label>
           <input id="email" name="email" type="email" autoComplete="email" required autoFocus />
 
-          <label htmlFor="password">Contraseña</label>
+          <label htmlFor="password">{x.contrasena}</label>
           <input id="password" name="password" type="password" autoComplete="current-password" required />
 
-          <button type="submit">Entrar</button>
+          <button type="submit">{x.entrar}</button>
         </form>
 
         <p className="auth-link">
-          <a href="/recuperar">¿Olvidaste tu contraseña?</a>
+          <a href="/recuperar">{x.olvidaste}</a>
         </p>
 
         <p className="auth-foot">
-          El acceso es por invitación. Si tu estudio trabaja con nosotros y todavía no entrás,
-          escribinos y te damos de alta.
+          {x.loginPie}
         </p>
       </div>
     </div>

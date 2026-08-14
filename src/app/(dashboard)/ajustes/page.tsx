@@ -7,7 +7,7 @@ import { slugUrl } from "@/lib/forms";
 import { baseUrl } from "@/lib/base-url";
 import { SubirArchivo } from "@/components/Subir";
 import { almacenamientoListo, CLASES } from "@/lib/storage";
-import { IDIOMAS, esLang } from "@/lib/i18n";
+import { IDIOMAS, esLang, t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +52,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
   const { user, firm } = await requireOwner();
 
   const [actual] = await sql<Firm[]>`select * from firms where id = ${firm.id}`;
+  const x = textos(actual.lang).ajustes;
   const base = baseUrl().replace(/^https?:\/\//, "");
   const puedeSubir = almacenamientoListo();
 
@@ -59,34 +60,31 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
     <>
       <div className="head">
         <div>
-          <h1>Ajustes del estudio</h1>
-          <p>
-            Cómo se ve el formulario y a dónde llegan las consultas. Todo esto lo ve la persona antes de
-            escribir: es lo que hace que el formulario parezca del estudio y no de una app cualquiera.
-          </p>
+          <h1>{x.titulo}</h1>
+          <p>{x.bajada}</p>
         </div>
-        <Link href={`/f/${actual.slug}`} className="btn ghost" target="_blank">Ver página pública</Link>
+        <Link href={`/f/${actual.slug}`} className="btn ghost" target="_blank">{x.verPublica}</Link>
       </div>
 
       {guardado && (
         <div className="card" style={{ marginBottom: "1rem" }}>
-          <span className="pill good">Guardado</span>
+          <span className="pill good">{x.guardado}</span>
         </div>
       )}
 
       <div className="grid cols-2-1">
         <div className="card">
-          <h3>Identidad</h3>
+          <h3>{x.identidad}</h3>
           <form action={guardar} className="ajustes">
-            <label className="lbl" htmlFor="name">Nombre del estudio</label>
+            <label className="lbl" htmlFor="name">{x.nombreEstudio}</label>
             <input id="name" name="name" defaultValue={actual.name} required />
 
-            <label className="lbl" htmlFor="slug">Dirección pública</label>
+            <label className="lbl" htmlFor="slug">{x.direccionPublica}</label>
             {user.is_staff ? (
               <>
                 <input id="slug" name="slug" defaultValue={actual.slug} />
                 <p className="muted" style={{ fontSize: ".78rem", marginTop: ".4rem" }}>
-                  {base}/f/<strong>{actual.slug}</strong> — si la cambiás, los links viejos dejan de andar.
+                  {base}/f/<strong>{actual.slug}</strong> {x.slugAviso}
                 </p>
               </>
             ) : (
@@ -95,62 +93,47 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
               </p>
             )}
 
-            <label className="lbl" htmlFor="notify_email">A dónde llegan las consultas</label>
+            <label className="lbl" htmlFor="notify_email">{x.aDondeLlegan}</label>
             <input id="notify_email" name="notify_email" type="email"
-                   defaultValue={actual.notify_email ?? ""} placeholder="consultas@estudio.com.ar" />
+                   defaultValue={actual.notify_email ?? ""} placeholder={x.ejemploNotify} />
 
-            <label className="lbl" htmlFor="accent">Color principal</label>
+            <label className="lbl" htmlFor="accent">{x.colorPrincipal}</label>
             <input id="accent" name="accent" type="color" defaultValue={actual.accent} />
 
-            <label className="lbl" htmlFor="lang">Idioma del formulario</label>
+            <label className="lbl" htmlFor="lang">{x.idioma}</label>
             <select id="lang" name="lang" defaultValue={actual.lang}>
               {IDIOMAS.map((i) => <option key={i.code} value={i.code}>{i.nombre}</option>)}
             </select>
             <p className="muted" style={{ fontSize: ".78rem", marginTop: ".4rem", lineHeight: 1.5 }}>
-              En qué idioma le habla el formulario a los clientes del estudio, y en cuál le llegan
-              los mails. No cambia las preguntas que cargaste vos: esas quedan como las escribiste.
+              {x.idiomaAyuda}
             </p>
 
-            <SubirArchivo name="logo_url" clase="imagen" etiqueta="Logo" defaultValue={actual.logo_url ?? ""}
+            <SubirArchivo lang={actual.lang} name="logo_url" clase="imagen" etiqueta={x.logo}
+                          defaultValue={actual.logo_url ?? ""}
                           habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
-                          ayuda="Se ve arriba del formulario. Fondo transparente (png o svg) queda mejor." />
+                          ayuda={x.logoAyuda} />
 
-            <SubirArchivo name="hero_url" clase="imagen" etiqueta="Imagen de la página pública"
+            <SubirArchivo lang={actual.lang} name="hero_url" clase="imagen" etiqueta={x.imagenPublica}
                           defaultValue={actual.hero_url ?? ""}
                           habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
-                          ayuda="La foto grande de la izquierda. Apaisada y de buena calidad; si no cargás ninguna queda el color del estudio." />
+                          ayuda={x.imagenPublicaAyuda} />
 
-            <label className="lbl" htmlFor="intro">Texto de privacidad</label>
+            <label className="lbl" htmlFor="intro">{x.privacidad}</label>
             <textarea id="intro" name="intro" rows={4} defaultValue={actual.intro ?? ""}
-                      placeholder="Lo que nos contés es confidencial y solo lo ve el estudio." />
+                      placeholder={x.privacidadEjemplo} />
 
-            <button type="submit" className="btn" style={{ width: "100%", marginTop: ".9rem" }}>Guardar</button>
+            <button type="submit" className="btn" style={{ width: "100%", marginTop: ".9rem" }}>{x.guardar}</button>
           </form>
         </div>
 
         <div className="card">
-          <h3>Dónde se usa cada cosa</h3>
+          <h3>{x.dondeSeUsa}</h3>
           <ul className="ayuda">
-            <li>
-              <strong>Logo y color</strong> — arriba del formulario, en el pop-up y en el mail que le llega a
-              quien abandona a mitad de camino.
-            </li>
-            <li>
-              <strong>A dónde llegan las consultas</strong> — cada formulario completado se manda a esa
-              dirección con los datos de contacto y el origen de la visita. Si está vacío, la consulta igual
-              queda guardada en el panel.
-            </li>
-            <li>
-              <strong>Imagen de la página pública</strong> — la foto del costado en {base}/f/{actual.slug}.
-            </li>
-            <li>
-              <strong>Idioma</strong> — el formulario público, el pop-up, el clip y los mails al
-              cliente. El panel también lo sigue, así ves lo mismo que ve el estudio.
-            </li>
-            <li>
-              <strong>Texto de privacidad</strong> — el párrafo debajo del formulario. Es lo que baja la
-              desconfianza de dejar un teléfono.
-            </li>
+            <li><strong>{x.usoLogo}</strong> — {x.usoLogoDet}</li>
+            <li><strong>{x.usoNotify}</strong> — {x.usoNotifyDet}</li>
+            <li><strong>{x.usoImagen}</strong> — {x.usoImagenDet} {base}/f/{actual.slug}.</li>
+            <li><strong>{x.usoIdioma}</strong> — {x.usoIdiomaDet}</li>
+            <li><strong>{x.usoPrivacidad}</strong> — {x.usoPrivacidadDet}</li>
           </ul>
         </div>
       </div>

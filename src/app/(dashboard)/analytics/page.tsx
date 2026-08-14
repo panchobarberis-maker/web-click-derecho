@@ -3,16 +3,11 @@ import { activeFirm } from "@/lib/tenancy";
 import { totals, series, attribution, byFunnel, bySurface, campanas, dropoff, type Range } from "@/lib/analytics";
 import { LineChart, BarList, Tile } from "@/components/Charts";
 import { RangePicker } from "@/components/RangePicker";
-import { fmtShort, sourceLabel } from "@/lib/format";
+import { fmtShort, fmtNum, sourceLabel } from "@/lib/format";
+import { t as textos } from "@/lib/i18n";
 import { WorkflowPicker } from "@/components/WorkflowPicker";
 
 export const dynamic = "force-dynamic";
-
-const SURFACES: Record<string, string> = {
-  page: "Página de consultas",
-  popup: "Pop-up en el sitio",
-  clip: "Clip de video",
-};
 
 export default async function Analytics({
   searchParams,
@@ -22,6 +17,8 @@ export default async function Analytics({
   const params = await searchParams;
   const range = ((params.r as Range) ?? "30d") satisfies Range;
   const { firm } = await activeFirm();
+  const x = textos(firm.lang).stats;
+  const lang = firm.lang;
 
   // Todo junto: el embudo ya resuelve solo cual es el formulario, asi que la
   // lista no tiene que llegar antes y nada espera a nada.
@@ -37,7 +34,7 @@ export default async function Analytics({
     byFunnel(firm.id, range),
     bySurface(firm.id, range),
     campanas(firm.id, range),
-    dropoff(firm.id, params.wf || null, range),
+    dropoff(firm.id, params.wf || null, range, lang),
   ]);
 
   const wfId = params.wf || workflows[0]?.id;
@@ -46,40 +43,41 @@ export default async function Analytics({
     <>
       <div className="head">
         <div>
-          <h1>Analytics</h1>
-          <p>Cuánta gente llega al formulario, cuánta lo termina y en qué paso se cae.</p>
+          <h1>{x.analytics}</h1>
+          <p>{x.analyticsBajada}</p>
         </div>
         <div style={{ display: "flex", gap: ".6rem", alignItems: "center", flexWrap: "wrap" }}>
-          <RangePicker current={range} />
+          <RangePicker current={range} lang={lang} />
           {/*
             Descarga directa, sin JavaScript: es un link a una ruta que
             devuelve el archivo. Lleva el mismo rango que se está mirando, así
             lo exportado coincide con los números de la pantalla.
           */}
           <a href={`/export?r=${range}`} className="btn ghost" download>
-            Exportar a Excel
+            {x.exportar}
           </a>
         </div>
       </div>
 
       <div className="grid cols-4" style={{ marginBottom: "1rem" }}>
-        <Tile label="Visitas" value={t.visits.toLocaleString("es-AR")} />
-        <Tile label="Empezaron" value={t.starts.toLocaleString("es-AR")} sub={`${t.visits ? Math.round((t.starts / t.visits) * 100) : 0}% de las visitas`} />
-        <Tile label="Consultas enviadas" value={t.responses.toLocaleString("es-AR")} />
-        <Tile label="Conversión" value={`${t.conversion}%`} meter={t.conversion} sub="Consultas sobre visitas" />
+        <Tile label={x.visitas} value={fmtNum(t.visits, lang)} />
+        <Tile label={x.empezaron} value={fmtNum(t.starts, lang)} sub={x.deLasVisitas(t.visits ? Math.round((t.starts / t.visits) * 100) : 0)} />
+        <Tile label={x.consultasEnviadas} value={fmtNum(t.responses, lang)} />
+        <Tile label={x.conversion} value={`${t.conversion}%`} meter={t.conversion} sub={x.sobreVisitas} />
       </div>
 
       <div className="card" style={{ marginBottom: "1rem" }}>
-        <h3>Visitas y consultas</h3>
+        <h3>{x.visitasYConsultas}</h3>
         <LineChart
-          data={s.map((r) => ({ label: fmtShort(r.bucket), visits: Number(r.visits), responses: Number(r.responses) }))}
+          lang={lang}
+          data={s.map((r) => ({ label: fmtShort(r.bucket, lang), visits: Number(r.visits), responses: Number(r.responses) }))}
         />
       </div>
 
       <div className="grid cols-2-1" style={{ marginBottom: "1rem" }}>
         <div className="card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", gap: "1rem", flexWrap: "wrap" }}>
-            <h3 style={{ margin: 0 }}>Dónde se cae la gente</h3>
+            <h3 style={{ margin: 0 }}>{x.dondeSeCae}</h3>
             <WorkflowPicker workflows={workflows} current={wfId ?? ""} />
           </div>
           {drop ? (
@@ -92,55 +90,54 @@ export default async function Analytics({
                 }))}
               />
               <p className="muted" style={{ fontSize: ".82rem", marginTop: "1rem" }}>
-                Cada barra es cuánta gente llegó hasta ahí. La caída más grande es el paso a rediseñar.
+                {x.cadaBarra}
               </p>
             </>
           ) : (
-            <p className="empty">Elegí un formulario.</p>
+            <p className="empty">{x.elegiFormulario}</p>
           )}
         </div>
 
         <div className="card">
-          <h3>De dónde vienen</h3>
+          <h3>{x.deDondeVienen}</h3>
           <BarList
             rows={attr.map((a) => ({
-              label: sourceLabel(a.source),
+              label: sourceLabel(a.source, lang),
               value: Number(a.n),
-              caption: `${Number(a.consultas)} de ${Number(a.n)}`,
+              caption: x.deTotal(Number(a.consultas), Number(a.n)),
             }))}
           />
           <p className="muted" style={{ fontSize: ".82rem", marginTop: "1rem" }}>
-            Consultas sobre visitas de cada origen.
+            {x.sobreVisitasOrigen}
           </p>
         </div>
       </div>
 
       <div className="card" style={{ marginBottom: "1rem" }}>
-        <h3>Campañas</h3>
+        <h3>{x.campanas}</h3>
         <p className="muted" style={{ fontSize: ".86rem", marginTop: "-.4rem", marginBottom: "1rem", lineHeight: 1.55 }}>
-          Cada consulta guarda los <code>utm_</code> de la página donde se abrió el formulario, aunque esté
-          embebido en el sitio del estudio. Acá se ve qué pauta trae consultas y no solo clics.
+          {x.campanasAyuda1} <code>utm_</code> {x.campanasAyuda2}
         </p>
 
         {camps.length === 0 ? (
-          <p className="empty">Todavía no hay visitas en este período.</p>
+          <p className="empty">{x.sinVisitas}</p>
         ) : (
           <div className="scroll-x">
             <table>
               <thead>
                 <tr>
-                  <th>Fuente</th>
-                  <th>Medio</th>
-                  <th>Campaña</th>
-                  <th className="num">Visitas</th>
-                  <th className="num">Consultas</th>
-                  <th className="num">Conversión</th>
+                  <th>{x.fuente}</th>
+                  <th>{x.medio}</th>
+                  <th>{x.campana}</th>
+                  <th className="num">{x.visitas}</th>
+                  <th className="num">{x.consultas}</th>
+                  <th className="num">{x.conversion}</th>
                 </tr>
               </thead>
               <tbody>
                 {camps.map((c) => (
                   <tr key={`${c.fuente}|${c.medio}|${c.campana}`}>
-                    <td style={{ fontWeight: 500 }}>{sourceLabel(c.fuente)}</td>
+                    <td style={{ fontWeight: 500 }}>{sourceLabel(c.fuente, lang)}</td>
                     <td className="muted">{c.medio}</td>
                     <td>{c.campana}</td>
                     <td className="num">{Number(c.visitas)}</td>
@@ -156,15 +153,15 @@ export default async function Analytics({
 
       <div className="grid cols-2-1">
         <div className="card">
-          <h3>Por área de práctica</h3>
+          <h3>{x.porArea}</h3>
           <div className="scroll-x">
             <table>
               <thead>
                 <tr>
-                  <th>Área</th>
-                  <th className="num">Visitas</th>
-                  <th className="num">Consultas</th>
-                  <th className="num">Conversión</th>
+                  <th>{x.area}</th>
+                  <th className="num">{x.visitas}</th>
+                  <th className="num">{x.consultas}</th>
+                  <th className="num">{x.conversion}</th>
                 </tr>
               </thead>
               <tbody>
@@ -185,20 +182,20 @@ export default async function Analytics({
         </div>
 
         <div className="card">
-          <h3>Por dónde entraron</h3>
+          <h3>{x.porDondeEntraron}</h3>
           <div className="scroll-x">
             <table>
               <thead>
                 <tr>
-                  <th>Superficie</th>
-                  <th className="num">Visitas</th>
-                  <th className="num">Conv.</th>
+                  <th>{x.superficie}</th>
+                  <th className="num">{x.visitas}</th>
+                  <th className="num">{x.conv}</th>
                 </tr>
               </thead>
               <tbody>
                 {surfaces.map((s) => (
                   <tr key={s.surface}>
-                    <td>{SURFACES[s.surface] ?? s.surface}</td>
+                    <td>{x.superficies[s.surface as keyof typeof x.superficies] ?? s.surface}</td>
                     <td className="num">{Number(s.visits)}</td>
                     <td className="num">{Number(s.conversion)}%</td>
                   </tr>

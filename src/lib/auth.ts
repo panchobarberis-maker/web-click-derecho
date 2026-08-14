@@ -4,6 +4,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { sql } from "./db";
 import { SESSION_COOKIE } from "./cookie-names";
+import { t, type Lang } from "./i18n";
 
 const scrypt = promisify(scryptCb) as (pw: string | Buffer, salt: Buffer, len: number, opts: object) => Promise<Buffer>;
 
@@ -141,7 +142,7 @@ export const sesionConEstudios = cache(async function sesionConEstudios(): Promi
            u.is_staff     as u_is_staff,
            f.id           as f_id,
            f.name, f.slug, f.notify_email, f.accent,
-           f.logo_url, f.hero_url, f.intro, f.show_on_home,
+           f.logo_url, f.hero_url, f.intro, f.show_on_home, f.lang,
            case when u.is_staff then 'staff' else m.role end as role
     from auth_sessions s
     join users u on u.id = s.user_id
@@ -202,9 +203,10 @@ export async function applyPasswordReset(reset: Reset, nueva: string): Promise<v
 }
 
 /** Reglas mínimas de la contraseña. Devuelve el problema, o null si está bien. */
-export function revisarContrasena(nueva: string, repetida: string): string | null {
-  if (nueva.length < 10) return "La contraseña tiene que tener al menos 10 caracteres.";
-  if (nueva !== repetida) return "Las dos contraseñas no coinciden.";
+export function revisarContrasena(nueva: string, repetida: string, lang: Lang = "es"): string | null {
+  const x = t(lang).auth;
+  if (nueva.length < 10) return x.claveCorta;
+  if (nueva !== repetida) return x.clavesDistintas;
   return null;
 }
 

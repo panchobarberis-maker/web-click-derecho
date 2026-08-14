@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { sql, type Funnel } from "@/lib/db";
 import { activeFirm, requireOwner } from "@/lib/tenancy";
 import { pasoDeContacto, slugUrl } from "@/lib/forms";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -91,6 +92,7 @@ export default async function AreaDetalle({ params }: { params: Promise<{ funnel
   const { funnel: slug } = await params;
   const { firm, funnel } = await buscarArea(slug);
   const puedeEditar = firm.role !== "member";
+  const x = textos(firm.lang).areas;
 
   const casos = await sql<Caso[]>`
     select w.id, w.name, w.slug, w.active,
@@ -105,35 +107,29 @@ export default async function AreaDetalle({ params }: { params: Promise<{ funnel
       <div className="head">
         <div>
           <Link href="/funnels" className="muted" style={{ fontSize: ".88rem", textDecoration: "none" }}>
-            ← Áreas
+            {x.volverAreas}
           </Link>
           <h1 style={{ marginTop: ".5rem" }}>{funnel.name}</h1>
-          <p>
-            Los casos que atiende esta área. Cada uno tiene su propio formulario, con las preguntas que
-            correspondan.
-          </p>
+          <p>{x.detalleBajada}</p>
         </div>
         <Link href={`/f/${firm.slug}/${funnel.slug}`} className="btn ghost" target="_blank">
-          Ver esta área
+          {x.verArea}
         </Link>
       </div>
 
       <div className="grid cols-2-1">
         <div className="card">
-          <h3>Casos</h3>
+          <h3>{x.casos}</h3>
 
           {casos.length === 0 ? (
-            <p className="empty">
-              Todavía no hay casos. Agregá el primero: &ldquo;Despido sin causa&rdquo;, &ldquo;Divorcio&rdquo;, lo
-              que corresponda.
-            </p>
+            <p className="empty">{x.sinCasos}</p>
           ) : (
             <table>
               <thead>
                 <tr>
-                  <th>Caso</th>
-                  <th className="num">Pasos</th>
-                  <th className="num">Consultas</th>
+                  <th>{x.caso}</th>
+                  <th className="num">{x.pasos}</th>
+                  <th className="num">{x.consultas}</th>
                   <th />
                 </tr>
               </thead>
@@ -144,7 +140,7 @@ export default async function AreaDetalle({ params }: { params: Promise<{ funnel
                       <Link href={`/funnels/${funnel.slug}/${c.slug}`} style={{ fontWeight: 500 }}>
                         {c.name}
                       </Link>
-                      {!c.active && <div className="muted" style={{ fontSize: ".78rem" }}>Desactivado</div>}
+                      {!c.active && <div className="muted" style={{ fontSize: ".78rem" }}>{x.desactivado}</div>}
                     </td>
                     <td className="num">{c.pasos}</td>
                     <td className="num">{c.consultas}</td>
@@ -153,7 +149,7 @@ export default async function AreaDetalle({ params }: { params: Promise<{ funnel
                         <form action={borrarCaso}>
                           <input type="hidden" name="id" value={c.id} />
                           <button type="submit" className="btn ghost" style={{ padding: ".3rem .8rem", fontSize: ".78rem" }}>
-                            Borrar
+                            {x.borrar}
                           </button>
                         </form>
                       )}
@@ -167,43 +163,43 @@ export default async function AreaDetalle({ params }: { params: Promise<{ funnel
           {puedeEditar && (
             <form action={crearCaso} className="fila-alta">
               <input type="hidden" name="funnelId" value={funnel.id} />
-              <input name="name" placeholder="Despido sin causa" required aria-label="Nombre del caso" />
-              <button type="submit" className="btn">Agregar caso</button>
+              <input name="name" placeholder={x.ejemploCaso} required aria-label={x.nombreDelCaso} />
+              <button type="submit" className="btn">{x.agregarCaso}</button>
             </form>
           )}
         </div>
 
         {puedeEditar && (
           <div className="card">
-            <h3>Ajustes del área</h3>
+            <h3>{x.ajustesArea}</h3>
             <form action={guardarArea} className="ajustes">
               <input type="hidden" name="id" value={funnel.id} />
 
-              <label className="lbl" htmlFor="name">Nombre</label>
+              <label className="lbl" htmlFor="name">{x.nombre}</label>
               <input id="name" name="name" defaultValue={funnel.name} required />
 
-              <label className="lbl" htmlFor="color">Color</label>
+              <label className="lbl" htmlFor="color">{x.color}</label>
               <input id="color" name="color" type="color" defaultValue={funnel.color} />
 
               <label className="check">
                 <input type="checkbox" name="active" defaultChecked={funnel.active} />
-                Activa
+                {x.activa}
               </label>
               <label className="check">
                 <input type="checkbox" name="on_storefront" defaultChecked={funnel.on_storefront} />
-                Visible en la página pública
+                {x.visiblePublica}
               </label>
 
-              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Guardar</button>
+              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>{x.guardar}</button>
             </form>
 
             <form action={borrarArea} style={{ marginTop: "1.5rem" }}>
               <input type="hidden" name="id" value={funnel.id} />
               <button type="submit" className="btn ghost" style={{ width: "100%", fontSize: ".84rem" }}>
-                Borrar el área
+                {x.borrarArea}
               </button>
               <p className="muted" style={{ fontSize: ".78rem", marginTop: ".6rem", lineHeight: 1.5 }}>
-                Se borran sus casos y formularios. Las consultas ya recibidas se conservan.
+                {x.borrarAreaAyuda}
               </p>
             </form>
           </div>

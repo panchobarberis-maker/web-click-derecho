@@ -2,26 +2,26 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
+import { t as textos, type Lang } from "@/lib/i18n";
 
-const OPTS: { key: string; label: string }[] = [
-  { key: "7d", label: "7 días" },
-  { key: "30d", label: "30 días" },
-  { key: "90d", label: "90 días" },
-  { key: "all", label: "Todo" },
-];
+const CLAVES = ["7d", "30d", "90d", "all"] as const;
 
-export function RangePicker({ current }: { current: string }) {
+export function RangePicker({ current, lang = "es" }: { current: string; lang?: Lang }) {
   const path = usePathname();
   const params = useSearchParams();
+  const x = textos(lang).comp;
+  const nombre: Record<string, string> = {
+    "7d": x.rango7, "30d": x.rango30, "90d": x.rango90, all: x.rangoTodo,
+  };
 
   return (
     <div className="ranges">
-      {OPTS.map((o) => {
+      {CLAVES.map((clave) => {
         const next = new URLSearchParams(params);
-        next.set("r", o.key);
+        next.set("r", clave);
         return (
-          <Link key={o.key} href={`${path}?${next}`} aria-current={current === o.key ? "page" : undefined}>
-            {o.label}
+          <Link key={clave} href={`${path}?${next}`} aria-current={current === clave ? "page" : undefined}>
+            {nombre[clave]}
           </Link>
         );
       })}

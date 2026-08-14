@@ -7,13 +7,10 @@ import { RangePicker } from "@/components/RangePicker";
 import { Snippet } from "@/components/Snippet";
 import { SubirArchivo } from "@/components/Subir";
 import { almacenamientoListo, CLASES } from "@/lib/storage";
+import { fmtNum } from "@/lib/format";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
-
-const AYUDA_VIDEO =
-  `Vertical, de 15 a 20 segundos, hasta ${CLASES.video.maxMb} MB. Cuanto más liviano, más rápido arranca en el sitio del estudio.`;
-const AYUDA_PORTADA =
-  `Es lo que se ve mientras el video carga. Vertical, hasta ${CLASES.imagen.maxMb} MB.`;
 
 async function crear(formData: FormData) {
   "use server";
@@ -21,12 +18,13 @@ async function crear(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const video = String(formData.get("video_url") ?? "").trim();
   if (!name || !video) return;
+  const cta = textos(firm.lang).widgets.ctaClipDefecto;
 
   await sql`
     insert into clips (firm_id, name, video_url, poster_url, cta, funnel_id, paginas, autoplay)
     values (${firm.id}, ${name}, ${video},
             ${String(formData.get("poster_url") ?? "").trim() || null},
-            ${String(formData.get("cta") ?? "").trim() || "Empezar"},
+            ${String(formData.get("cta") ?? "").trim() || cta},
             ${String(formData.get("funnel_id") ?? "") || null},
             ${String(formData.get("paginas") ?? "").trim() || null},
             ${formData.get("autoplay") === "on"})`;
@@ -36,12 +34,13 @@ async function crear(formData: FormData) {
 async function guardar(formData: FormData) {
   "use server";
   const { firm } = await requireOwner();
+  const cta = textos(firm.lang).widgets.ctaClipDefecto;
   await sql`
     update clips set
       name       = ${String(formData.get("name") ?? "").trim()},
       video_url  = ${String(formData.get("video_url") ?? "").trim()},
       poster_url = ${String(formData.get("poster_url") ?? "").trim() || null},
-      cta        = ${String(formData.get("cta") ?? "").trim() || "Empezar"},
+      cta        = ${String(formData.get("cta") ?? "").trim() || cta},
       funnel_id  = ${String(formData.get("funnel_id") ?? "") || null},
       paginas    = ${String(formData.get("paginas") ?? "").trim() || null},
       autoplay   = ${formData.get("autoplay") === "on"},
@@ -66,6 +65,7 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
   const range = (((await searchParams).r as Range) ?? "30d") satisfies Range;
   const { firm } = await activeFirm();
   const puedeEditar = firm.role !== "member";
+  const x = textos(firm.lang).widgets;
 
   const [clips, areas, stats] = await Promise.all([
     sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas, autoplay from clips
@@ -82,20 +82,17 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
     <>
       <div className="head">
         <div>
-          <h1>Clips</h1>
-          <p>
-            Un video corto fijo en una esquina del sitio. Al tocarlo abre el formulario. Sirve para poner la cara
-            del estudio antes de que la persona escriba nada.
-          </p>
+          <h1>{x.clips}</h1>
+          <p>{x.clipsBajada}</p>
         </div>
-        <RangePicker current={range} />
+        <RangePicker current={range} lang={firm.lang} />
       </div>
 
       <div className="grid cols-2-1">
         <div style={{ display: "grid", gap: "1rem" }}>
           {clips.length === 0 && (
             <div className="card">
-              <p className="empty">Todavía no hay clips. Creá el primero acá al lado.</p>
+              <p className="empty">{x.sinClips}</p>
             </div>
           )}
 
@@ -106,87 +103,81 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                 <div className="widget-head">
                   <div>
                     <h3>{c.name}</h3>
-                    <span className={c.active ? "pill good" : "pill"}>{c.active ? "Activo" : "Pausado"}</span>
+                    <span className={c.active ? "pill good" : "pill"}>{c.active ? x.activo : x.pausado}</span>
                   </div>
                   <div className="widget-stats">
-                    <div><strong>{(s?.impresiones ?? 0).toLocaleString("es-AR")}</strong><span>se mostró</span></div>
-                    <div><strong>{s?.clicks ?? 0}</strong><span>aperturas</span></div>
-                    <div><strong>{s?.responses ?? 0}</strong><span>consultas</span></div>
-                    <div className="tasa"><strong>{s?.apertura ?? 0}%</strong><span>abre</span></div>
-                    <div className="tasa"><strong>{s?.conversion ?? 0}%</strong><span>convierte</span></div>
+                    <div><strong>{fmtNum(s?.impresiones ?? 0, firm.lang)}</strong><span>{x.seMostro}</span></div>
+                    <div><strong>{s?.clicks ?? 0}</strong><span>{x.aperturas}</span></div>
+                    <div><strong>{s?.responses ?? 0}</strong><span>{x.consultas}</span></div>
+                    <div className="tasa"><strong>{s?.apertura ?? 0}%</strong><span>{x.abre}</span></div>
+                    <div className="tasa"><strong>{s?.conversion ?? 0}%</strong><span>{x.convierte}</span></div>
                   </div>
                 </div>
 
                 {(s?.impresiones ?? 0) > 0 && (
-                  <p className="resumen-widget">
-                    De cada 100 personas que vieron este clip,{" "}
-                    <strong>{Math.round((100 * (s?.responses ?? 0)) / (s?.impresiones || 1))} dejaron una consulta</strong>.
-                  </p>
+                  <p className="resumen-widget">{x.resumen(Math.round((100 * (s?.responses ?? 0)) / (s?.impresiones || 1)), x.unClip)}</p>
                 )}
 
-                <Snippet code={`<script src="${base}/w.js?clip=${c.id}"></script>`} />
+                <Snippet code={`<script src="${base}/w.js?clip=${c.id}"></script>`} lang={firm.lang} />
 
                 <a href={`/preview/clip/${c.id}`} target="_blank" className="btn ghost"
                    style={{ marginTop: ".9rem", padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
-                  Ver cómo queda
+                  {x.verComoQueda}
                 </a>
 
                 {puedeEditar && (
                   <details className="ajuste">
-                    <summary>Ajustes</summary>
+                    <summary>{x.ajustes}</summary>
                     <form action={guardar} className="ajustes">
                       <input type="hidden" name="id" value={c.id} />
 
-                      <label className="lbl">Nombre</label>
+                      <label className="lbl">{x.nombre}</label>
                       <input name="name" defaultValue={c.name} required />
 
-                      <SubirArchivo name="video_url" clase="video" etiqueta="Video" defaultValue={c.video_url}
-                                    habilitado={puedeSubir} maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
+                      <SubirArchivo lang={firm.lang} name="video_url" clase="video" etiqueta={x.video} defaultValue={c.video_url}
+                                    habilitado={puedeSubir} maxMb={CLASES.video.maxMb} ayuda={x.ayudaVideo(CLASES.video.maxMb)} />
 
-                      <SubirArchivo name="poster_url" clase="imagen" etiqueta="Imagen de portada (opcional)"
+                      <SubirArchivo lang={firm.lang} name="poster_url" clase="imagen" etiqueta={x.portada}
                                     defaultValue={c.poster_url ?? ""}
                                     habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb}
-                                    ayuda={AYUDA_PORTADA} vistaPrevia />
+                                    ayuda={x.ayudaPortada(CLASES.imagen.maxMb)} vistaPrevia />
 
-                      <label className="lbl">Texto del botón</label>
+                      <label className="lbl">{x.textoBoton}</label>
                       <input name="cta" defaultValue={c.cta} />
 
-                      <label className="lbl">Abre directo en</label>
+                      <label className="lbl">{x.abreDirectoEn}</label>
                       <select name="funnel_id" defaultValue={c.funnel_id ?? ""}>
-                        <option value="">Todas las áreas (menú)</option>
+                        <option value="">{x.todasLasAreas}</option>
                         {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                       </select>
 
-                      <label className="lbl">¿En qué páginas aparece?</label>
+                      <label className="lbl">{x.enQuePaginas}</label>
                       <textarea name="paginas" rows={4} defaultValue={c.paginas ?? ""}
-                                placeholder={"Vacío = en todo el sitio\n/laboral\n/servicios/*\n!/contacto"} />
+                                placeholder={x.ejemploPaginas} />
                       <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
-                        Una dirección por línea. <code>*</code> vale por cualquier cosa
-                        (<code>/blog/*</code>). Una línea que empieza con <code>!</code> la excluye
-                        (<code>!/contacto</code>). Si lo dejás vacío, aparece en todo el sitio.
+                        {x.reglasAyuda} <code>*</code> {x.reglasComodin} (<code>/blog/*</code>). {x.reglasExcluye} <code>!</code> {x.reglasExcluye2} (<code>!/contacto</code>). {x.reglasVacio}
                       </p>
 
                       <label className="check">
                         <input type="checkbox" name="autoplay" defaultChecked={c.autoplay} />
-                        Arranca solo, en silencio
+                        {x.arrancaSolo}
                       </label>
                       <p className="muted" style={{ fontSize: ".76rem", marginTop: "-.2rem", lineHeight: 1.5 }}>
-                        Así se ve el video andando apenas entran, que es para lo que sirve.
-                        Destildalo solo si preferís que quede quieto con un botón de play.
+                        {x.arrancaAyuda}
                       </p>
 
                       <label className="check">
-                        <input type="checkbox" name="active" defaultChecked={c.active} /> Activo
+                        <input type="checkbox" name="active" defaultChecked={c.active} /> {x.activoCheck}
                       </label>
 
                       <div className="fila-alta" style={{ marginTop: ".5rem" }}>
-                        <button type="submit" className="btn">Guardar</button>
+                        <button type="submit" className="btn">{x.guardar}</button>
                       </div>
                     </form>
 
                     <form action={borrar} style={{ marginTop: ".75rem" }}>
                       <input type="hidden" name="id" value={c.id} />
-                      <button type="submit" className="btn ghost" style={{ fontSize: ".8rem" }}>Borrar</button>
+                      <button type="submit" className="btn ghost" style={{ fontSize: ".8rem" }}>{x.borrar}</button>
                     </form>
                   </details>
                 )}
@@ -197,43 +188,41 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
 
         {puedeEditar && (
           <div className="card">
-            <h3>Nuevo clip</h3>
+            <h3>{x.nuevoClip}</h3>
             <form action={crear} className="ajustes">
-              <label className="lbl">Nombre</label>
-              <input name="name" placeholder="Home — presentación" required />
+              <label className="lbl">{x.nombre}</label>
+              <input name="name" placeholder={x.ejemploNombreClip} required />
 
-              <SubirArchivo name="video_url" clase="video" etiqueta="Video" habilitado={puedeSubir}
-                            maxMb={CLASES.video.maxMb} ayuda={AYUDA_VIDEO} />
+              <SubirArchivo lang={firm.lang} name="video_url" clase="video" etiqueta={x.video} habilitado={puedeSubir}
+                            maxMb={CLASES.video.maxMb} ayuda={x.ayudaVideo(CLASES.video.maxMb)} />
 
-              <SubirArchivo name="poster_url" clase="imagen" etiqueta="Imagen de portada (opcional)"
+              <SubirArchivo lang={firm.lang} name="poster_url" clase="imagen" etiqueta={x.portada}
                             habilitado={puedeSubir}
-                            maxMb={CLASES.imagen.maxMb} ayuda={AYUDA_PORTADA} vistaPrevia />
+                            maxMb={CLASES.imagen.maxMb} ayuda={x.ayudaPortada(CLASES.imagen.maxMb)} vistaPrevia />
 
-              <label className="lbl">Texto del botón</label>
-              <input name="cta" placeholder="Empezar" />
+              <label className="lbl">{x.textoBoton}</label>
+              <input name="cta" placeholder={x.ctaClipDefecto} />
 
-              <label className="lbl">Abre directo en</label>
+              <label className="lbl">{x.abreDirectoEn}</label>
               <select name="funnel_id" defaultValue="">
-                <option value="">Todas las áreas (menú)</option>
+                <option value="">{x.todasLasAreas}</option>
                 {areas.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
               </select>
 
-              <label className="lbl">¿En qué páginas aparece?</label>
+              <label className="lbl">{x.enQuePaginas}</label>
               <textarea name="paginas" rows={3}
-                        placeholder={"Vacío = en todo el sitio\n/laboral\n!/contacto"} />
+                        placeholder={x.ejemploPaginasCorto} />
 
               <label className="check">
                 <input type="checkbox" name="autoplay" defaultChecked />
-                Arranca solo, en silencio
+                {x.arrancaSolo}
               </label>
 
-              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>Crear</button>
+              <button type="submit" className="btn" style={{ width: "100%", marginTop: ".5rem" }}>{x.crear}</button>
             </form>
 
             <p className="muted" style={{ fontSize: ".8rem", marginTop: "1rem", lineHeight: 1.55 }}>
-              {puedeSubir
-                ? "Subís el video y queda hospedado con nosotros. Vertical y de 15 a 20 segundos es lo que mejor funciona."
-                : "La subida no está configurada en este servidor: por ahora el video lo hospedás donde quieras y pegás la dirección."}
+              {puedeSubir ? x.pieClip : x.pieClipSinSubida}
             </p>
           </div>
         )}

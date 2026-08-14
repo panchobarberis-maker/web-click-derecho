@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { t as textos, type Lang } from "@/lib/i18n";
 
 /** Bloque de código con botón de copiar: el snippet se copia, no se transcribe. */
-export function Snippet({ code }: { code: string }) {
+export function Snippet({ code, lang = "es" }: { code: string; lang?: Lang }) {
+  const x = textos(lang).widgets;
   const [copiado, setCopiado] = useState(false);
 
   return (
@@ -19,7 +21,7 @@ export function Snippet({ code }: { code: string }) {
           });
         }}
       >
-        {copiado ? "Copiado" : "Copiar"}
+        {copiado ? x.copiado : x.copiar}
       </button>
     </div>
   );

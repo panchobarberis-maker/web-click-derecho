@@ -1,4 +1,5 @@
 import { sql } from "./db";
+import { t, type Lang } from "./i18n";
 
 /**
  * Estado de puesta en marcha de un estudio.
@@ -62,37 +63,32 @@ export async function estadoDeTodos(): Promise<Map<string, Estado>> {
  * El checklist. El primer paso ya no es "crear el estudio": si se esta viendo
  * esto, el estudio existe. Lo que falta es que tenga cara propia.
  */
-export function pasosDe(e: Estado, firmSlug: string): Paso[] {
+export function pasosDe(e: Estado, firmSlug: string, lang: Lang = "es"): Paso[] {
+  const x = t(lang).comp;
   return [
     {
-      titulo: "Ponerle la marca del estudio",
-      detalle: "Logo, color y el texto de privacidad que ve la persona antes de escribir.",
-      href: "/ajustes", accion: "Cargar", listo: e.marca,
+      titulo: x.pasoMarca, detalle: x.pasoMarcaDet,
+      href: "/ajustes", accion: x.pasoMarcaAcc, listo: e.marca,
     },
     {
-      titulo: "Cargar las áreas de práctica",
-      detalle: "Los temas que atiende el estudio: laboral, familia, sucesiones.",
-      href: "/funnels", accion: "Cargar áreas", listo: e.areas > 0,
+      titulo: x.pasoAreas, detalle: x.pasoAreasDet,
+      href: "/funnels", accion: x.pasoAreasAcc, listo: e.areas > 0,
     },
     {
-      titulo: "Armar los formularios",
-      detalle: "Un caso concreto por área, con sus preguntas propias.",
-      href: "/funnels", accion: "Armar", listo: e.casos > 0,
+      titulo: x.pasoFormularios, detalle: x.pasoFormulariosDet,
+      href: "/funnels", accion: x.pasoFormulariosAcc, listo: e.casos > 0,
     },
     {
-      titulo: "Instalarlo en el sitio del estudio",
-      detalle: "Un pop-up o un clip, con una línea de código.",
-      href: "/popups", accion: "Crear un pop-up", listo: e.widgets > 0,
+      titulo: x.pasoInstalar, detalle: x.pasoInstalarDet,
+      href: "/popups", accion: x.pasoInstalarAcc, listo: e.widgets > 0,
     },
     {
-      titulo: "Dar acceso al estudio",
-      detalle: "Invitar a quien va a atender las consultas.",
-      href: "/equipo", accion: "Invitar", listo: e.equipo > 0,
+      titulo: x.pasoEquipo, detalle: x.pasoEquipoDet,
+      href: "/equipo", accion: x.pasoEquipoAcc, listo: e.equipo > 0,
     },
     {
-      titulo: "Recibir la primera consulta real",
-      detalle: "Probá el formulario vos mismo para ver el circuito completo.",
-      href: `/f/${firmSlug}`, accion: "Probar el formulario", listo: e.visitas > 0,
+      titulo: x.pasoPrimera, detalle: x.pasoPrimeraDet,
+      href: `/f/${firmSlug}`, accion: x.pasoPrimeraAcc, listo: e.visitas > 0,
     },
   ];
 }

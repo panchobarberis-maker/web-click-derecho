@@ -1,19 +1,20 @@
+import { headers } from "next/headers";
+import { langDeCabecera, t as textos } from "@/lib/i18n";
 import "../login/login.css";
 
-export default function SinAcceso() {
+export default async function SinAcceso() {
+  const x = textos(langDeCabecera((await headers()).get("accept-language"))).auth;
+
   return (
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
           Right Lead
-          <small>Sin acceso</small>
+          <small>{x.sinAcceso}</small>
         </div>
-        <p className="auth-hint">
-          Tu cuenta existe pero todavía no está asociada a ningún estudio.
-          Pedile a quien te invitó que te dé acceso, o escribinos.
-        </p>
+        <p className="auth-hint">{x.sinAccesoCuerpo}</p>
         <form action="/api/auth/logout" method="post">
-          <button type="submit">Cerrar sesión</button>
+          <button type="submit">{x.cerrarSesion}</button>
         </form>
       </div>
     </div>

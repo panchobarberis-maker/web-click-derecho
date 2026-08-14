@@ -1,18 +1,22 @@
 import type { Field, Step } from "./db";
-import type { Lang } from "./i18n";
+import { t, type Lang } from "./i18n";
 
-export const TIPOS: { value: Field["type"]; label: string }[] = [
-  { value: "text", label: "Texto corto" },
-  { value: "textarea", label: "Texto largo" },
-  { value: "email", label: "Email" },
-  { value: "tel", label: "Teléfono" },
-  { value: "date", label: "Fecha" },
-  { value: "select", label: "Lista desplegable" },
-  { value: "radio", label: "Opciones (una sola)" },
-  { value: "checkbox", label: "Casilla de confirmación" },
+/** El orden en que se ofrecen; el nombre de cada uno lo pone el diccionario. */
+export const TIPOS: Field["type"][] = [
+  "text", "textarea", "email", "tel", "date", "select", "radio", "checkbox",
 ];
 
 export const CON_OPCIONES = new Set<Field["type"]>(["select", "radio"]);
+
+/**
+ * Si una casilla quedo tildada.
+ *
+ * El valor que se guarda es el texto que vio la persona, y eso cambia con el
+ * idioma del formulario: "Sí" en uno, "Yes" en el otro. Comparar contra uno
+ * solo dejaba el consentimiento en false para todos los estudios en ingles.
+ */
+const TILDADO = new Set(["sí", "si", "yes", "true", "on", "1"]);
+export const esSi = (v: unknown) => TILDADO.has(String(v ?? "").trim().toLowerCase());
 
 /** Claves que el panel y el mail al estudio tratan de forma especial. */
 export const CLAVES_CONTACTO = ["first_name", "last_name", "email", "phone", "consent"] as const;
@@ -36,27 +40,28 @@ export const slugUrl = (texto: string) => slugify(texto).replace(/_/g, "-") || "
  *
  * Devuelve la lista de problemas; vacía significa que se puede guardar.
  */
-export function validarFormulario(steps: Step[]): string[] {
+export function validarFormulario(steps: Step[], lang: Lang = "es"): string[] {
+  const x = t(lang).editor;
   const problemas: string[] = [];
 
-  if (steps.length === 0) return ["El formulario necesita al menos un paso."];
+  if (steps.length === 0) return [x.valAlMenosUnPaso];
 
   const vistas = new Set<string>();
   let tieneEmail = false;
   let emailEnPasoUno = false;
 
   steps.forEach((paso, i) => {
-    if (!paso.title?.trim()) problemas.push(`El paso ${i + 1} no tiene título.`);
-    if (paso.fields.length === 0) problemas.push(`El paso ${i + 1} no tiene ninguna pregunta.`);
+    if (!paso.title?.trim()) problemas.push(x.valSinTitulo(i + 1));
+    if (paso.fields.length === 0) problemas.push(x.valSinPreguntas(i + 1));
 
     for (const f of paso.fields) {
-      if (!f.label?.trim()) problemas.push(`Hay una pregunta sin texto en el paso ${i + 1}.`);
-      if (!f.key) problemas.push(`La pregunta "${f.label}" no tiene clave.`);
-      else if (vistas.has(f.key)) problemas.push(`La clave "${f.key}" está repetida: cada pregunta necesita una distinta.`);
+      if (!f.label?.trim()) problemas.push(x.valPreguntaSinTexto(i + 1));
+      if (!f.key) problemas.push(x.valSinClave(f.label));
+      else if (vistas.has(f.key)) problemas.push(x.valClaveRepetida(f.key));
       vistas.add(f.key);
 
       if (CON_OPCIONES.has(f.type) && !(f.options ?? []).filter((o) => o.trim()).length) {
-        problemas.push(`"${f.label}" es una lista de opciones pero no tiene ninguna cargada.`);
+        problemas.push(x.valSinOpciones(f.label));
       }
 
       if (f.key === "email") {
@@ -68,17 +73,8 @@ export function validarFormulario(steps: Step[]): string[] {
 
   // El email es la pieza de la que depende recuperar a los que abandonan:
   // sin el, una persona que se va a mitad del formulario se pierde.
-  if (!tieneEmail) {
-    problemas.push(
-      'Falta una pregunta de email con la clave "email". Sin eso no se puede ' +
-        "contactar a quien abandone el formulario.",
-    );
-  } else if (!emailEnPasoUno) {
-    problemas.push(
-      "El email tiene que estar en el primer paso. Si se pide más adelante, " +
-        "quien abandone antes de llegar ahí se pierde.",
-    );
-  }
+  if (!tieneEmail) problemas.push(x.valFaltaEmail);
+  else if (!emailEnPasoUno) problemas.push(x.valEmailPasoUno);
 
   return problemas;
 }

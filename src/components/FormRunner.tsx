@@ -138,7 +138,7 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
     for (const f of steps[step]?.fields ?? []) {
       const v = (data[f.key] ?? "").trim();
       if (f.type === "checkbox") {
-        if (f.required && v !== "Sí") errs[f.key] = x.consentimiento;
+        if (f.required && v !== x.si) errs[f.key] = x.consentimiento;
         continue;
       }
       if (f.required && !v) errs[f.key] = x.requerido;
@@ -265,8 +265,8 @@ function FieldInput({
         <label className="fcheck">
           <input
             type="checkbox"
-            checked={value === "Sí"}
-            onChange={(e) => onChange(field.key, e.target.checked ? "Sí" : "No")}
+            checked={value === x.si}
+            onChange={(e) => onChange(field.key, e.target.checked ? x.si : x.no)}
           />
           <span>{field.label} {field.required && <span className="req">*</span>}</span>
         </label>

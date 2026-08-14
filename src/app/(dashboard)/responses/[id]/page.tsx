@@ -3,18 +3,15 @@ import { notFound } from "next/navigation";
 import { sql, type Workflow } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace, sourceLabel } from "@/lib/format";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
-
-const SUPERFICIES: Record<string, string> = {
-  page: "Página de consultas",
-  popup: "Pop-up",
-  clip: "Clip de video",
-};
 
 export default async function ResponseDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { firm } = await activeFirm();
+  const x = textos(firm.lang).panel;
+  const lang = firm.lang;
 
   const [s] = await sql<
     {
@@ -52,22 +49,24 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
       <div className="head">
         <div>
           <Link href="/responses" className="muted" style={{ fontSize: ".88rem", textDecoration: "none" }}>
-            ← Consultas
+            {x.volverConsultas}
           </Link>
-          <h1 style={{ marginTop: ".5rem" }}>{s.full_name ?? s.email ?? "Anónimo"}</h1>
+          <h1 style={{ marginTop: ".5rem" }}>{s.full_name ?? s.email ?? x.anonimo}</h1>
           <p>
             {s.funnel} · {s.workflow} ·{" "}
-            {s.submitted_at ? `enviada ${hace(s.submitted_at)}` : `abandonada en el paso ${s.max_step}`}
+            {s.submitted_at ? x.enviadaHace(hace(s.submitted_at, lang)) : x.abandonadaEnPaso(s.max_step)}
           </p>
         </div>
-        {s.submitted_at ? <span className="pill good">Completa</span> : <span className="pill warn">Incompleta</span>}
+        {s.submitted_at
+          ? <span className="pill good">{x.completa}</span>
+          : <span className="pill warn">{x.incompleta}</span>}
       </div>
 
       <div className="grid cols-2-1">
         <div className="card">
-          <h3>Respuestas</h3>
+          <h3>{x.respuestas}</h3>
           {entries.length === 0 ? (
-            <p className="empty">No llegó a responder nada.</p>
+            <p className="empty">{x.noRespondioNada}</p>
           ) : (
             <table>
               <tbody>
@@ -83,25 +82,27 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
         </div>
 
         <div className="card">
-          <h3>Contacto</h3>
+          <h3>{x.contacto}</h3>
           <table>
             <tbody>
               <tr><td className="muted">Email</td><td>{s.email ? <a href={`mailto:${s.email}`}>{s.email}</a> : "—"}</td></tr>
-              <tr><td className="muted">Teléfono</td><td>{s.phone ?? "—"}</td></tr>
+              <tr><td className="muted">{x.telefono}</td><td>{s.phone ?? "—"}</td></tr>
               <tr>
-                <td className="muted">¿Aceptó contacto?</td>
-                <td>{s.consent ? <span className="pill good">Sí</span> : <span className="pill">No</span>}</td>
+                <td className="muted">{x.aceptoContacto}</td>
+                <td>{s.consent
+                  ? <span className="pill good">{x.si}</span>
+                  : <span className="pill">{x.no}</span>}</td>
               </tr>
-              <tr><td className="muted">Origen</td><td>{sourceLabel(s.source ?? "direct")}</td></tr>
-              {campana && <tr><td className="muted">Campaña</td><td>{campana}</td></tr>}
-              <tr><td className="muted">Entró por</td><td>{SUPERFICIES[s.surface] ?? s.surface}</td></tr>
+              <tr><td className="muted">{x.origen}</td><td>{sourceLabel(s.source ?? "direct", lang)}</td></tr>
+              {campana && <tr><td className="muted">{x.campanaCol}</td><td>{campana}</td></tr>}
+              <tr><td className="muted">{x.entroPor}</td><td>{x.superficies[s.surface] ?? s.surface}</td></tr>
               {s.landing_page && (
                 <tr>
-                  <td className="muted">Página</td>
+                  <td className="muted">{x.paginaCol}</td>
                   <td style={{ wordBreak: "break-all", fontSize: ".82rem" }}>{s.landing_page}</td>
                 </tr>
               )}
-              <tr><td className="muted">Primera visita</td><td>{fmtLong(s.created_at)}</td></tr>
+              <tr><td className="muted">{x.primeraVisita}</td><td>{fmtLong(s.created_at, lang)}</td></tr>
             </tbody>
           </table>
         </div>

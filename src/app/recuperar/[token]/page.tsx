@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { applyPasswordReset, findPasswordReset, revisarContrasena } from "@/lib/auth";
+import { langDeCabecera, t as textos } from "@/lib/i18n";
 import "../../login/login.css";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +9,7 @@ export const dynamic = "force-dynamic";
 async function cambiar(formData: FormData) {
   "use server";
 
+  const lang = langDeCabecera((await headers()).get("accept-language"));
   const token = String(formData.get("token") ?? "");
 
   // El token se vuelve a buscar acá: el server action es una entrada más y no
@@ -15,7 +18,7 @@ async function cambiar(formData: FormData) {
   if (!reset) redirect("/recuperar?vencido=1");
 
   const nueva = String(formData.get("password") ?? "");
-  const problema = revisarContrasena(nueva, String(formData.get("password2") ?? ""));
+  const problema = revisarContrasena(nueva, String(formData.get("password2") ?? ""), lang);
   if (problema) redirect(`/recuperar/${token}?e=${encodeURIComponent(problema)}`);
 
   await applyPasswordReset(reset, nueva);
@@ -35,6 +38,7 @@ export default async function Elegir({
   const { token } = await params;
   const reset = await findPasswordReset(token);
   const error = (await searchParams).e;
+  const x = textos(langDeCabecera((await headers()).get("accept-language"))).auth;
 
   if (!reset) {
     return (
@@ -42,11 +46,11 @@ export default async function Elegir({
         <div className="auth-card">
           <div className="auth-brand">
             Right Lead
-            <small>Recuperar el acceso</small>
+            <small>{x.recuperarAcceso}</small>
           </div>
-          <p className="auth-error">Este link ya se usó o venció.</p>
-          <p className="auth-foot">Los links valen una hora. Pedí uno nuevo y usalo apenas te llegue.</p>
-          <p className="auth-link"><a href="/recuperar">Pedir un link nuevo</a></p>
+          <p className="auth-error">{x.linkUsado}</p>
+          <p className="auth-foot">{x.linkUsadoPie}</p>
+          <p className="auth-link"><a href="/recuperar">{x.pedirLinkNuevo}</a></p>
         </div>
       </div>
     );
@@ -57,7 +61,7 @@ export default async function Elegir({
       <div className="auth-card">
         <div className="auth-brand">
           Right Lead
-          <small>Elegí tu contraseña</small>
+          <small>{x.elegiClave}</small>
         </div>
 
         {error && <p className="auth-error">{error}</p>}
@@ -65,20 +69,19 @@ export default async function Elegir({
         <form action={cambiar}>
           <input type="hidden" name="token" value={token} />
 
-          <label htmlFor="password">Contraseña nueva</label>
+          <label htmlFor="password">{x.claveNueva}</label>
           <input id="password" name="password" type="password" autoComplete="new-password"
                  minLength={10} required autoFocus />
 
-          <label htmlFor="password2">Repetila</label>
+          <label htmlFor="password2">{x.repetila}</label>
           <input id="password2" name="password2" type="password" autoComplete="new-password"
                  minLength={10} required />
 
-          <button type="submit">Guardar</button>
+          <button type="submit">{x.guardar}</button>
         </form>
 
         <p className="auth-foot">
-          Para <strong>{reset.email}</strong>. Al menos 10 caracteres. Se cierran las sesiones que
-          tengas abiertas en otros dispositivos.
+          {x.para} <strong>{reset.email}</strong>. {x.clavePie}
         </p>
       </div>
     </div>

@@ -3,12 +3,11 @@
 import { useState, useTransition } from "react";
 import type { Field, Step } from "@/lib/db";
 import { CON_OPCIONES, TIPOS, pasoDeCoordinacion, slugify, validarFormulario } from "@/lib/forms";
-import type { Lang } from "@/lib/i18n";
+import { t as textos, type Lang } from "@/lib/i18n";
 
 type Guardar = (steps: Step[]) => Promise<{ ok: boolean; problemas?: string[] }>;
 
 const nuevaPregunta = (): Field => ({ key: "", label: "", type: "text", required: false });
-const nuevoPaso = (n: number): Step => ({ title: `Paso ${n}`, fields: [nuevaPregunta()] });
 
 export function FormEditor({
   inicial,
@@ -22,6 +21,8 @@ export function FormEditor({
   /** Para que el paso sugerido salga en el idioma del estudio. */
   lang?: Lang;
 }) {
+  const x = textos(lang).editor;
+  const nuevoPaso = (n: number): Step => ({ title: x.paso(n), fields: [nuevaPregunta()] });
   const [steps, setSteps] = useState<Step[]>(inicial.length ? inicial : [nuevoPaso(1)]);
   const [problemas, setProblemas] = useState<string[]>([]);
   const [guardado, setGuardado] = useState(false);
@@ -48,7 +49,7 @@ export function FormEditor({
   };
 
   function onGuardar() {
-    const encontrados = validarFormulario(steps);
+    const encontrados = validarFormulario(steps, lang);
     setProblemas(encontrados);
     if (encontrados.length) return;
 
@@ -58,7 +59,7 @@ export function FormEditor({
         setGuardado(true);
         setProblemas([]);
       } else {
-        setProblemas(r.problemas ?? ["No se pudo guardar."]);
+        setProblemas(r.problemas ?? [x.noSePudo]);
       }
     });
   }
@@ -68,34 +69,34 @@ export function FormEditor({
       {steps.map((paso, i) => (
         <section className="card paso" key={i}>
           <header>
-            <span className="paso-n">Paso {i + 1}</span>
+            <span className="paso-n">{x.paso(i + 1)}</span>
             <div className="acciones">
-              <button type="button" onClick={() => actualizar((s) => mover(s, i, -1))} disabled={i === 0} aria-label="Subir el paso">↑</button>
-              <button type="button" onClick={() => actualizar((s) => mover(s, i, 1))} disabled={i === steps.length - 1} aria-label="Bajar el paso">↓</button>
+              <button type="button" onClick={() => actualizar((s) => mover(s, i, -1))} disabled={i === 0} aria-label={x.subirPaso}>↑</button>
+              <button type="button" onClick={() => actualizar((s) => mover(s, i, 1))} disabled={i === steps.length - 1} aria-label={x.bajarPaso}>↓</button>
               <button
                 type="button"
                 className="borrar"
                 onClick={() => actualizar((s) => void s.splice(i, 1))}
                 disabled={steps.length === 1}
-                aria-label="Borrar el paso"
+                aria-label={x.borrarElPaso}
               >
-                Borrar paso
+                {x.borrarPaso}
               </button>
             </div>
           </header>
 
-          <label className="lbl">Título</label>
+          <label className="lbl">{x.tituloCampo}</label>
           <input
             value={paso.title}
             onChange={(e) => actualizar((s) => void (s[i].title = e.target.value))}
-            placeholder="Sobre tu trabajo"
+            placeholder={x.ejemploTitulo}
           />
 
-          <label className="lbl">Aclaración (opcional)</label>
+          <label className="lbl">{x.aclaracion}</label>
           <input
             value={paso.subtitle ?? ""}
             onChange={(e) => actualizar((s) => void (s[i].subtitle = e.target.value))}
-            placeholder="Una línea que ayude a responder"
+            placeholder={x.ejemploAclaracion}
           />
 
           <div className="preguntas">
@@ -103,7 +104,7 @@ export function FormEditor({
               <div className="pregunta" key={j}>
                 <div className="fila">
                   <div className="crece">
-                    <label className="lbl">Pregunta</label>
+                    <label className="lbl">{x.pregunta}</label>
                     <input
                       value={f.label}
                       onChange={(e) =>
@@ -115,12 +116,12 @@ export function FormEditor({
                           if (claveAuto) campo.key = slugify(e.target.value);
                         })
                       }
-                      placeholder="¿Cuánto tiempo trabajaste ahí?"
+                      placeholder={x.ejemploPregunta}
                     />
                   </div>
 
                   <div>
-                    <label className="lbl">Tipo</label>
+                    <label className="lbl">{x.tipo}</label>
                     <select
                       value={f.type}
                       onChange={(e) =>
@@ -132,41 +133,41 @@ export function FormEditor({
                         })
                       }
                     >
-                      {TIPOS.map((t) => (
-                        <option key={t.value} value={t.value}>{t.label}</option>
+                      {TIPOS.map((tipo) => (
+                        <option key={tipo} value={tipo}>{x.tipos[tipo]}</option>
                       ))}
                     </select>
                   </div>
 
                   <div className="botones">
-                    <button type="button" onClick={() => actualizar((s) => mover(s[i].fields, j, -1))} disabled={j === 0} aria-label="Subir la pregunta">↑</button>
-                    <button type="button" onClick={() => actualizar((s) => mover(s[i].fields, j, 1))} disabled={j === paso.fields.length - 1} aria-label="Bajar la pregunta">↓</button>
-                    <button type="button" className="borrar" onClick={() => actualizar((s) => void s[i].fields.splice(j, 1))} aria-label="Borrar la pregunta">✕</button>
+                    <button type="button" onClick={() => actualizar((s) => mover(s[i].fields, j, -1))} disabled={j === 0} aria-label={x.subirPregunta}>↑</button>
+                    <button type="button" onClick={() => actualizar((s) => mover(s[i].fields, j, 1))} disabled={j === paso.fields.length - 1} aria-label={x.bajarPregunta}>↓</button>
+                    <button type="button" className="borrar" onClick={() => actualizar((s) => void s[i].fields.splice(j, 1))} aria-label={x.borrarPregunta}>✕</button>
                   </div>
                 </div>
 
                 {CON_OPCIONES.has(f.type) && (
                   <div className="opciones">
-                    <label className="lbl">Opciones</label>
+                    <label className="lbl">{x.opciones}</label>
                     {(f.options ?? []).map((o, k) => (
                       <div className="fila-opcion" key={k}>
                         <input
                           value={o}
                           onChange={(e) => actualizar((s) => void (s[i].fields[j].options![k] = e.target.value))}
-                          placeholder={`Opción ${k + 1}`}
+                          placeholder={x.opcionN(k + 1)}
                         />
                         <button
                           type="button"
                           className="borrar"
                           onClick={() => actualizar((s) => void s[i].fields[j].options!.splice(k, 1))}
-                          aria-label="Borrar la opción"
+                          aria-label={x.borrarOpcion}
                         >
                           ✕
                         </button>
                       </div>
                     ))}
                     <button type="button" className="agregar chico" onClick={() => actualizar((s) => void s[i].fields[j].options!.push(""))}>
-                      + Agregar opción
+                      {x.agregarOpcion}
                     </button>
                   </div>
                 )}
@@ -178,17 +179,17 @@ export function FormEditor({
                       checked={!!f.required}
                       onChange={(e) => actualizar((s) => void (s[i].fields[j].required = e.target.checked))}
                     />
-                    Obligatoria
+                    {x.obligatoria}
                   </label>
-                  <span className="clave" title="Con este nombre se guarda la respuesta">
-                    clave: <code>{f.key || "—"}</code>
+                  <span className="clave" title={x.claveTitulo}>
+                    {x.clave} <code>{f.key || "—"}</code>
                   </span>
                 </div>
               </div>
             ))}
 
             <button type="button" className="agregar" onClick={() => actualizar((s) => void s[i].fields.push(nuevaPregunta()))}>
-              + Agregar pregunta
+              {x.agregarPregunta}
             </button>
           </div>
         </section>
@@ -196,7 +197,7 @@ export function FormEditor({
 
       <div className="pasos-nuevos">
         <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(nuevoPaso(s.length + 1)))}>
-          + Agregar paso
+          {x.agregarPaso}
         </button>
 
         {/*
@@ -207,24 +208,24 @@ export function FormEditor({
         */}
         {!tieneCoordinacion && (
           <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(pasoDeCoordinacion(lang)))}>
-            + Agregar paso de coordinación
+            {x.agregarCoordinacion}
           </button>
         )}
       </div>
 
       {problemas.length > 0 && (
         <div className="problemas">
-          <strong>Revisá esto antes de guardar:</strong>
+          <strong>{x.revisaEsto}</strong>
           <ul>{problemas.map((p, i) => <li key={i}>{p}</li>)}</ul>
         </div>
       )}
 
       <div className="barra">
         <button type="button" className="btn" onClick={onGuardar} disabled={pendiente}>
-          {pendiente ? "Guardando…" : "Guardar formulario"}
+          {pendiente ? x.guardando : x.guardarFormulario}
         </button>
-        <a className="btn ghost" href={verUrl} target="_blank" rel="noreferrer">Ver cómo queda</a>
-        {guardado && <span className="ok">Guardado</span>}
+        <a className="btn ghost" href={verUrl} target="_blank" rel="noreferrer">{x.verComoQueda}</a>
+        {guardado && <span className="ok">{x.guardado}</span>}
       </div>
     </div>
   );

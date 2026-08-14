@@ -5,6 +5,7 @@ import { sql, type Funnel, type Step, type Workflow } from "@/lib/db";
 import { activeFirm, requireOwner } from "@/lib/tenancy";
 import { validarFormulario } from "@/lib/forms";
 import { FormEditor } from "@/components/FormEditor";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,7 @@ export default async function EditarCaso({
 }) {
   const { funnel: fSlug, caso: cSlug } = await params;
   const { firm } = await activeFirm();
+  const x = textos(firm.lang).areas;
 
   const [funnel] = await sql<Funnel[]>`
     select * from funnels where firm_id = ${firm.id} and slug = ${fSlug}`;
@@ -38,14 +40,14 @@ export default async function EditarCaso({
     "use server";
     const { firm: f } = await requireOwner();
 
-    const problemas = validarFormulario(steps);
+    const problemas = validarFormulario(steps, f.lang);
     if (problemas.length) return { ok: false, problemas };
 
     const r = await sql`
       update workflows w set steps = ${sql.json({ steps })}
       from funnels fu
       where w.id = ${caso.id} and w.funnel_id = fu.id and fu.firm_id = ${f.id}`;
-    if (r.count === 0) return { ok: false, problemas: ["No se encontró el formulario."] };
+    if (r.count === 0) return { ok: false, problemas: [textos(f.lang).editor.noSeEncontro] };
 
     revalidatePath(`/funnels/${fSlug}/${cSlug}`);
     return { ok: true };
@@ -59,14 +61,11 @@ export default async function EditarCaso({
             ← {funnel.name}
           </Link>
           <h1 style={{ marginTop: ".5rem" }}>{caso.name}</h1>
-          <p>
-            Las preguntas de este caso. El primer paso pide el contacto: es lo que permite escribirle a quien
-            abandone el formulario a mitad de camino.
-          </p>
+          <p>{x.editarBajada}</p>
         </div>
         <div style={{ textAlign: "right" }}>
           <div className="muted" style={{ fontSize: ".82rem" }}>
-            {stats.enviadas} de {stats.visitas} visitas terminaron
+            {x.terminaron(stats.enviadas, stats.visitas)}
           </div>
         </div>
       </div>

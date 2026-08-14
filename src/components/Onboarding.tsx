@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Paso } from "@/lib/onboarding";
+import { t as textos, type Lang } from "@/lib/i18n";
 
 /**
  * Checklist de puesta en marcha de un estudio.
@@ -8,18 +9,19 @@ import type { Paso } from "@/lib/onboarding";
  * completados": si alguien borra sus formularios, el paso vuelve a aparecer.
  * Desaparece del Inicio cuando esta todo hecho.
  */
-export function Onboarding({ pasos }: { pasos: Paso[] }) {
+export function Onboarding({ pasos, lang = "es" }: { pasos: Paso[]; lang?: Lang }) {
   const hechos = pasos.filter((p) => p.listo).length;
   if (hechos === pasos.length) return null;
+  const x = textos(lang).comp;
 
   return (
     <section className="card onboarding">
       <header>
         <div>
-          <h3>Puesta en marcha</h3>
-          <p className="muted">Lo que falta para que el estudio empiece a recibir consultas.</p>
+          <h3>{x.puestaEnMarcha}</h3>
+          <p className="muted">{x.puestaBajada}</p>
         </div>
-        <span className="progreso">{hechos} de {pasos.length}</span>
+        <span className="progreso">{x.deTotal(hechos, pasos.length)}</span>
       </header>
 
       <ol>

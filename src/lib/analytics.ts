@@ -1,4 +1,5 @@
 import { sql } from "./db";
+import { t, type Lang } from "./i18n";
 
 export type Range = "7d" | "30d" | "90d" | "all";
 
@@ -147,7 +148,7 @@ export async function bySurface(firmId: string, range: Range) {
  * Con workflowId en null toma el primero del estudio, que es lo que la
  * pantalla muestra por defecto.
  */
-export async function dropoff(firmId: string, workflowId: string | null, range: Range) {
+export async function dropoff(firmId: string, workflowId: string | null, range: Range, lang: Lang = "es") {
   const s = since(range);
 
   const filas = await sql<
@@ -172,6 +173,7 @@ export async function dropoff(firmId: string, workflowId: string | null, range: 
     order by gs.step`;
 
   if (filas.length === 0) return null;
+  const tx = t(lang).stats;
 
   const titulos = filas[0].steps?.steps ?? [];
   const top = Number(filas[0].reached ?? 0);
@@ -179,7 +181,7 @@ export async function dropoff(firmId: string, workflowId: string | null, range: 
     name: filas[0].name,
     steps: filas.map((r) => ({
       step: r.step,
-      title: r.step === 0 ? "Abrió el formulario" : titulos[r.step - 1]?.title ?? `Paso ${r.step}`,
+      title: r.step === 0 ? tx.abrioFormulario : titulos[r.step - 1]?.title ?? tx.pasoN(r.step),
       reached: Number(r.reached),
       pct: top ? Math.round((Number(r.reached) / top) * 100) : 0,
     })),

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { esSi } from "@/lib/forms";
 import { sql } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
       first_name = coalesce(nullif(${data.first_name ?? null}, ''), first_name),
       last_name  = coalesce(nullif(${data.last_name ?? null}, ''), last_name),
       phone      = coalesce(nullif(${data.phone ?? null}, ''), phone),
-      consent    = ${data.consent === "Sí"},
+      consent    = ${esSi(data.consent)},
       max_step   = ${alcanzado},
       updated_at = now()
     where id = ${b.sessionId}`;

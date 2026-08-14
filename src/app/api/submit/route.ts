@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql, type Workflow } from "@/lib/db";
+import { esSi } from "@/lib/forms";
 import { leadEmail, sendMail } from "@/lib/mailer";
 import type { Lang } from "@/lib/i18n";
 import { sourceLabel } from "@/lib/format";
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
       first_name = coalesce(nullif(${data.first_name ?? null}, ''), first_name),
       last_name  = coalesce(nullif(${data.last_name ?? null}, ''), last_name),
       phone      = coalesce(nullif(${data.phone ?? null}, ''), phone),
-      consent    = ${data.consent === "Sí"},
+      consent    = ${esSi(data.consent)},
       max_step = ${pasos}, submitted_at = coalesce(submitted_at, now()), updated_at = now()
     where id = ${s.id}`;
 
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
       lastName: data.last_name ?? "",
       email: data.email ?? "",
       phone: data.phone ?? "",
-      consent: data.consent === "Sí",
+      consent: esSi(data.consent),
       funnel: s.funnel,
       service: s.workflow,
       source: sourceLabel(s.source ?? "direct"),

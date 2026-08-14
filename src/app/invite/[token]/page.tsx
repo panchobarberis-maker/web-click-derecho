@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { sql } from "@/lib/db";
 import { acceptInvitation, createSession, currentUser, findInvitation, hashPassword } from "@/lib/auth";
 import { googleEnabled } from "@/lib/google";
+import { langDeCabecera, t as textos } from "@/lib/i18n";
 import "../../login/login.css";
 
 export const dynamic = "force-dynamic";
@@ -43,12 +44,13 @@ export default async function Invite({
 }) {
   const { token } = await params;
   const inv = await findInvitation(token);
+  const x = textos(langDeCabecera((await headers()).get("accept-language"))).auth;
   if (!inv) {
     return (
       <div className="auth">
         <div className="auth-card">
           <div className="auth-brand">Right Lead</div>
-          <p className="auth-error">Esta invitación venció o ya fue usada. Pedile una nueva al estudio.</p>
+          <p className="auth-error">{x.invitacionVencida}</p>
         </div>
       </div>
     );
@@ -68,13 +70,13 @@ export default async function Invite({
       <form action={aceptar}>
         <input type="hidden" name="token" value={token} />
 
-        <label htmlFor="name">Tu nombre</label>
+        <label htmlFor="name">{x.tuNombre}</label>
         <input id="name" name="name" type="text" autoComplete="name" />
 
-        <label htmlFor="password">Contraseña</label>
+        <label htmlFor="password">{x.contrasena}</label>
         <input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required />
 
-        <button type="submit">Crear mi acceso</button>
+        <button type="submit">{x.crearMiAcceso}</button>
       </form>
     );
   }
@@ -84,14 +86,14 @@ export default async function Invite({
       <div className="auth-card">
         <div className="auth-brand">
           {inv.firm_name}
-          <small>Te invitaron al panel</small>
+          <small>{x.teInvitaron}</small>
         </div>
 
         <p className="auth-hint">
-          Vas a entrar como <strong>{inv.email}</strong>.
+          {x.vasAEntrarComo} <strong>{inv.email}</strong>.
         </p>
 
-        {corta && <p className="auth-error">La contraseña tiene que tener al menos 10 caracteres.</p>}
+        {corta && <p className="auth-error">{x.claveCorta}</p>}
 
         {/*
           Con Google alcanza un click y no hay contraseña que recordar ni que
@@ -109,14 +111,14 @@ export default async function Invite({
                 <path fill="#FBBC05" d="M3.9 10.7a5.4 5.4 0 0 1 0-3.4V5H.9a9 9 0 0 0 0 8l3-2.3z" />
                 <path fill="#EA4335" d="M9 3.6c1.3 0 2.5.5 3.4 1.3l2.6-2.6A9 9 0 0 0 .9 5l3 2.3C4.6 5.2 6.6 3.6 9 3.6z" />
               </svg>
-              Entrar con Google
+              {x.entrarConGoogle}
             </a>
             <p className="auth-foot" style={{ marginTop: ".9rem" }}>
-              Un click y listo. No tenés que inventar ninguna contraseña.
+              {x.googlePie}
             </p>
 
             <details className="auth-alt">
-              <summary>Prefiero entrar con una contraseña</summary>
+              <summary>{x.prefieroClave}</summary>
               <FormularioClave token={token} />
             </details>
           </>
