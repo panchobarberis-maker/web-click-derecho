@@ -1,0 +1,21 @@
+<!doctype html><meta charset="utf-8">
+<style>
+  /* Se ve a unos 200 px de ancho en la esquina del sitio, o sea a un cuarto
+     de este tamaño: todo tiene que ser enorme o no se lee. */
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:720px;height:1280px;overflow:hidden;
+       background:linear-gradient(165deg,#0e2b40 0%,#1f5d7a 58%,#3387ad 100%);
+       font-family:'Liberation Sans',Arial,sans-serif;color:#fff;
+       display:flex;flex-direction:column;justify-content:center;align-items:center;
+       text-align:center;padding:70px 54px;position:relative}
+  body:after{content:"";position:absolute;inset:0;
+       background:repeating-linear-gradient(118deg,rgba(255,255,255,.055) 0 4px,transparent 4px 40px)}
+  .marca{position:absolute;top:56px;left:0;right:0;font-family:'Liberation Serif',Georgia,serif;
+         font-size:52px;opacity:.9}
+  .titular{position:relative;z-index:1;font-family:'Liberation Serif',Georgia,serif;
+           font-size:132px;line-height:1.02;letter-spacing:-.015em;text-shadow:0 4px 24px rgba(0,0,0,.3)}
+  .quien{position:absolute;bottom:74px;left:0;right:0;font-size:40px;opacity:.8;z-index:1}
+</style>
+<div class="marca">Whitfield &amp; Marsh</div>
+<div class="titular">Hurt<br>at work?</div>
+<div class="quien">Dana Whitfield</div>

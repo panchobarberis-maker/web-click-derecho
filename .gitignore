@@ -3,3 +3,7 @@ node_modules
 .env.local
 *.tsbuildinfo
 next-env.d.ts
+
+# El video se regenera: lo crudo y lo compilado no van al repo
+demo/salida/
+demo/.build/
