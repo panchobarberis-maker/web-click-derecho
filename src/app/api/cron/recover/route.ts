@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/base-url";
+import { linkParaRetomar } from "@/lib/base-url";
 import type { Lang } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
@@ -21,17 +21,18 @@ export async function GET(req: Request) {
     if (auth !== `Bearer ${secret}`) return NextResponse.json({ error: "no autorizado" }, { status: 401 });
   }
 
-  const base = baseUrl();
-
   const pendientes = await sql<
-    { id: string; email: string; full_name: string | null; firm: string; slug: string; accent: string; notify_email: string | null; funnel: string; lang: Lang }[]
+    { id: string; email: string; full_name: string | null; firm: string; slug: string; accent: string;
+      notify_email: string | null; funnel: string; funnel_slug: string | null; workflow_slug: string | null; lang: Lang }[]
   >`
     select s.id, s.email, s.full_name,
            fi.name as firm, fi.slug, fi.accent, fi.notify_email, fi.lang,
-           coalesce(f.name, 'tu consulta') as funnel
+           coalesce(f.name, 'tu consulta') as funnel,
+           f.slug as funnel_slug, w.slug as workflow_slug
     from sessions s
     join firms fi on fi.id = s.firm_id
     left join funnels f on f.id = s.funnel_id
+    left join workflows w on w.id = s.workflow_id
     where s.submitted_at is null
       and s.recovery_sent_at is null
       and s.email is not null and s.email <> ''
@@ -47,7 +48,9 @@ export async function GET(req: Request) {
       firm: p.firm,
       accent: p.accent,
       area: p.funnel,
-      url: `${base}/f/${p.slug}?retomar=${p.id}`,
+      url: linkParaRetomar({
+        firmSlug: p.slug, funnelSlug: p.funnel_slug, workflowSlug: p.workflow_slug, sessionId: p.id,
+      }),
       lang: p.lang,
     });
 

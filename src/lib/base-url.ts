@@ -23,3 +23,26 @@ export function baseUrl(): string {
 
   return "http://localhost:3000";
 }
+
+/**
+ * El link del mail de recuperacion.
+ *
+ * Tiene que llevar al formulario que la persona estaba completando, no a la
+ * portada del estudio: `retomar` lo lee el formulario cuando se monta, y en la
+ * portada no hay ninguno. Apuntando a la portada, quien volvia se encontraba
+ * con "¿Cómo podemos ayudarte?" y tenia que elegir todo de nuevo y reescribir
+ * lo que ya habia puesto —justo lo que el mail promete que no va a pasar.
+ *
+ * Si la sesion se abandono antes de elegir el caso no hay nada que retomar, y
+ * entonces si corresponde la portada.
+ */
+export function linkParaRetomar(o: {
+  firmSlug: string;
+  funnelSlug: string | null;
+  workflowSlug: string | null;
+  sessionId: string;
+}): string {
+  const base = baseUrl();
+  if (!o.funnelSlug || !o.workflowSlug) return `${base}/f/${o.firmSlug}`;
+  return `${base}/f/${o.firmSlug}/${o.funnelSlug}/${o.workflowSlug}?retomar=${o.sessionId}`;
+}

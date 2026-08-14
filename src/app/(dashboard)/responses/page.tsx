@@ -5,7 +5,7 @@ import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace } from "@/lib/format";
 import { t as textos } from "@/lib/i18n";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/base-url";
+import { linkParaRetomar } from "@/lib/base-url";
 
 export const dynamic = "force-dynamic";
 
@@ -29,19 +29,26 @@ async function recuperar(formData: FormData) {
   const id = String(formData.get("id"));
   const { firm } = await activeFirm();
 
-  const [s] = await sql<{ email: string; full_name: string | null; funnel: string; slug: string }[]>`
-    select s.email, s.full_name, coalesce(f.name, 'tu consulta') as funnel, ${firm.slug} as slug
-    from sessions s left join funnels f on f.id = s.funnel_id
+  const [s] = await sql<{
+    email: string; full_name: string | null; funnel: string;
+    funnel_slug: string | null; workflow_slug: string | null;
+  }[]>`
+    select s.email, s.full_name, coalesce(f.name, 'tu consulta') as funnel,
+           f.slug as funnel_slug, w.slug as workflow_slug
+    from sessions s
+    left join funnels f on f.id = s.funnel_id
+    left join workflows w on w.id = s.workflow_id
     where s.id = ${id} and s.firm_id = ${firm.id} and s.email is not null`;
   if (!s) return;
 
-  const base = baseUrl();
   const mail = recoveryEmail({
     name: s.full_name,
     firm: firm.name,
     accent: firm.accent,
     area: s.funnel,
-    url: `${base}/f/${firm.slug}?retomar=${id}`,
+    url: linkParaRetomar({
+      firmSlug: firm.slug, funnelSlug: s.funnel_slug, workflowSlug: s.workflow_slug, sessionId: id,
+    }),
     lang: firm.lang,
   });
 
