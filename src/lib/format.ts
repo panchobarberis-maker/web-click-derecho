@@ -30,6 +30,10 @@ export const fmtNum = (n: number, lang: Lang = "es") => n.toLocaleString(LOCALE[
 export function hace(d: Date | string, lang: Lang = "es") {
   const ms = Date.now() - new Date(d).getTime();
   const min = Math.round(ms / 6e4);
+  // Lo de recien y lo que viene del futuro caen en el mismo lugar: "0 min ago"
+  // se lee como un error, y "-1149 min ago" —que sale con el reloj corrido o
+  // con datos de demostracion— directamente parece la aplicacion rota.
+  if (min < 1) return lang === "en" ? "just now" : "recién";
   if (lang === "en") {
     if (min < 60) return `${min} min ago`;
     const h = Math.round(min / 60);

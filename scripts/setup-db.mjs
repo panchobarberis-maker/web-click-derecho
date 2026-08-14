@@ -222,7 +222,9 @@ if (demo) {
     for (let k = 0; k < n; k++) {
       const wf = rnd(workflowIds);
       const surface = Math.random() < 0.7 ? "page" : rnd(superficies);
-      const at = new Date(base.getTime() + Math.random() * 864e5);
+      // Sin el tope, el ultimo dia reparte visitas por delante de ahora y el
+      // panel las muestra como "hace -800 min".
+      const at = new Date(Math.min(Date.now() - 25 * 6e4, base.getTime() + Math.random() * 864e5));
 
       // 55% viene de pauta: de ahi salen los utm. El resto es organico o directo.
       const camp = Math.random() < 0.55 ? rnd(campanas) : null;
@@ -260,7 +262,7 @@ if (demo) {
       }
 
       if (step >= wf.steps) {
-        const done = new Date(at.getTime() + 6e5);
+        const done = new Date(Math.min(Date.now() - 6e4, at.getTime() + 6e5));
         await sql`update sessions set submitted_at = ${done}, updated_at = ${done},
           read_at = ${Math.random() < 0.6 ? done : null} where id = ${s.id}`;
         await sql`insert into events (session_id, firm_id, funnel_id, workflow_id, type, step_index, surface, created_at)
