@@ -41,7 +41,7 @@ export default async function Elegir({
       <div className="auth">
         <div className="auth-card">
           <div className="auth-brand">
-            Click Derecho
+            Right Lead
             <small>Recuperar el acceso</small>
           </div>
           <p className="auth-error">Este link ya se usó o venció.</p>
@@ -56,7 +56,7 @@ export default async function Elegir({
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
-          Click Derecho
+          Right Lead
           <small>Elegí tu contraseña</small>
         </div>
 

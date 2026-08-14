@@ -15,7 +15,7 @@ import { firm, funnels } from "../db/seed-data.mjs";
 const scrypt = promisify(scryptCb);
 const here = dirname(fileURLToPath(import.meta.url));
 
-const PASS = process.env.SEED_PASSWORD || "clickderecho2026";
+const PASS = process.env.SEED_PASSWORD || "rightlead2026";
 
 async function hashPassword(plain) {
   const salt = randomBytes(16);
@@ -40,7 +40,7 @@ partes.push(`-- ================================================================
 --
 -- Se puede correr más de una vez sin romper nada.
 --
---   hola@clickderecho.com               (agencia: ve todos los estudios)
+--   hola@rightlead.com               (agencia: ve todos los estudios)
 --   ${firm.notify_email.padEnd(35)}(dueño del estudio de ejemplo)
 --   contraseña: ${PASS}
 --
@@ -89,7 +89,7 @@ partes.push(`
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', ${lit(await hashPassword(PASS))}, true)
+values ('hola@rightlead.com', 'Right Lead', ${lit(await hashPassword(PASS))}, true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)

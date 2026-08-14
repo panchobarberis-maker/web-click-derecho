@@ -82,7 +82,7 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
-          Click Derecho
+          Right Lead
           <small>Panel de consultas</small>
         </div>
 

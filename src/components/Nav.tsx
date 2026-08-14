@@ -64,7 +64,7 @@ export function Nav({
   return (
     <nav className="sidebar">
       <div>
-        <div className="brand">Click Derecho</div>
+        <div className="brand">Right Lead</div>
 
         {firms.length > 1 ? (
           <div className="switch">

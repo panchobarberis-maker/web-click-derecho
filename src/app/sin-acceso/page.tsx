@@ -5,7 +5,7 @@ export default function SinAcceso() {
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
-          Click Derecho
+          Right Lead
           <small>Sin acceso</small>
         </div>
         <p className="auth-hint">

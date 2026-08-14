@@ -50,7 +50,7 @@ export default async function Recuperar({ searchParams }: { searchParams: Promis
     <div className="auth">
       <div className="auth-card">
         <div className="auth-brand">
-          Click Derecho
+          Right Lead
           <small>Recuperar el acceso</small>
         </div>
 

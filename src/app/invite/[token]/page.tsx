@@ -47,7 +47,7 @@ export default async function Invite({
     return (
       <div className="auth">
         <div className="auth-card">
-          <div className="auth-brand">Click Derecho</div>
+          <div className="auth-brand">Right Lead</div>
           <p className="auth-error">Esta invitación venció o ya fue usada. Pedile una nueva al estudio.</p>
         </div>
       </div>

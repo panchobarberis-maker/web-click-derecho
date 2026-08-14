@@ -171,10 +171,10 @@ console.log(`estudio "${f.name}": ${funnels.length} areas, ${workflowIds.length}
 // Dos cuentas para arrancar: la de la agencia (ve todos los estudios) y la
 // del estudio. La contraseña se cambia despues desde el panel.
 const CUENTAS = [
-  { email: process.env.SEED_STAFF_EMAIL || "hola@clickderecho.com", name: "Click Derecho", staff: true },
+  { email: process.env.SEED_STAFF_EMAIL || "hola@rightlead.com", name: "Right Lead", staff: true },
   { email: firm.notify_email, name: "Mariano Alzogaray", staff: false },
 ];
-const PASS = process.env.SEED_PASSWORD || "clickderecho2026";
+const PASS = process.env.SEED_PASSWORD || "rightlead2026";
 
 for (const c of CUENTAS) {
   const [u] = await sql`

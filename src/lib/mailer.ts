@@ -90,7 +90,7 @@ export function resetEmail(o: { name: string | null; url: string }) {
        </p>
        <p>Si no lo pediste vos, no hace falta que hagas nada: tu contraseña actual sigue
        funcionando y este link se vence solo.</p>
-       <p style="margin-top:1.5rem">— Click Derecho</p>`,
+       <p style="margin-top:1.5rem">— Right Lead</p>`,
       "Si no pediste recuperar el acceso, ignorá este mail.",
     ),
   };

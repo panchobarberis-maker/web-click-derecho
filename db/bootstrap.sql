@@ -9,9 +9,9 @@
 --
 -- Se puede correr más de una vez sin romper nada.
 --
---   hola@clickderecho.com               (agencia: ve todos los estudios)
+--   hola@rightlead.com               (agencia: ve todos los estudios)
 --   consultas@alzogarayserrano.com.ar  (dueño del estudio de ejemplo)
---   contraseña: clickderecho2026
+--   contraseña: rightlead2026
 --
 -- CAMBIÁ ESA CONTRASEÑA apenas entres, desde Perfil: está publicada en el
 -- repositorio, así que cualquiera que encuentre tu URL la conoce.
@@ -447,11 +447,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$WhuTEmbGPCJQ3BbGeSeVPA==$uewNpjbtll9i0YYRYq/1KjMzFzp8cAn2M1jRRJyhBK3MMtn/47P5aqEhyw4tr99/RzAMbiZ4keYeCuqkN/p8PQ==', true)
+values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$7U2YX8UWUcmhUDtFlkI/AA==$Pcj+whlaLmSsBDpiZrMtUYTaiMGWW5y+OZsfPCcpW/fCAfNAlAZKuhfu4Ka28gEqVTy9PsDsoH1e4d7VNOm4Aw==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$AuFj5KJj9NoJXqbxom1/DA==$9A1dcTwcbWW64h/WbPD/bNcnwTfVeaRC/vKpYQ8LRIxvHGV9+4SH2q7CFkszNHAuBQ4AIijtyqeID6VvI/KqnA==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$xAnLjajM2DsNky+Nm8koVg==$NBm3SfAR0tIMw3QuTajw7sPKUyzBsnv8T34NBU8pKWM5AqEISOTOXuXEblbEMlhXAFx2fDBkv3kCLY3dEcW8+Q==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)
