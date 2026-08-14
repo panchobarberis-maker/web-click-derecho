@@ -41,6 +41,7 @@ async function recuperar(formData: FormData) {
     accent: firm.accent,
     area: s.funnel,
     url: `${base}/f/${firm.slug}?retomar=${id}`,
+    lang: firm.lang,
   });
 
   const ok = await sendMail({ to: s.email, ...mail, replyTo: firm.notify_email ?? undefined });

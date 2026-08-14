@@ -1,3 +1,4 @@
+import { t, type Lang } from "./i18n";
 // Envio via Resend. Sin RESEND_API_KEY los mails se loguean en consola,
 // asi el flujo completo se puede probar en local sin cuenta.
 
@@ -47,22 +48,29 @@ const PIE_VISITANTE =
 
 const PIE_ESTUDIO = "Aviso automático de tu formulario de consultas.";
 
-/** Al que dejo el mail y no termino el form. */
-export function recoveryEmail(o: { name: string | null; firm: string; accent: string; url: string; area: string }) {
+/**
+ * Al que dejo el mail y no termino el form.
+ *
+ * Va en el idioma del estudio: lo recibe su cliente, no el abogado.
+ */
+export function recoveryEmail(o: {
+  name: string | null; firm: string; accent: string; url: string; area: string; lang?: Lang;
+}) {
+  const m = t(o.lang ?? "es").mail;
+  const nombre = o.name ? o.name.split(" ")[0] : "";
   return {
-    subject: `Dejaste una consulta a medias en ${o.firm}`,
+    subject: m.recuperarAsunto(o.firm),
     html: wrap(
-      `<p>Hola${o.name ? ` ${o.name.split(" ")[0]}` : ""},</p>
-       <p>Vimos que empezaste una consulta sobre <strong>${o.area}</strong> y no llegaste a terminarla.
-       Quedó guardada: podés retomarla donde la dejaste, son dos minutos.</p>
+      `<p>${esc(m.recuperarHola(nombre))}</p>
+       <p>${esc(m.recuperarCuerpo(o.area))}</p>
        <p style="margin:1.75rem 0">
          <a href="${o.url}" style="background:${o.accent};color:#fff;padding:12px 26px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
-           Retomar mi consulta
+           ${esc(m.recuperarBoton)}
          </a>
        </p>
-       <p>Si preferís, respondé este mail y te contactamos nosotros.</p>
-       <p style="margin-top:1.5rem">— ${o.firm}</p>`,
-      PIE_VISITANTE,
+       <p>${esc(m.recuperarResponder)}</p>
+       <p style="margin-top:1.5rem">— ${esc(o.firm)}</p>`,
+      m.pieEstudio,
     ),
   };
 }
@@ -115,37 +123,38 @@ export function leadEmail(o: {
   source: string;
   answers: [string, string][];
   url: string;
+  lang?: Lang;
 }) {
-  const nombre = [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || "Consulta sin nombre";
+  const m = t(o.lang ?? "es").mail;
+  const c = m.campos;
+  const nombre = [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || m.sinNombre;
 
   const contacto = [
-    fila("Nombre", o.firstName),
-    fila("Apellido", o.lastName),
-    fila("Email", o.email),
-    fila("Teléfono", o.phone),
-    fila("¿Aceptó que lo contacten?", o.consent ? "Sí" : "No"),
-    fila("Área", o.funnel),
-    fila("Tipo de caso", o.service),
-    fila("Origen", o.source),
+    fila(c.nombre, o.firstName),
+    fila(c.apellido, o.lastName),
+    fila(c.email, o.email),
+    fila(c.telefono, o.phone),
+    fila(c.consent, o.consent ? c.si : c.no),
+    fila(c.area, o.funnel),
+    fila(c.caso, o.service),
+    fila(c.origen, o.source),
   ].join("");
 
   const resto = o.answers.length
     ? `<h3 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b6478;font-weight:600;margin:2rem 0 .5rem">
-         Respuestas del formulario
+         ${esc(m.leadRespuestas)}
        </h3>
        <table style="border-collapse:collapse;width:100%">${o.answers.map(([k, v]) => fila(k, v)).join("")}</table>`
     : "";
 
   return {
-    subject: `Nueva consulta: ${o.funnel} — ${nombre}`,
+    subject: m.leadAsunto(o.funnel, nombre),
     html: wrap(
-      `<h2 style="font-size:24px;margin:0 0 .35rem">Tenés una consulta nueva</h2>
-       <p style="color:#6b6478;margin-bottom:1.75rem">
-         Entró una consulta por ${esc(o.funnel)}. Los datos de contacto están abajo.
-       </p>
+      `<h2 style="font-size:24px;margin:0 0 .35rem">${esc(m.leadTitulo)}</h2>
+       <p style="color:#6b6478;margin-bottom:1.75rem">${esc(m.leadBajada(o.funnel))}</p>
 
        <h3 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b6478;font-weight:600;margin:0 0 .5rem">
-         Datos de contacto
+         ${esc(m.leadContacto)}
        </h3>
        <table style="border-collapse:collapse;width:100%">${contacto}</table>
 
@@ -153,7 +162,7 @@ export function leadEmail(o: {
 
        <p style="margin:2rem 0 0">
          <a href="${o.url}" style="background:#2d0a4e;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;display:inline-block;font-weight:500">
-           Ver la consulta
+           ${esc(m.leadVer)}
          </a>
        </p>`,
       PIE_ESTUDIO,

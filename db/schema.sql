@@ -316,3 +316,14 @@ alter table events add column if not exists surface_id uuid;
 create index if not exists idx_events_surface
   on events (firm_id, surface, surface_id, created_at desc)
   where surface_id is not null;
+
+-- En que idioma habla cada estudio.
+--
+-- Un estudio argentino y uno de Estados Unidos usan la misma instalacion: el
+-- idioma no puede ser global. Vive en el estudio y no en el usuario porque lo
+-- que manda es a quien le habla el formulario —el cliente del estudio— y no
+-- quien administra el panel.
+--
+-- Arranca en castellano para no cambiarle nada a los que ya estan.
+alter table firms add column if not exists lang text not null default 'es'
+  check (lang in ('es', 'en'));

@@ -75,6 +75,7 @@ export default async function EditarCaso({
         inicial={caso.steps?.steps ?? []}
         guardar={guardar}
         verUrl={`/f/${firm.slug}/${funnel.slug}/${caso.slug}`}
+        lang={firm.lang}
       />
     </>
   );

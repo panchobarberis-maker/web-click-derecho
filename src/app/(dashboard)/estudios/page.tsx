@@ -7,6 +7,7 @@ import { requireStaff, FIRM_COOKIE } from "@/lib/tenancy";
 import { slugUrl } from "@/lib/forms";
 import { estadoDeTodos, pasosDe, hechos } from "@/lib/onboarding";
 import { baseUrl } from "@/lib/base-url";
+import { IDIOMAS, esLang } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -40,11 +41,12 @@ async function crear(formData: FormData) {
   const notify = String(formData.get("notify_email") ?? "").trim().toLowerCase();
 
   const [firm] = await sql<{ id: string }[]>`
-    insert into firms (name, slug, notify_email, accent, logo_url, intro)
+    insert into firms (name, slug, notify_email, accent, logo_url, intro, lang)
     values (${name}, ${slug}, ${notify || null},
             ${String(formData.get("accent") ?? "#5a4630")},
             ${String(formData.get("logo_url") ?? "").trim() || null},
-            ${String(formData.get("intro") ?? "").trim() || null})
+            ${String(formData.get("intro") ?? "").trim() || null},
+            ${esLang(formData.get("lang")) ? String(formData.get("lang")) : "es"})
     returning id`;
 
   // Quedar parado en el estudio recién creado es lo que uno quiere después de
@@ -203,6 +205,15 @@ export default async function Estudios() {
 
             <label className="lbl" htmlFor="accent">Color principal</label>
             <input id="accent" name="accent" type="color" defaultValue="#5a4630" />
+
+            <label className="lbl" htmlFor="lang">Idioma</label>
+            <select id="lang" name="lang" defaultValue="es">
+              {IDIOMAS.map((i) => <option key={i.code} value={i.code}>{i.nombre}</option>)}
+            </select>
+            <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+              En qué idioma le habla el formulario a los clientes de este estudio. Se puede cambiar
+              después desde Ajustes.
+            </p>
 
             <label className="lbl" htmlFor="logo_url">Logo (URL)</label>
             <input id="logo_url" name="logo_url" placeholder="https://…/logo.png" />

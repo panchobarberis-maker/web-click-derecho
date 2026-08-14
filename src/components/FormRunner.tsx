@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { Field, Firm, Funnel, Workflow } from "@/lib/db";
 import { sessionKey } from "@/lib/session-key";
 import { pickAttribution } from "@/lib/attribution";
+import { t } from "@/lib/i18n";
 
 type Props = {
   firm: Firm;
@@ -16,6 +17,9 @@ const post = (url: string, body: unknown) =>
   fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 
 export function FormRunner({ firm, funnel, workflow, search }: Props) {
+  // El formulario le habla al cliente del estudio, asi que el idioma sale del
+  // estudio y no del navegador de quien mira.
+  const x = t(firm.lang).form;
   const steps = workflow.steps?.steps ?? [];
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Record<string, string>>({});
@@ -134,11 +138,11 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
     for (const f of steps[step]?.fields ?? []) {
       const v = (data[f.key] ?? "").trim();
       if (f.type === "checkbox") {
-        if (f.required && v !== "Sí") errs[f.key] = "Necesitamos tu confirmación para seguir";
+        if (f.required && v !== "Sí") errs[f.key] = x.consentimiento;
         continue;
       }
-      if (f.required && !v) errs[f.key] = "Completá este campo";
-      else if (f.type === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) errs[f.key] = "Revisá el email";
+      if (f.required && !v) errs[f.key] = x.requerido;
+      else if (f.type === "email" && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) errs[f.key] = x.emailInvalido;
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -177,10 +181,10 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
       <div className="fcard">
         <div className="fdone">
           <div className="check">✓</div>
-          <h2>Recibimos tu consulta</h2>
+          <h2>{x.graciasTitulo}</h2>
           <p>
-            Un abogado de {firm.name} la va a revisar y te contacta
-            {data.email ? <> a <strong>{data.email}</strong></> : null}. Si es urgente, respondé el mail que te acabamos de mandar.
+            {x.graciasCuerpo(firm.name)}
+            {data.email ? <> — <strong>{data.email}</strong></> : null}. {x.graciasEmail}
           </p>
         </div>
       </div>
@@ -188,13 +192,11 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
   }
 
   const current = steps[step];
-  if (!current) return <div className="fcard"><p className="empty">Este formulario todavía no tiene preguntas.</p></div>;
+  if (!current) return <div className="fcard"><p className="empty">{x.sinPreguntas}</p></div>;
 
   return (
     <div className="fcard">
-      <div className="fsteps">
-        Paso {step + 1} de {steps.length} · {funnel.name}
-      </div>
+      <div className="fsteps">{x.paso(step + 1, steps.length, funnel.name)}</div>
       <div className="fprogress">
         <span style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
       </div>
@@ -205,36 +207,35 @@ export function FormRunner({ firm, funnel, workflow, search }: Props) {
       </div>
 
       {current.fields.map((f) => (
-        <FieldInput key={f.key} field={f} value={data[f.key] ?? ""} error={errors[f.key]} onChange={set} />
+        <FieldInput key={f.key} field={f} value={data[f.key] ?? ""} error={errors[f.key]} onChange={set} x={x} />
       ))}
 
       <div className="fnav">
         {step > 0 && (
           <button type="button" className="fbtn back" onClick={() => setStep(step - 1)}>
-            ← Atrás
+            {x.atras}
           </button>
         )}
         <button type="button" className="fbtn" onClick={next} disabled={sending} style={{ marginLeft: "auto" }}>
-          {sending ? "Enviando…" : step === steps.length - 1 ? "Enviar consulta" : "Continuar"}
+          {sending ? x.enviando : step === steps.length - 1 ? x.enviar : x.continuar}
         </button>
       </div>
 
       {step === 0 && (
-        <p className="fnote">
-          Tus datos van directo al estudio y se usan solo para responder esta consulta.
-        </p>
+        <p className="fnote">{x.nota}</p>
       )}
     </div>
   );
 }
 
 function FieldInput({
-  field, value, error, onChange,
+  field, value, error, onChange, x,
 }: {
   field: Field;
   value: string;
   error?: string;
   onChange: (k: string, v: string) => void;
+  x: ReturnType<typeof t>["form"];
 }) {
   const id = `f-${field.key}`;
   const label = (
@@ -257,7 +258,7 @@ function FieldInput({
         <textarea id={id} value={value} onChange={(e) => onChange(field.key, e.target.value)} />
       ) : field.type === "select" ? (
         <select id={id} value={value} onChange={(e) => onChange(field.key, e.target.value)}>
-          <option value="">Elegí una opción…</option>
+          <option value="">{x.elegir}</option>
           {field.options?.map((o) => <option key={o} value={o}>{o}</option>)}
         </select>
       ) : field.type === "checkbox" ? (

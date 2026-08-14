@@ -7,6 +7,7 @@ import { slugUrl } from "@/lib/forms";
 import { baseUrl } from "@/lib/base-url";
 import { SubirArchivo } from "@/components/Subir";
 import { almacenamientoListo, CLASES } from "@/lib/storage";
+import { IDIOMAS, esLang } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,8 @@ async function guardar(formData: FormData) {
       accent       = ${String(formData.get("accent") ?? "#5a4630")},
       logo_url     = ${String(formData.get("logo_url") ?? "").trim() || null},
       hero_url     = ${String(formData.get("hero_url") ?? "").trim() || null},
-      intro        = ${String(formData.get("intro") ?? "").trim() || null}
+      intro        = ${String(formData.get("intro") ?? "").trim() || null},
+      lang         = ${esLang(formData.get("lang")) ? String(formData.get("lang")) : firm.lang}
     where id = ${firm.id}`;
 
   revalidatePath("/", "layout");
@@ -100,6 +102,15 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             <label className="lbl" htmlFor="accent">Color principal</label>
             <input id="accent" name="accent" type="color" defaultValue={actual.accent} />
 
+            <label className="lbl" htmlFor="lang">Idioma del formulario</label>
+            <select id="lang" name="lang" defaultValue={actual.lang}>
+              {IDIOMAS.map((i) => <option key={i.code} value={i.code}>{i.nombre}</option>)}
+            </select>
+            <p className="muted" style={{ fontSize: ".78rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+              En qué idioma le habla el formulario a los clientes del estudio, y en cuál le llegan
+              los mails. No cambia las preguntas que cargaste vos: esas quedan como las escribiste.
+            </p>
+
             <SubirArchivo name="logo_url" clase="imagen" etiqueta="Logo" defaultValue={actual.logo_url ?? ""}
                           habilitado={puedeSubir} maxMb={CLASES.imagen.maxMb} vistaPrevia
                           ayuda="Se ve arriba del formulario. Fondo transparente (png o svg) queda mejor." />
@@ -131,6 +142,10 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             </li>
             <li>
               <strong>Imagen de la página pública</strong> — la foto del costado en {base}/f/{actual.slug}.
+            </li>
+            <li>
+              <strong>Idioma</strong> — el formulario público, el pop-up, el clip y los mails al
+              cliente. El panel también lo sigue, así ves lo mismo que ve el estudio.
             </li>
             <li>
               <strong>Texto de privacidad</strong> — el párrafo debajo del formulario. Es lo que baja la

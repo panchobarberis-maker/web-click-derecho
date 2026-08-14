@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { sql, type Workflow } from "@/lib/db";
 import { leadEmail, sendMail } from "@/lib/mailer";
+import type { Lang } from "@/lib/i18n";
 import { sourceLabel } from "@/lib/format";
 import { baseUrl } from "@/lib/base-url";
 
@@ -18,12 +19,12 @@ export async function POST(req: Request) {
   const [s] = await sql<
     {
       id: string; firm_id: string; funnel_id: string | null; workflow_id: string | null;
-      notify_email: string | null; funnel: string; workflow: string;
+      notify_email: string | null; funnel: string; workflow: string; lang: Lang;
       steps: Workflow["steps"] | null; source: string | null;
     }[]
   >`
     select s.id, s.firm_id, s.funnel_id, s.workflow_id, s.source,
-           fi.notify_email,
+           fi.notify_email, fi.lang,
            coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow, w.steps
     from sessions s
     join firms fi on fi.id = s.firm_id
@@ -67,6 +68,7 @@ export async function POST(req: Request) {
         .filter(([k, v]) => !k.startsWith("_") && !CONTACTO.has(k) && v)
         .map(([k, v]) => [labels.get(k) ?? k, String(v)] as [string, string]),
       url: `${base}/responses/${s.id}`,
+      lang: s.lang,
     });
 
     sendMail({ to: s.notify_email, ...mail, replyTo: data.email || undefined }).catch((e) =>

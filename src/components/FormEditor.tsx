@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import type { Field, Step } from "@/lib/db";
 import { CON_OPCIONES, TIPOS, pasoDeCoordinacion, slugify, validarFormulario } from "@/lib/forms";
+import type { Lang } from "@/lib/i18n";
 
 type Guardar = (steps: Step[]) => Promise<{ ok: boolean; problemas?: string[] }>;
 
@@ -13,10 +14,13 @@ export function FormEditor({
   inicial,
   guardar,
   verUrl,
+  lang = "es",
 }: {
   inicial: Step[];
   guardar: Guardar;
   verUrl: string;
+  /** Para que el paso sugerido salga en el idioma del estudio. */
+  lang?: Lang;
 }) {
   const [steps, setSteps] = useState<Step[]>(inicial.length ? inicial : [nuevoPaso(1)]);
   const [problemas, setProblemas] = useState<string[]>([]);
@@ -202,7 +206,7 @@ export function FormEditor({
           Así lo agrega el que arma el formulario cuando ya cargó el resto.
         */}
         {!tieneCoordinacion && (
-          <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(pasoDeCoordinacion()))}>
+          <button type="button" className="agregar paso-nuevo" onClick={() => actualizar((s) => void s.push(pasoDeCoordinacion(lang)))}>
             + Agregar paso de coordinación
           </button>
         )}

@@ -1,5 +1,6 @@
 import { baseUrl } from "@/lib/base-url";
 import { sql } from "@/lib/db";
+import { t, type Lang } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -9,9 +10,10 @@ type Cfg = {
   paginas: string;
   autoplay: boolean;
   preview: boolean;
+  lang: Lang;
 };
 
-const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "", autoplay: true, preview: false };
+const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "", autoplay: true, preview: false, lang: "es" };
 
 /**
  * Configuracion guardada de un pop-up o un clip.
@@ -32,9 +34,9 @@ async function cargarCfg(url: URL): Promise<Cfg> {
   const [row] = await sql<
     { name: string; cta: string; active: boolean; accent: string; firm: string;
       funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string;
-      paginas?: string | null; autoplay?: boolean }[]
+      paginas?: string | null; autoplay?: boolean; lang: Lang }[]
   >`
-    select w.*, fi.slug as firm, fi.accent,
+    select w.*, fi.slug as firm, fi.accent, fi.lang,
            f.slug as funnel, wf.slug as workflow
     from ${sql(tabla)} w
     join firms fi on fi.id = w.firm_id
@@ -57,6 +59,7 @@ async function cargarCfg(url: URL): Promise<Cfg> {
     paginas: row.paginas ?? "",
     autoplay: row.autoplay !== false,
     preview: url.searchParams.get("preview") === "1",
+    lang: row.lang ?? "es",
     id,
   };
 }
@@ -84,6 +87,9 @@ export async function GET(req: Request) {
   "use strict";
   var ORIGIN = ${JSON.stringify(origin)};
   var CFG = ${JSON.stringify(cfg)};
+  // Los textos del widget viajan resueltos: el idioma lo decide el estudio y
+  // el sitio del estudio no tiene por que saber nada de esto.
+  var TX = ${JSON.stringify(t(cfg.lang).widget)};
   var s = document.currentScript;
   if (!s) return;
 
@@ -97,7 +103,7 @@ export async function GET(req: Request) {
   var funnel  = attr("funnel", "");
   var flow    = attr("workflow", "");
   var trigger = attr("trigger", "delay:12");  // delay:N | scroll:N | exit | now
-  var cta     = attr("cta", "Consultá tu caso");
+  var cta     = attr("cta", TX.ctaDefecto);
   var accent  = attr("accent", "#2d0a4e");
   var target  = s.getAttribute("data-target") || "";
   var video   = attr("video", "");
@@ -244,7 +250,7 @@ export async function GET(req: Request) {
   function frame(surface) {
     var f = document.createElement("iframe");
     f.src = url(surface);
-    f.title = "Formulario de consulta";
+    f.title = TX.tituloIframe;
     f.loading = "lazy";
     f.style.cssText = "width:100%;height:100%;border:0;display:block;background:#f7f5f2";
     return f;
@@ -285,7 +291,7 @@ export async function GET(req: Request) {
 
     var close = document.createElement("button");
     close.innerHTML = "&times;";
-    close.setAttribute("aria-label", "Cerrar");
+    close.setAttribute("aria-label", TX.cerrar);
     close.style.cssText =
       "position:absolute;top:12px;right:14px;z-index:2;width:32px;height:32px;border:0;border-radius:50%;" +
       "background:rgba(255,255,255,.92);color:#1c1230;font-size:22px;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.15)";
@@ -397,7 +403,7 @@ export async function GET(req: Request) {
       return btn;
     }
 
-    var play = chip(arranca ? "&#10073;&#10073;" : "&#9654;", arranca ? "Pausar" : "Reproducir", function () {
+    var play = chip(arranca ? "&#10073;&#10073;" : "&#9654;", arranca ? TX.pausar : TX.reproducir, function () {
       if (v.paused) v.play(); else v.pause();
     });
 
@@ -405,16 +411,16 @@ export async function GET(req: Request) {
     // autoplay o corto la reproduccion por su cuenta, el boton dice la verdad.
     function pintar() {
       play.innerHTML = v.paused ? "&#9654;" : "&#10073;&#10073;";
-      play.setAttribute("aria-label", v.paused ? "Reproducir" : "Pausar");
+      play.setAttribute("aria-label", v.paused ? TX.reproducir : TX.pausar);
     }
     v.addEventListener("play", pintar);
     v.addEventListener("pause", pintar);
-    var sound = chip("&#128263;", "Activar sonido", function () {
+    var sound = chip("&#128263;", TX.activarSonido, function () {
       v.muted = !v.muted;
       sound.innerHTML = v.muted ? "&#128263;" : "&#128266;";
-      sound.setAttribute("aria-label", v.muted ? "Activar sonido" : "Silenciar");
+      sound.setAttribute("aria-label", v.muted ? TX.activarSonido : TX.silenciar);
     });
-    var hide = chip("&times;", "Cerrar el video", function () { card.remove(); });
+    var hide = chip("&times;", TX.cerrarVideo, function () { card.remove(); });
     hide.style.marginLeft = "auto";
 
     bar.appendChild(play);

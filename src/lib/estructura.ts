@@ -22,4 +22,5 @@ export const COLUMNAS: [tabla: string, columna: string][] = [
   ["clips", "paginas"],
   ["clips", "autoplay"],
   ["events", "surface_id"],
+  ["firms", "lang"],
 ];

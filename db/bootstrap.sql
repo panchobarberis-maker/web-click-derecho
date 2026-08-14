@@ -337,6 +337,17 @@ create index if not exists idx_events_surface
   on events (firm_id, surface, surface_id, created_at desc)
   where surface_id is not null;
 
+-- En que idioma habla cada estudio.
+--
+-- Un estudio argentino y uno de Estados Unidos usan la misma instalacion: el
+-- idioma no puede ser global. Vive en el estudio y no en el usuario porque lo
+-- que manda es a quien le habla el formulario —el cliente del estudio— y no
+-- quien administra el panel.
+--
+-- Arranca en castellano para no cambiarle nada a los que ya estan.
+alter table firms add column if not exists lang text not null default 'es'
+  check (lang in ('es', 'en'));
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -436,11 +447,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$qZIQjRNMh5jY9sts7AS1/Q==$AWzyOIzf+e67dBNSZk4Qxlr3RimSMbEiGuzpN5ak0LDYLDDeByhbJ3NMt0YaAS05y1nnmZFPQCr6wSvMn3CezA==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$WhuTEmbGPCJQ3BbGeSeVPA==$uewNpjbtll9i0YYRYq/1KjMzFzp8cAn2M1jRRJyhBK3MMtn/47P5aqEhyw4tr99/RzAMbiZ4keYeCuqkN/p8PQ==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$+QfzfhcZdlW6LtjRr1pjbA==$vAS3rJcgYf4rg3Ea7FGtNXV80uZaKucjwdKAEOruNgiJkhNRsn85C43A9msCacU7/5T4nYgtdYCmU+145wcL2A==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$AuFj5KJj9NoJXqbxom1/DA==$9A1dcTwcbWW64h/WbPD/bNcnwTfVeaRC/vKpYQ8LRIxvHGV9+4SH2q7CFkszNHAuBQ4AIijtyqeID6VvI/KqnA==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

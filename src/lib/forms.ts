@@ -1,4 +1,5 @@
 import type { Field, Step } from "./db";
+import type { Lang } from "./i18n";
 
 export const TIPOS: { value: Field["type"]; label: string }[] = [
   { value: "text", label: "Texto corto" },
@@ -89,7 +90,15 @@ export function validarFormulario(steps: Step[]): string[] {
  * estudios que solo litigan en algunas. Preguntarlo en el paso 1 evita que el
  * estudio invierta una entrevista en un caso que no puede tomar.
  */
+/**
+ * Las jurisdicciones que se ofrecen por defecto.
+ *
+ * En Argentina el derecho cambia de provincia a provincia y en Estados Unidos
+ * de estado a estado, asi que la pregunta es la misma y solo cambia la lista.
+ */
 export const PROVINCIAS = ["Ciudad Autónoma de Buenos Aires", "Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes", "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro", "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", "Tierra del Fuego", "Tucumán"] as const;
+
+export const ESTADOS_US = ["Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"] as const;
 
 /**
  * Paso de cierre sugerido: como y cuando contactar, y con cuanta urgencia.
@@ -98,7 +107,49 @@ export const PROVINCIAS = ["Ciudad Autónoma de Buenos Aires", "Buenos Aires", "
  * empieza o se va, asi que cuanto mas corto mejor; estas preguntas se
  * responden bien cuando ya conto el caso y esta invertida.
  */
-export function pasoDeCoordinacion(): Step {
+export function pasoDeCoordinacion(lang: Lang = "es"): Step {
+  if (lang === "en") {
+    return {
+      title: "Tell us more",
+      subtitle: "Last one: your case in your own words, and how you'd like us to reach you.",
+      fields: [
+        { key: "relato", label: "What happened?", type: "textarea", required: false },
+        {
+          key: "urgencia",
+          label: "How urgent is it?",
+          type: "radio",
+          required: true,
+          options: [
+            "Urgent — I have a deadline coming up",
+            "I want it handled this month",
+            "Just looking into it, no rush",
+          ],
+        },
+        {
+          key: "contacto_pref",
+          label: "How would you prefer we reach you?",
+          type: "radio",
+          required: true,
+          options: ["Phone call", "Text message", "Email", "Video call (Zoom or Meet)", "In person at the office"],
+        },
+        {
+          key: "franja",
+          label: "Best time of day?",
+          type: "select",
+          required: false,
+          options: ["Morning (9am–1pm)", "Afternoon (1pm–6pm)", "Either works"],
+        },
+        {
+          key: "otro_abogado",
+          label: "Have you already spoken with another attorney about this?",
+          type: "radio",
+          required: false,
+          options: ["No", "Yes, one consultation", "Yes, I have an attorney on the case"],
+        },
+      ],
+    };
+  }
+
   return {
     title: "Contanos y coordinamos",
     subtitle: "Lo último: tu caso en tus palabras, y cómo te viene bien que te contactemos.",
@@ -152,7 +203,27 @@ export function pasoDeCoordinacion(): Step {
 }
 
 /** Paso de contacto sugerido al crear un formulario nuevo. */
-export function pasoDeContacto(): Step {
+export function pasoDeContacto(lang: Lang = "es"): Step {
+  if (lang === "en") {
+    return {
+      title: "Who are we speaking with?",
+      subtitle: "That's all we need to open your request and get back to you.",
+      fields: [
+        { key: "first_name", label: "First name", type: "text", required: true },
+        { key: "last_name", label: "Last name", type: "text", required: true },
+        { key: "email", label: "Email", type: "email", required: true },
+        { key: "phone", label: "Phone", type: "tel", required: false },
+        { key: "provincia", label: "Which state?", type: "select", required: true, options: [...ESTADOS_US] },
+        {
+          key: "consent",
+          label: "I agree to be contacted by email and text about my request",
+          type: "checkbox",
+          required: false,
+        },
+      ],
+    };
+  }
+
   return {
     title: "¿Con quién hablamos?",
     subtitle: "Con esto ya podemos abrir la consulta y contactarte.",

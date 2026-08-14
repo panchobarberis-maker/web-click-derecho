@@ -69,7 +69,7 @@ async function crearCaso(formData: FormData) {
   // al final y no en el medio de los pasos del caso.
   await sql`
     insert into workflows (funnel_id, name, slug, steps, sort_order)
-    values (${funnel.id}, ${name}, ${slug}, ${sql.json({ steps: [pasoDeContacto()] })}, ${n})`;
+    values (${funnel.id}, ${name}, ${slug}, ${sql.json({ steps: [pasoDeContacto(firm.lang)] })}, ${n})`;
 
   revalidatePath(`/funnels/${funnel.slug}`);
   redirect(`/funnels/${funnel.slug}/${slug}`);
