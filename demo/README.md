@@ -10,7 +10,7 @@ Todo esto está acá para poder **volver a grabarlos** cuando la aplicación cam
 
 | Archivo | Qué es |
 |---|---|
-| `video/right-lead-corto-en.mp4` | 1:00. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
+| `video/right-lead-corto-en.mp4` | 1:06. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
 | `video/right-lead-demo-en.mp4` | 2:04, con locución. La primera versión, con la historia contada de otra forma. Para una reunión. |
 
 Los dos están en inglés.

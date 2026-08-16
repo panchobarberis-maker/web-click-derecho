@@ -76,6 +76,10 @@ const limpiar = async () => {
   await sql`delete from sessions where email = ${VISITANTE.email}`;
   await sql`update popups set trigger = ${pop.trigger} where id = ${pop.id}`;
   await sql`update clips set video_url = ${clip.video_url} where id = ${clip.id}`;
+  // Todas, no solo la que se usa: cada grabacion manda un recordatorio y a la
+  // tercera la lista de abandonos aparece con medio panel ya recordado.
+  await sql`update sessions set recovery_sent_at = null
+            where firm_id = ${firm.id} and data->>'_demo' = '1'`;
   await sql`update sessions set recovery_sent_at = null where id = ${dejado.id}`;
 };
 for (const s of ["SIGINT", "SIGTERM"]) process.on(s, async () => { await limpiar(); process.exit(1); });
@@ -133,24 +137,24 @@ try {
   await pausa(VOZ.length ? VOZ[0] * 1000 + 300 : 2200);
   await cartel(null);
 
-  await rotulo(p, "Someone reads the firm's blog post about workplace injuries.");
+  await rotulo(p, "So this is the firm's blog. Someone's reading it — they came in from an ad.");
   await mover(p, 700, 400, { esperar: 300 });
   await p.mouse.wheel(0, 300);
   await p.locator('div[role="dialog"]').waitFor({ timeout: 20000 });
   await pausa(300);
 
   // El pop-up no es el formulario: es un aviso que invita a consultar.
-  await rotulo(p, "A pop-up invites them to ask — it isn't the form yet.");
+  await rotulo(p, "And there's the pop-up. Notice it's not the form. It just asks.");
   await pausa(700);
   await tocar(p, p.locator('div[role="dialog"] button', { hasText: ctaAviso }).first(), rapido);
   await marco().locator(".pill-btn").first().waitFor({ timeout: 20000 });
 
-  await rotulo(p, "The form asks what the case is about…");
+  await rotulo(p, "She taps it, and now it asks what her case is about.");
   await tocar(p, marco().locator(".pill-btn", { hasText: "Employment Law" }), rapido);
   await tocar(p, marco().locator(".pill-btn", { hasText: "Workplace injury" }), rapido);
   await marco().locator("#f-first_name").waitFor({ timeout: 15000 });
 
-  await rotulo(p, "…then asks only what that case needs.");
+  await rotulo(p, "Employment, workplace injury. From here it only asks what that case needs.");
   await escribir(p, marco().locator("#f-first_name"), VISITANTE.nombre, { ms: 16 });
   await escribir(p, marco().locator("#f-email"), VISITANTE.email, { ms: 14 });
   await marco().locator("#f-last_name").fill(VISITANTE.apellido);
@@ -159,7 +163,7 @@ try {
   await tocar(p, marco().locator(".fcheck"), veloz);
   await tocar(p, marco().locator(".fbtn", { hasText: "Continue" }), veloz);
 
-  await rotulo(p, "She answers, and sends it.");
+  await rotulo(p, "Name, email, what happened to her. And she sends it.");
   await marco().locator("#f-lesion").waitFor({ timeout: 15000 });
   await marco().locator("#f-lesion").fill("Fractured wrist");
   await marco().locator("#f-fecha").fill("2026-07-28");
@@ -178,20 +182,20 @@ try {
   await p.goto(`${APP}/responses`, { waitUntil: "networkidle" });
   await tocar(p, p.locator("a", { hasText: `${VISITANTE.nombre} ${VISITANTE.apellido}` }).first(), rapido);
   await p.waitForURL("**/responses/**", { timeout: 15000 });
-  await rotulo(p, "It reaches the firm complete: every answer, and how urgent it is.");
+  await rotulo(p, "And here it is on the firm's side. Every answer, and how urgent she says it is.");
   await pausa(2200);
 
   // ======================= 2. y cuando no terminan =========================
   await p.goto(`${APP}/responses?tab=abandonadas`, { waitUntil: "networkidle" });
-  await rotulo(p, "Most people don't finish. Those are the ones you normally lose.");
+  await rotulo(p, "Now — most people never get that far. That's the part everybody loses.");
   await pausa(1900);
-  await rotulo(p, "Here you still have them, and the step they stopped at.");
+  await rotulo(p, "Not here. You've got her email and the exact step she stopped at.");
   await pausa(1700);
 
   // Por id y no por mail: los nombres del historial se repiten y la fila de
   // arriba puede ser otra consulta de la misma persona, ya recordada.
   const fila = p.locator(`tr:has(a[href="/responses/${dejado.id}"])`);
-  await rotulo(p, "One reminder brings them back to their own half-filled form.");
+  await rotulo(p, "One reminder goes out, with a link straight back to her own form.");
   await tocar(p, fila.locator("button", { hasText: "Send a reminder" }), rapido);
   await pausa(700);
 
@@ -205,16 +209,16 @@ try {
   await tocar(p, p.locator("a", { hasText: "Finish my request" }), rapido);
   await p.waitForURL("**/f/**", { timeout: 20000 });
   await p.locator(".fsteps").waitFor({ timeout: 20000 });
-  await rotulo(p, "Nothing they already typed has to be typed again.");
+  await rotulo(p, "And look — everything she typed is still there.");
   await pausa(2000);
 
   // ======================= 3. donde vive el formulario =====================
   await p.goto(`${APP}/popups`, { waitUntil: "networkidle" });
-  await rotulo(p, "It can live in a pop-up — each one with its own code and its own numbers.");
+  await rotulo(p, "The form can live in a pop-up. Each one has its own snippet and its own numbers.");
   await mover(p, 800, 210, { esperar: 1800 });
 
   await p.goto(`${SITIO}/?w=clip=${clip.id}`, { waitUntil: "domcontentloaded" });
-  await rotulo(p, "Or in a short video of the attorney, pinned to a corner.");
+  await rotulo(p, "Or in a little video of you, down in the corner.");
   // Sin remate propio: que el clip abre el mismo formulario ya se vio con el
   // pop-up, y el click se sigue viendo igual.
   await p.locator("video").waitFor({ timeout: 20000 });
@@ -226,7 +230,7 @@ try {
   await p.goto(`${APP}/responses`, { waitUntil: "networkidle" });
   await tocar(p, p.locator("a", { hasText: `${VISITANTE.nombre} ${VISITANTE.apellido}` }).first(), veloz);
   await p.waitForURL("**/responses/**", { timeout: 15000 });
-  await rotulo(p, "And every request says where it came from — down to the blog post.");
+  await rotulo(p, "And every request tells you where it came from. Right down to the blog post.");
   await mover(p, 1090, 300, { esperar: 400 });
   await mover(p, 1090, 445, { esperar: 2000 });
 
@@ -234,7 +238,7 @@ try {
   await mover(p, 720, 500, { esperar: 200 });
   await p.mouse.wheel(0, 700);
   await pausa(250);
-  await rotulo(p, "So you know which campaign brings cases, not clicks.");
+  await rotulo(p, "So you can see which campaign is actually bringing you cases.");
   await pausa(1900);
   await rotulo(p, "");
 
