@@ -7,3 +7,6 @@ next-env.d.ts
 # El video se regenera: lo crudo y lo compilado no van al repo
 demo/salida/
 demo/.build/
+
+# El clip del abogado, que va suelto y no se versiona
+demo/clip-abogado.*

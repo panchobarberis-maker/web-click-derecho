@@ -52,7 +52,7 @@ npx tsc demo/.build/*.ts --module esnext --target es2022 --moduleResolution bund
 
 # 4. El estudio de demostración y el video del clip
 node demo/estudio-en.mjs
-node demo/clip.mjs
+node demo/clip.mjs            # avisa si está usando el relleno
 
 # 5. A grabar (deja el .webm crudo y los tiempos en demo/salida/)
 node demo/grabar-corto.mjs      # o grabar.mjs para el largo
@@ -103,17 +103,43 @@ que mirarla antes de montar.
 | `escena.mjs` | El puntero, los subtítulos y las placas. También lleva la cuenta de en qué segundo entra cada frase. |
 | `sitio.mjs` | El sitio del estudio y la casilla de mail. Es el escenario, no parte de la aplicación. |
 | `estudio-en.mjs` | El estudio inventado: áreas, formularios, pop-ups, clips y dos meses de tráfico. |
-| `clip-fondo.html` · `clip.mjs` | La placa vertical del clip y el script que la convierte en video. Es un relleno: **reemplazar por una grabación real del abogado**, que es lo que hace que un clip sirva. |
+| `clip.mjs` | Prepara el video del clip: usa `clip-abogado.*` si está, y si no fabrica un relleno con `clip-fondo.html`. |
 | `cortar.py` · `montar.py` | Partir la locución y pegarla al video. |
+
+## El clip tiene que ser una persona hablando
+
+Es lo único del video que todavía es de mentira, y es justo lo que hace que un
+clip sirva: alguien mira quince segundos a un abogado explicando algo y por eso
+abre el formulario. Una placa con la marca no consigue eso.
+
+**Para reemplazarlo:** dejar la grabación en `demo/clip-abogado.mp4` (también
+sirve .mov, .webm o .m4v) y correr `node demo/clip.mjs`. No hay que tocar nada
+más: el script la recorta a vertical, la pasa a webm y la grabación siguiente ya
+la usa. Si el archivo no está, avisa por consola que está usando el relleno.
+
+Lo que conviene que tenga esa grabación:
+
+- **Vertical (9:16)**, o al menos que aguante un recorte al centro: en el video
+  se ve en una tarjeta de unos 200 px de ancho.
+- **De 10 a 20 segundos.** Más que eso nadie lo mira.
+- **Que se entienda sin sonido.** En un sitio real la mayoría lo ve mudo.
+- La cara grande y centrada. A ese tamaño, un plano abierto no se lee.
+
+El pasaje a webm no es un capricho: el Chromium con el que se graba no
+reproduce H.264, así que un mp4 se vería como un cuadro negro en el video —en
+el navegador de un visitante real andaría bien.
+
+`clip-abogado.*` está en el `.gitignore` a propósito: es la cara de una persona
+y no se sube al repositorio sin decidirlo. Si querés versionarlo,
+`git add -f demo/clip-abogado.mp4`.
 
 ## Un detalle que importa
 
 Todo lo que se ve es real menos dos cosas, y conviene tenerlas presentes antes
 de mostrarle el video a alguien:
 
-- **El contenido del clip** es una placa con la marca, no una persona hablando.
-  Es lo primero que conviene reemplazar: un clip funciona porque se ve la cara
-  del abogado.
+- **El contenido del clip** es una placa con la marca, no una persona hablando
+  (ver abajo).
 - **El historial** del estudio es tráfico generado. Las proporciones son
   verosímiles (se abre entre el 3% y el 9% de las veces que se muestra un
   pop-up), pero son números inventados y no hay que presentarlos como
