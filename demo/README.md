@@ -141,11 +141,19 @@ y no se sube al repositorio sin decidirlo. Si querés versionarlo,
 agachándola cuando habla —sin eso, una cama que se escucha bien en los
 silencios tapa la voz cuando entra.
 
-La que hay ahora **está sintetizada**: cuatro acordes de ondas filtradas. Suena
-a colchón y nada más, que para esto alcanza, pero no es una pista de verdad. No
-puedo bajar música con licencia desde acá, y usar una ajena en un video de venta
-es pedir un problema. Si conseguís una, dejala en `demo/musica.mp3` y
-`musica.py` la usa en vez de generar nada.
+La que hay ahora **está sintetizada**: cuatro acordes de ondas filtradas con un
+arpegio encima. Suena a colchón y nada más, que para esto alcanza, pero no es
+una pista de verdad. No puedo bajar música con licencia desde acá, y usar una
+ajena en un video de venta es pedir un problema. Si conseguís una, dejala en
+`demo/musica.mp3` y `musica.py` la usa en vez de generar nada.
+
+**El nivel se fija midiendo de 300 a 3000 Hz, no el pico**, y vale la pena saber
+por qué: las dos primeras versiones no se escuchaban aunque el pico estuviera
+donde tenía que estar, porque toda la energía vivía abajo de 300 Hz y un parlante
+de teléfono o de notebook no baja hasta ahí. Ahora la cama queda en -30 dB en esa
+banda contra una voz que promedia -19: se escucha en los silencios y desaparece
+abajo cuando alguien habla. Si tocás la síntesis, mirá ese número —el que imprime
+`musica.py`— y no el pico.
 
 ## Un detalle que importa
 
