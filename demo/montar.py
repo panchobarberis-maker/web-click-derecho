@@ -7,6 +7,10 @@ Cada frase va en el segundo en que entra su escena: el grabador dejo anotado
 cuando aparece cada cartel en tiempos[-corto].json, asi que no hay que
 sincronizar a ojo. Los audios se suman sobre una sola pista —no se promedian
 (normalize=0)— porque no se pisan entre si y promediar solo bajaria el volumen.
+
+Si esta salida/musica.wav, va abajo de todo como cama. La voz la agacha cuando
+habla (sidechaincompress): sin eso, una cama que se escucha en los silencios
+tapa la voz cuando entra.
 """
 import json
 import os
@@ -42,6 +46,20 @@ def main() -> None:
         etiquetas.append(f"[a{i}]")
 
     filtros.append("".join(etiquetas) + f"amix=inputs={len(etiquetas)}:normalize=0[voz]")
+
+    musica = SALIDA / "musica.wav"
+    if musica.exists():
+        entradas += ["-i", str(musica)]
+        i = len(etiquetas) + 1
+        # La cama se agacha 9 dB cuando hay voz y vuelve despacio al terminar.
+        filtros.append(f"[voz]asplit=2[voz1][llave]")
+        filtros.append(
+            f"[{i}:a][llave]sidechaincompress=threshold=0.03:ratio=6:attack=25:release=900[cama]")
+        filtros.append("[voz1][cama]amix=inputs=2:normalize=0:dropout_transition=0[mezcla]")
+        pista = "[mezcla]"
+    else:
+        pista = "[voz]"
+
     destino = AQUI / "video" / f"right-lead{sufijo or '-demo'}-en.mp4"
     destino.parent.mkdir(parents=True, exist_ok=True)
 
@@ -49,7 +67,7 @@ def main() -> None:
     # que quedar un momento en silencio, no cortarse con la ultima palabra.
     subprocess.run([FF, "-hide_banner", "-loglevel", "error", "-y", "-i", str(crudos[0]), *entradas,
                     "-filter_complex", ";".join(filtros),
-                    "-map", "0:v", "-map", "[voz]",
+                    "-map", "0:v", "-map", pista,
                     "-vf", "scale=1280:720:flags=lanczos,fps=30",
                     "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-pix_fmt", "yuv420p",
                     "-c:a", "aac", "-b:a", "160k", "-ar", "48000",

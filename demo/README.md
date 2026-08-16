@@ -10,8 +10,8 @@ Todo esto está acá para poder **volver a grabarlos** cuando la aplicación cam
 
 | Archivo | Qué es |
 |---|---|
-| `video/right-lead-corto-en.mp4` | 1:06. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
-| `video/right-lead-demo-en.mp4` | 2:04, con locución. La primera versión, con la historia contada de otra forma. Para una reunión. |
+| `video/right-lead-corto-en.mp4` | 1:25, con voz y música. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. |
+| `video/right-lead-demo-en.mp4` | 2:04, con voz. La primera versión, con la historia contada de otra forma y sin los pop-ups ni los clips. Queda como referencia. |
 
 Los dos están en inglés.
 
@@ -85,6 +85,7 @@ frase. Por eso el orden es guion → voz → grabar → montar.
 ```bash
 python3 demo/cortar.py demo/voz-corto.mp3 demo/guion-corto.txt
 node demo/grabar-corto.mjs
+python3 demo/musica.py 86        # la cama, opcional
 python3 demo/montar.py --corto
 ```
 
@@ -105,6 +106,7 @@ que mirarla antes de montar.
 | `estudio-en.mjs` | El estudio inventado: áreas, formularios, pop-ups, clips y dos meses de tráfico. |
 | `clip.mjs` | Prepara el video del clip: usa `clip-abogado.*` si está, y si no fabrica un relleno con `clip-fondo.html`. |
 | `cortar.py` · `montar.py` | Partir la locución y pegarla al video. |
+| `musica.py` | La cama de fondo. Usa `musica.*` si la dejás, y si no sintetiza una. |
 
 ## El clip tiene que ser una persona hablando
 
@@ -132,6 +134,18 @@ el navegador de un visitante real andaría bien.
 `clip-abogado.*` está en el `.gitignore` a propósito: es la cara de una persona
 y no se sube al repositorio sin decidirlo. Si querés versionarlo,
 `git add -f demo/clip-abogado.mp4`.
+
+## La música
+
+`montar.py` pone `salida/musica.wav` abajo de todo si existe, con la voz
+agachándola cuando habla —sin eso, una cama que se escucha bien en los
+silencios tapa la voz cuando entra.
+
+La que hay ahora **está sintetizada**: cuatro acordes de ondas filtradas. Suena
+a colchón y nada más, que para esto alcanza, pero no es una pista de verdad. No
+puedo bajar música con licencia desde acá, y usar una ajena en un video de venta
+es pedir un problema. Si conseguís una, dejala en `demo/musica.mp3` y
+`musica.py` la usa en vez de generar nada.
 
 ## Un detalle que importa
 
