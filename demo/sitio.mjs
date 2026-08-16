@@ -26,8 +26,13 @@ export function servirSitio({ puerto = 80, widget, mail = () => "", video = null
     // Con ?w= se cambia el widget sin levantar otro servidor: el mismo sitio
     // sirve para mostrar el pop-up y despues el clip.
     const cual = u.searchParams.get("w");
+    const src = cual ? widget.replace(/\?.*$/, `?${cual}`) : widget;
+
     res.writeHead(200, TIPO);
-    res.end(sitio(u.pathname, cual ? widget.replace(/\?.*$/, `?${cual}`) : widget));
+    // Una nota del blog: es de donde entra la mayoria del trafico organico de
+    // un estudio, y sirve para mostrar que la consulta queda atada a la pagina
+    // que la trajo y no a "el sitio" en general.
+    res.end(u.pathname.startsWith("/blog/") ? nota(src) : sitio(u.pathname, src));
   }).listen(puerto);
 }
 
@@ -102,6 +107,51 @@ const sitio = (ruta, widget) => `<!doctype html>
     </div>
   </section>
 
+  <script src="${widget}"></script>
+</body></html>`;
+
+/** Una nota del blog del estudio, con el widget puesto igual que en el resto. */
+const nota = (widget) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Ohio workers' comp deadlines — Whitfield &amp; Marsh</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Liberation Sans',Arial,sans-serif;color:#1d2b3a;background:#fff;-webkit-font-smoothing:antialiased}
+  header{display:flex;align-items:center;justify-content:space-between;padding:1.4rem 4rem;border-bottom:1px solid #e6eaef}
+  .marca{font-family:'Liberation Serif',Georgia,serif;font-size:1.5rem}
+  .marca span{color:#1e5f88}
+  nav{display:flex;gap:2.2rem;font-size:.9rem;color:#54677c}
+  .nota{max-width:44rem;margin:0 auto;padding:3.2rem 2rem 5rem}
+  .miga{font-size:.8rem;color:#7b8b9d;letter-spacing:.04em;text-transform:uppercase}
+  h1{font-family:'Liberation Serif',Georgia,serif;font-size:2.7rem;line-height:1.14;font-weight:400;margin:.9rem 0 1rem}
+  .firma{font-size:.88rem;color:#7b8b9d;padding-bottom:1.6rem;border-bottom:1px solid #e6eaef}
+  .nota p{margin-top:1.25rem;font-size:1.06rem;line-height:1.75;color:#33465a}
+  .nota h2{font-family:'Liberation Serif',Georgia,serif;font-size:1.5rem;font-weight:400;margin-top:2.2rem}
+  blockquote{margin:1.6rem 0;padding:1rem 1.3rem;border-left:3px solid #1e5f88;background:#f6f9fc;
+             font-size:1rem;line-height:1.65;color:#33465a}
+</style></head>
+<body>
+  <header>
+    <div class="marca">Whitfield <span>&amp; Marsh</span></div>
+    <nav><a>The firm</a><a>Practice areas</a><a>Results</a><a>Contact</a></nav>
+  </header>
+  <article class="nota">
+    <div class="miga">Blog · Employment law</div>
+    <h1>How long do you have to report a workplace injury in Ohio?</h1>
+    <div class="firma">Dana Whitfield · 6 min read</div>
+    <p>Most workers assume they have as long as they need. They don't. Ohio law
+       sets hard deadlines, and missing one can end a claim that would otherwise
+       have been worth pursuing.</p>
+    <h2>Report it to your employer first</h2>
+    <p>There is no magic form. A written notice to a supervisor, kept with a copy
+       and a date, is usually enough — and it is the single thing that decides
+       most disputes about whether the injury happened at work.</p>
+    <blockquote>If your employer tells you not to file, that instruction is not
+       lawful and it does not stop the clock.</blockquote>
+    <h2>Then the claim itself</h2>
+    <p>The claim goes to the Bureau of Workers' Compensation. What matters is the
+       date of injury, not the date you realized how bad it was.</p>
+  </article>
   <script src="${widget}"></script>
 </body></html>`;
 

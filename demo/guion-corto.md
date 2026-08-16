@@ -1,28 +1,43 @@
 # Right Lead — guion de locución (versión de un minuto)
 
-Video: `right-lead-corto.mp4`, 0:56, inglés.
+Video: `video/right-lead-corto-en.mp4`, 0:59, inglés.
 16 líneas. Cada una es un archivo aparte: `01.mp3` … `16.mp3`.
 
-> Este guion reemplaza al de la versión larga. El video es otro: entra el clip,
-> entran las pantallas de pop-ups y de clips, y se ve de dónde vino la consulta.
+> **Este guion reemplaza al anterior.** El video se rearmó en otro orden y la
+> locución vieja ya no le corresponde a ninguna escena.
 
 ---
 
-## Lo que cambia respecto de la vez pasada
+## El orden, que es lo que cambió
 
-**Ahora el tiempo importa.** En la versión larga te dije que hablaras tranquilo
-porque yo estiraba el video. Acá no puedo: pediste un minuto máximo y el video
-ya está en 0:56. Cada escena espera a que termine su frase, así que **cada
-segundo que te pasás se suma al total.**
+Antes el video mostraba a alguien abandonando el formulario en el segundo 13,
+cuando todavía no se había visto el formulario completo: se explicaba el
+abandono de algo que el espectador no conocía.
 
-La columna «máximo» es el hueco real que tiene cada frase. Si te pasás de ahí, el
-video crece. Un segundo de más en dos o tres líneas no se nota; cinco líneas
-largas nos sacan del minuto.
+Ahora va así:
 
-Si alguna no te entra, **no la aceleres: decime cuál y la acorto.** Una voz
-apurada suena mal; una frase más corta, no.
+1. **El proceso entero** (0:00–0:23). Alguien llega desde una nota del blog del
+   estudio, consulta, y al estudio le llega completa. De punta a punta.
+2. **Y cuando no terminan** (0:23–0:37). Recién ahí el abandono, que se entiende
+   porque ya se vio de qué se abandona.
+3. **Dónde vive el formulario** (0:37–0:48). El pop-up y el clip.
+4. **De dónde vino** (0:48–0:59). La nota del blog que trajo la consulta, y qué
+   campaña la pagó.
 
-**La voz:** la misma que usaste (Derek) para que las dos versiones suenen igual.
+---
+
+## Cómo generarlas
+
+**Una línea = un archivo**, numerados. También podés mandar una sola toma con
+las 16 seguidas: la parto yo, como la vez pasada.
+
+**La voz:** la misma que usaste la última vez (Alex Wright) para que no cambie
+el tono entre versiones.
+
+**El tiempo importa.** El video está en 0:59 y cada escena espera a que termine
+su frase, así que cada segundo de más se suma al total. La columna «máximo» es
+el hueco real de cada frase. Si alguna no entra, **no la aceleres: decime cuál y
+la acorto.**
 
 ---
 
@@ -31,27 +46,28 @@ apurada suena mal; una frase más corta, no.
 | # | Entra a | Máximo | Texto |
 |---|---------|--------|-------|
 | 1 | 0:00 | 2,2 s | Law firms pay for clicks. Most of them never become a case. |
-| 2 | 0:02 | 2,5 s | One line of code on the firm's site. |
+| 2 | 0:02 | 3,6 s | Someone reads the firm's blog post about workplace injuries. |
 | 3 | 0:05 | 2,6 s | The form asks what the case is about… |
-| 4 | 0:07 | 5,4 s | …then asks only what that case needs. |
-| 5 | 0:13 | 3,0 s | Then she leaves. Most people do. |
-| 6 | 0:16 | 2,8 s | You still have her — and where she stopped. |
-| 7 | 0:19 | 4,1 s | A reminder goes out on its own. |
-| 8 | 0:23 | 9,2 s | It puts her back exactly where she left off. |
-| 9 | 0:32 | 2,1 s | The request lands complete… |
-| 10 | 0:34 | 3,5 s | …and it says where the lead came from. |
-| 11 | 0:37 | 3,6 s | Every pop-up and clip has its own code, and its own numbers. |
-| 12 | 0:41 | 4,2 s | The same form inside a video clip, pinned to a corner. |
-| 13 | 0:45 | 3,2 s | It opens the same intake. |
-| 14 | 0:49 | 2,7 s | Which campaign brings cases, not clicks. |
-| 15 | 0:51 | 2,3 s | And the step where people quit. |
-| 16 | 0:54 | 2,5 s | Right Lead. Intake forms that don't lose the case. |
+| 4 | 0:08 | 3,9 s | …then asks only what that case needs. |
+| 5 | 0:12 | 7,2 s | She answers, and sends it. |
+| 6 | 0:19 | 3,8 s | It reaches the firm complete: every answer, and how urgent it is. |
+| 7 | 0:23 | 3,7 s | Most people don't finish. Those are the ones you normally lose. |
+| 8 | 0:27 | 3,4 s | Here you still have them, and the step they stopped at. |
+| 9 | 0:30 | 4,5 s | One reminder brings them back to their own half-filled form. |
+| 10 | 0:34 | 3,1 s | Nothing they already typed has to be typed again. |
+| 11 | 0:37 | 4,2 s | It can live in a pop-up — each one with its own code and its own numbers. |
+| 12 | 0:42 | 3,7 s | Or in a short video of the attorney, pinned to a corner. |
+| 13 | 0:45 | 2,6 s | It opens the same form. |
+| 14 | 0:48 | 4,8 s | And every request says where it came from — down to the blog post. |
+| 15 | 0:53 | 3,2 s | So you know which campaign brings cases, not clicks. |
+| 16 | 0:56 | 2,5 s | Right Lead. Intake forms that don't lose the case. |
 
-Las líneas 3 y 4, y las 9 y 10, son una sola frase partida en dos: los puntos
-suspensivos son una pausa a propósito, la frase sigue en la siguiente.
+Las líneas 3 y 4 son una sola frase partida: los puntos suspensivos son una
+pausa a propósito y la frase sigue en la siguiente.
 
-**La 5 es el remate** — «Then she leaves. Most people do.» Es la que justifica
-todo lo que viene después. Dejá un silencio antes y bajá el ritmo.
+**La 7 es el remate** — «Most people don't finish. Those are the ones you
+normally lose.» Es la frase que justifica todo lo que viene después. Dejá un
+silencio antes y bajá el ritmo.
 
 ---
 
@@ -62,7 +78,7 @@ todo lo que viene después. Dejá un silencio antes y bajá el ritmo.
 Law firms pay for clicks. Most of them never become a case.
 
 02
-One line of code on the firm's site.
+Someone reads the firm's blog post about workplace injuries.
 
 03
 The form asks what the case is about…
@@ -71,37 +87,37 @@ The form asks what the case is about…
 …then asks only what that case needs.
 
 05
-Then she leaves. Most people do.
+She answers, and sends it.
 
 06
-You still have her — and where she stopped.
+It reaches the firm complete: every answer, and how urgent it is.
 
 07
-A reminder goes out on its own.
+Most people don't finish. Those are the ones you normally lose.
 
 08
-It puts her back exactly where she left off.
+Here you still have them, and the step they stopped at.
 
 09
-The request lands complete…
+One reminder brings them back to their own half-filled form.
 
 10
-…and it says where the lead came from.
+Nothing they already typed has to be typed again.
 
 11
-Every pop-up and clip has its own code, and its own numbers.
+It can live in a pop-up — each one with its own code and its own numbers.
 
 12
-The same form inside a video clip, pinned to a corner.
+Or in a short video of the attorney, pinned to a corner.
 
 13
-It opens the same intake.
+It opens the same form.
 
 14
-Which campaign brings cases, not clicks.
+And every request says where it came from — down to the blog post.
 
 15
-And the step where people quit.
+So you know which campaign brings cases, not clicks.
 
 16
 Right Lead. Intake forms that don't lose the case.
@@ -114,7 +130,3 @@ Right Lead. Intake forms that don't lose the case.
 Mido cada uno, regrabo el video ajustando las escenas y te paso el mp4 con
 sonido. Si el total se pasa del minuto te aviso y recortamos texto, no
 velocidad.
-
-Podés mandarlos como la vez pasada: un archivo por línea, numerados. Si te
-resulta más cómodo mandar uno solo con las 16 seguidas, también sirve — los
-separo yo, como hice con el anterior.

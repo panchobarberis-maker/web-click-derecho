@@ -10,10 +10,17 @@ Todo esto está acá para poder **volver a grabarlos** cuando la aplicación cam
 
 | Archivo | Qué es |
 |---|---|
-| `video/right-lead-demo-en.mp4` | 2:04. La historia completa: alguien empieza el formulario, lo abandona, el recordatorio la trae de vuelta y termina. Para una reunión. |
-| `video/right-lead-corto-en.mp4` | 0:59. Lo mismo más rápido, más los pop-ups, los clips y la atribución. Para redes y primer contacto. |
+| `video/right-lead-corto-en.mp4` | 0:59. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
+| `video/right-lead-demo-en.mp4` | 2:04, con locución. La primera versión, con la historia contada de otra forma. Para una reunión. |
 
-Los dos están en inglés y con locución.
+Los dos están en inglés.
+
+El corto va en este orden, y el orden es la parte pensada: primero el proceso
+**entero** —alguien llega desde una nota del blog, consulta, y al estudio le
+llega completa—, y recién después qué pasa cuando alguien no termina. Al revés
+no se entiende: no se puede explicar el abandono de algo que todavía no se
+mostró. Después las dos formas que tiene el formulario de aparecer en un sitio
+—pop-up y clip— y al final de dónde vino la consulta.
 
 ## El estudio del video es inventado
 
@@ -64,7 +71,8 @@ frase. Por eso el orden es guion → voz → grabar → montar.
 1. `guion-corto.md` / `guion-locucion.md` tienen el texto, los tiempos y las
    instrucciones para generarlo.
 2. La voz se genera aparte (se usó ElevenLabs) y se guarda como `voz-corto.mp3`
-   o `voz.mp3`.
+   o `voz.mp3`. La del corto no está en el repo: el guion cambió y hay que
+   volver a generarla.
 3. `cortar.py` la parte en una frase por archivo. Vienen todas seguidas en un
    solo audio, así que los cortes se buscan alineando los silencios con el largo
    esperado de cada línea —una frase de 90 caracteres dura el doble que una de
@@ -104,6 +112,8 @@ Todo lo que se ve es real menos dos cosas, y conviene tenerlas presentes antes
 de mostrarle el video a alguien:
 
 - **El contenido del clip** es una placa con la marca, no una persona hablando.
+  Es lo primero que conviene reemplazar: un clip funciona porque se ve la cara
+  del abogado.
 - **El historial** del estudio es tráfico generado. Las proporciones son
   verosímiles (se abre entre el 3% y el 9% de las veces que se muestra un
   pop-up), pero son números inventados y no hay que presentarlos como
