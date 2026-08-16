@@ -348,6 +348,10 @@ create index if not exists idx_events_surface
 alter table firms add column if not exists lang text not null default 'es'
   check (lang in ('es', 'en'));
 
+-- El pop-up es un aviso que invita a consultar, no el formulario en si: el
+-- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
+alter table popups add column if not exists titulo text;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -447,11 +451,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$7U2YX8UWUcmhUDtFlkI/AA==$Pcj+whlaLmSsBDpiZrMtUYTaiMGWW5y+OZsfPCcpW/fCAfNAlAZKuhfu4Ka28gEqVTy9PsDsoH1e4d7VNOm4Aw==', true)
+values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$bDrZvotZaud3pdThzDrv2g==$xwXImJgHwcFd1b3orvdqWoTtUs/IbVGdOgnHPhLUU0T5shNVxU3o/g/uOzGHn88Y2+gKMmmxY7EM41Eppwq6jg==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$xAnLjajM2DsNky+Nm8koVg==$NBm3SfAR0tIMw3QuTajw7sPKUyzBsnv8T34NBU8pKWM5AqEISOTOXuXEblbEMlhXAFx2fDBkv3kCLY3dEcW8+Q==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$hCKrRhwYdM3ESJpcb/YU7A==$V991usYxJtuIzgdscJ61v8YSV3nTVirVGyHxPTRtzX0yRLgpPUXxPELhp5QJuxRGdm42fZuPeDZhsYOjARdwHQ==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

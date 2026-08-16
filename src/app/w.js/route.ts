@@ -5,7 +5,7 @@ import { t, type Lang } from "@/lib/i18n";
 export const dynamic = "force-dynamic";
 
 type Cfg = {
-  firm: string; mode: string; funnel: string; workflow: string;
+  firm: string; mode: string; funnel: string; workflow: string; titulo: string;
   trigger: string; cta: string; accent: string; video: string; poster: string; id: string;
   paginas: string;
   autoplay: boolean;
@@ -13,7 +13,7 @@ type Cfg = {
   lang: Lang;
 };
 
-const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "", autoplay: true, preview: false, lang: "es" };
+const VACIO: Cfg = { firm: "", mode: "", funnel: "", workflow: "", titulo: "", trigger: "", cta: "", accent: "", video: "", poster: "", id: "", paginas: "", autoplay: true, preview: false, lang: "es" };
 
 /**
  * Configuracion guardada de un pop-up o un clip.
@@ -33,7 +33,8 @@ async function cargarCfg(url: URL): Promise<Cfg> {
 
   const [row] = await sql<
     { name: string; cta: string; active: boolean; accent: string; firm: string;
-      funnel: string | null; workflow: string | null; trigger?: string; video_url?: string; poster_url?: string;
+      funnel: string | null; workflow: string | null; trigger?: string; titulo?: string | null;
+      video_url?: string; poster_url?: string;
       paginas?: string | null; autoplay?: boolean; lang: Lang }[]
   >`
     select w.*, fi.slug as firm, fi.accent, fi.lang,
@@ -52,6 +53,7 @@ async function cargarCfg(url: URL): Promise<Cfg> {
     funnel: row.funnel ?? "",
     workflow: row.workflow ?? "",
     trigger: row.trigger ?? "delay:12",
+    titulo: row.titulo ?? "",
     cta: row.cta,
     accent: row.accent,
     video: row.video_url ?? "",
@@ -104,6 +106,7 @@ export async function GET(req: Request) {
   var flow    = attr("workflow", "");
   var trigger = attr("trigger", "delay:12");  // delay:N | scroll:N | exit | now
   var cta     = attr("cta", TX.ctaDefecto);
+  var titulo  = attr("titulo", TX.avisoDefecto);
   var accent  = attr("accent", "#2d0a4e");
   var target  = s.getAttribute("data-target") || "";
   var video   = attr("video", "");
@@ -443,6 +446,90 @@ export async function GET(req: Request) {
     return;
   }
 
+  /**
+   * El aviso.
+   *
+   * Esto es el pop-up: una tarjeta que invita a consultar. El formulario no
+   * aparece hasta que la tocan, y por eso el aviso es lo que cuenta como
+   * "se mostro" mientras que abrir el formulario cuenta como apertura. Antes
+   * el disparador abria el formulario de una y las dos cosas eran la misma:
+   * la tasa de apertura de un pop-up daba siempre 100%, que no decia nada.
+   */
+  var aviso;
+
+  function mostrarAviso() {
+    if (aviso || opened) return;
+    try { if (once) sessionStorage.setItem(KEY, "1"); } catch (e) {}
+
+    aviso = document.createElement("div");
+    aviso.setAttribute("role", "dialog");
+    aviso.setAttribute("aria-modal", "true");
+    aviso.style.cssText =
+      "position:fixed;inset:0;z-index:2147482500;background:rgba(20,12,34,.5);" +
+      "display:flex;align-items:center;justify-content:center;padding:20px;" +
+      "opacity:0;transition:opacity .22s";
+
+    var caja = document.createElement("div");
+    caja.style.cssText =
+      "position:relative;width:100%;max-width:430px;background:#fff;border-radius:16px;" +
+      "padding:34px 32px 28px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.3);" +
+      "transform:translateY(10px);transition:transform .24s;font-family:system-ui,-apple-system,sans-serif";
+
+    // La barra de color es del estudio: el aviso tiene que parecer del
+    // estudio y no de un servicio pegado encima.
+    var banda = document.createElement("div");
+    banda.style.cssText =
+      "position:absolute;top:0;left:0;right:0;height:5px;border-radius:16px 16px 0 0;background:" + accent;
+
+    var h = document.createElement("div");
+    h.textContent = titulo;
+    h.style.cssText = "font:600 21px/1.3 inherit;color:#1c1230;margin-bottom:9px";
+
+    var sub = document.createElement("div");
+    sub.textContent = TX.avisoBajada;
+    sub.style.cssText = "font:400 14.5px/1.55 inherit;color:#645c75;margin-bottom:22px";
+
+    var si = document.createElement("button");
+    si.textContent = cta;
+    si.style.cssText =
+      "width:100%;background:" + accent + ";color:#fff;border:0;padding:14px 24px;border-radius:99px;" +
+      "font:500 15.5px/1 inherit;cursor:pointer";
+    si.onclick = function () { cerrarAviso(); open("popup"); };
+
+    var no = document.createElement("button");
+    no.textContent = TX.ahoraNo;
+    no.style.cssText =
+      "margin-top:12px;background:none;border:0;color:#8a8397;font:400 13.5px/1 inherit;cursor:pointer";
+    no.onclick = cerrarAviso;
+
+    var x = document.createElement("button");
+    x.innerHTML = "&times;";
+    x.setAttribute("aria-label", TX.cerrar);
+    x.style.cssText =
+      "position:absolute;top:10px;right:12px;width:30px;height:30px;border:0;border-radius:50%;" +
+      "background:none;color:#8a8397;font:400 22px/1 inherit;cursor:pointer";
+    x.onclick = cerrarAviso;
+
+    caja.appendChild(banda); caja.appendChild(x); caja.appendChild(h);
+    caja.appendChild(sub); caja.appendChild(si); caja.appendChild(no);
+    aviso.appendChild(caja);
+    aviso.onclick = function (e) { if (e.target === aviso) cerrarAviso(); };
+    document.body.appendChild(aviso);
+
+    requestAnimationFrame(function () {
+      aviso.style.opacity = "1";
+      caja.style.transform = "translateY(0)";
+    });
+
+    contarImpresion("popup");
+  }
+
+  function cerrarAviso() {
+    if (!aviso) return;
+    aviso.remove();
+    aviso = null;
+  }
+
   // ---------- boton flotante ----------
   if (mode === "button") {
     var btn = document.createElement("button");
@@ -460,22 +547,22 @@ export async function GET(req: Request) {
   var kind = trigger.split(":")[0];
   var arg = parseFloat(trigger.split(":")[1] || "0");
 
-  if (kind === "now") open("popup");
-  else if (kind === "delay") setTimeout(function () { open("popup"); }, (arg || 12) * 1000);
+  if (kind === "now") mostrarAviso();
+  else if (kind === "delay") setTimeout(mostrarAviso, (arg || 12) * 1000);
   else if (kind === "scroll") {
     var onScroll = function () {
       var h = document.documentElement;
       var pct = (h.scrollTop / (h.scrollHeight - h.clientHeight || 1)) * 100;
-      if (pct >= (arg || 50)) { open("popup"); window.removeEventListener("scroll", onScroll); }
+      if (pct >= (arg || 50)) { mostrarAviso(); window.removeEventListener("scroll", onScroll); }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
   } else if (kind === "exit") {
     var onOut = function (e) {
-      if (e.clientY <= 0) { open("popup"); document.removeEventListener("mouseout", onOut); }
+      if (e.clientY <= 0) { mostrarAviso(); document.removeEventListener("mouseout", onOut); }
     };
     document.addEventListener("mouseout", onOut);
     // En mobile no hay exit intent: se cae a un delay largo.
-    if (matchMedia("(pointer:coarse)").matches) setTimeout(function () { open("popup"); }, 25000);
+    if (matchMedia("(pointer:coarse)").matches) setTimeout(mostrarAviso, 25000);
   }
 })();`;
 

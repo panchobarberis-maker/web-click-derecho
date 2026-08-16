@@ -21,9 +21,10 @@ async function crear(formData: FormData) {
   const cta = textos(firm.lang).widgets.ctaPopupDefecto;
 
   await sql`
-    insert into popups (firm_id, name, trigger, cta, funnel_id, paginas)
+    insert into popups (firm_id, name, trigger, titulo, cta, funnel_id, paginas)
     values (${firm.id}, ${name},
             ${String(formData.get("trigger") ?? "delay:12")},
+            ${String(formData.get("titulo") ?? "").trim() || null},
             ${String(formData.get("cta") ?? "").trim() || cta},
             ${String(formData.get("funnel_id") ?? "") || null},
             ${String(formData.get("paginas") ?? "").trim() || null})`;
@@ -38,6 +39,7 @@ async function guardar(formData: FormData) {
     update popups set
       name      = ${String(formData.get("name") ?? "").trim()},
       trigger   = ${String(formData.get("trigger") ?? "delay:12")},
+      titulo    = ${String(formData.get("titulo") ?? "").trim() || null},
       cta       = ${String(formData.get("cta") ?? "").trim() || cta},
       funnel_id = ${String(formData.get("funnel_id") ?? "") || null},
       paginas   = ${String(formData.get("paginas") ?? "").trim() || null},
@@ -54,7 +56,7 @@ async function borrar(formData: FormData) {
 }
 
 type Popup = {
-  id: string; name: string; trigger: string; cta: string;
+  id: string; name: string; trigger: string; cta: string; titulo: string | null;
   funnel_id: string | null; active: boolean; paginas: string | null;
 };
 
@@ -63,9 +65,11 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
   const { firm } = await activeFirm();
   const puedeEditar = firm.role !== "member";
   const x = textos(firm.lang).widgets;
+  // El titular por defecto es el que pone el widget cuando el campo esta vacio.
+  const porDefecto = textos(firm.lang).widget.avisoDefecto;
 
   const [popups, areas, stats] = await Promise.all([
-    sql<Popup[]>`select id, name, trigger, cta, funnel_id, active, paginas from popups
+    sql<Popup[]>`select id, name, trigger, cta, titulo, funnel_id, active, paginas from popups
                  where firm_id = ${firm.id} order by created_at desc`,
     sql<{ id: string; name: string }[]>`select id, name from funnels where firm_id = ${firm.id} order by sort_order`,
     porWidget(firm.id, "popups", range),
@@ -135,6 +139,12 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
                         {DISPARADORES.map((d) => <option key={d} value={d}>{x.disparadores[d]}</option>)}
                       </select>
 
+                      <label className="lbl">{x.tituloAviso}</label>
+                      <input name="titulo" defaultValue={p.titulo ?? ""} placeholder={porDefecto} />
+                      <p className="muted" style={{ fontSize: ".76rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+                        {x.tituloAvisoAyuda}
+                      </p>
+
                       <label className="lbl">{x.textoBoton}</label>
                       <input name="cta" defaultValue={p.cta} />
 
@@ -182,6 +192,9 @@ export default async function Popups({ searchParams }: { searchParams: Promise<{
               <select name="trigger" defaultValue="delay:12">
                 {DISPARADORES.map((d) => <option key={d} value={d}>{x.disparadores[d]}</option>)}
               </select>
+
+              <label className="lbl">{x.tituloAviso}</label>
+              <input name="titulo" placeholder={porDefecto} />
 
               <label className="lbl">{x.textoBoton}</label>
               <input name="cta" placeholder={x.ctaPopupDefecto} />

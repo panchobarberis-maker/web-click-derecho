@@ -327,3 +327,7 @@ create index if not exists idx_events_surface
 -- Arranca en castellano para no cambiarle nada a los que ya estan.
 alter table firms add column if not exists lang text not null default 'es'
   check (lang in ('es', 'en'));
+
+-- El pop-up es un aviso que invita a consultar, no el formulario en si: el
+-- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
+alter table popups add column if not exists titulo text;

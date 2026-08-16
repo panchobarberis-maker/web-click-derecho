@@ -37,9 +37,15 @@ const real = ["mp4", "mov", "webm", "m4v"]
 if (real) {
   // Se recorta a vertical por si viene apaisado: el clip se ve en una tarjeta
   // 9:16 y un video ancho quedaria con bandas o deformado.
+  //
+  // El sonido se conserva: el widget arranca en silencio —lo exigen los
+  // navegadores— pero tiene boton para activarlo, y a un abogado hablando hay
+  // que poder escucharlo.
   ff(["-i", real,
       "-vf", "scale=720:1280:force_original_aspect_ratio=increase,crop=720:1280,fps=25",
-      "-c:v", "libvpx", "-b:v", "1200k", "-an", DESTINO]);
+      "-c:v", "libvpx", "-b:v", "1400k",
+      "-c:a", "libvorbis", "-b:a", "96k", "-ac", "2",
+      DESTINO]);
   console.log(`clip del abogado: ${real} → ${DESTINO}`);
 } else {
   const b = await chromium.launch({ executablePath: NAVEGADOR });

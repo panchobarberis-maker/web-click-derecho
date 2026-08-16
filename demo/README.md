@@ -10,7 +10,7 @@ Todo esto está acá para poder **volver a grabarlos** cuando la aplicación cam
 
 | Archivo | Qué es |
 |---|---|
-| `video/right-lead-corto-en.mp4` | 0:59. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
+| `video/right-lead-corto-en.mp4` | 1:00. El recorrido completo, el abandono, las dos superficies y la atribución. Para redes y primer contacto. **Sin locución todavía**: el guion se rehizo y la voz está pendiente. |
 | `video/right-lead-demo-en.mp4` | 2:04, con locución. La primera versión, con la historia contada de otra forma. Para una reunión. |
 
 Los dos están en inglés.
@@ -138,8 +138,8 @@ y no se sube al repositorio sin decidirlo. Si querés versionarlo,
 Todo lo que se ve es real menos dos cosas, y conviene tenerlas presentes antes
 de mostrarle el video a alguien:
 
-- **El contenido del clip** es una placa con la marca, no una persona hablando
-  (ver abajo).
+- Nada, si `clip-abogado.*` está puesto. Si no, el clip es una placa con la
+  marca en vez de una persona hablando (ver abajo).
 - **El historial** del estudio es tráfico generado. Las proporciones son
   verosímiles (se abre entre el 3% y el 9% de las veces que se muestra un
   pop-up), pero son números inventados y no hay que presentarlos como

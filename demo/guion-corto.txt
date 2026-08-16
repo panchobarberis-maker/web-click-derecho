@@ -5,37 +5,37 @@ Law firms pay for clicks. Most of them never become a case.
 Someone reads the firm's blog post about workplace injuries.
 
 03
-The form asks what the case is about…
+A pop-up invites them to ask — it isn't the form yet.
 
 04
-…then asks only what that case needs.
+The form asks what the case is about…
 
 05
-She answers, and sends it.
+…then asks only what that case needs.
 
 06
-It reaches the firm complete: every answer, and how urgent it is.
+She answers, and sends it.
 
 07
-Most people don't finish. Those are the ones you normally lose.
+It reaches the firm complete: every answer, and how urgent it is.
 
 08
-Here you still have them, and the step they stopped at.
+Most people don't finish. Those are the ones you normally lose.
 
 09
-One reminder brings them back to their own half-filled form.
+Here you still have them, and the step they stopped at.
 
 10
-Nothing they already typed has to be typed again.
+One reminder brings them back to their own half-filled form.
 
 11
-It can live in a pop-up — each one with its own code and its own numbers.
+Nothing they already typed has to be typed again.
 
 12
-Or in a short video of the attorney, pinned to a corner.
+It can live in a pop-up — each one with its own code and its own numbers.
 
 13
-It opens the same form.
+Or in a short video of the attorney, pinned to a corner.
 
 14
 And every request says where it came from — down to the blog post.

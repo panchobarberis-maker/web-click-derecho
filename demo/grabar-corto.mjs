@@ -53,7 +53,8 @@ const [firm] = await sql`select id, accent from firms where slug = ${ESTUDIO.slu
 if (!firm) throw new Error("falta el estudio de demostración: corré estudio-en.mjs");
 
 const [pop] = await sql`
-  select id, trigger from popups where firm_id = ${firm.id} and active order by created_at limit 1`;
+  select id, trigger, cta from popups where firm_id = ${firm.id} and active order by created_at limit 1`;
+const ctaAviso = pop?.cta ?? "";
 const [clip] = await sql`
   select id, video_url from clips where firm_id = ${firm.id} and active order by created_at limit 1`;
 if (!pop || !clip) throw new Error("el estudio de demostración no tiene pop-ups ni clips");
@@ -136,7 +137,13 @@ try {
   await mover(p, 700, 400, { esperar: 300 });
   await p.mouse.wheel(0, 300);
   await p.locator('div[role="dialog"]').waitFor({ timeout: 20000 });
-  await pausa(600);
+  await pausa(300);
+
+  // El pop-up no es el formulario: es un aviso que invita a consultar.
+  await rotulo(p, "A pop-up invites them to ask — it isn't the form yet.");
+  await pausa(700);
+  await tocar(p, p.locator('div[role="dialog"] button', { hasText: ctaAviso }).first(), rapido);
+  await marco().locator(".pill-btn").first().waitFor({ timeout: 20000 });
 
   await rotulo(p, "The form asks what the case is about…");
   await tocar(p, marco().locator(".pill-btn", { hasText: "Employment Law" }), rapido);
@@ -144,8 +151,8 @@ try {
   await marco().locator("#f-first_name").waitFor({ timeout: 15000 });
 
   await rotulo(p, "…then asks only what that case needs.");
-  await escribir(p, marco().locator("#f-first_name"), VISITANTE.nombre, { ms: 20 });
-  await escribir(p, marco().locator("#f-email"), VISITANTE.email, { ms: 18 });
+  await escribir(p, marco().locator("#f-first_name"), VISITANTE.nombre, { ms: 16 });
+  await escribir(p, marco().locator("#f-email"), VISITANTE.email, { ms: 14 });
   await marco().locator("#f-last_name").fill(VISITANTE.apellido);
   await marco().locator("#f-phone").fill(VISITANTE.tel);
   await marco().locator("#f-provincia").selectOption(VISITANTE.estado);
@@ -181,9 +188,9 @@ try {
   await rotulo(p, "Here you still have them, and the step they stopped at.");
   await pausa(1700);
 
-  // Los nombres del historial se repiten, asi que puede haber mas de una fila
-  // con ese mail: la de arriba es la que acaba de abandonar.
-  const fila = p.locator("tr", { hasText: dejado.email }).first();
+  // Por id y no por mail: los nombres del historial se repiten y la fila de
+  // arriba puede ser otra consulta de la misma persona, ya recordada.
+  const fila = p.locator(`tr:has(a[href="/responses/${dejado.id}"])`);
   await rotulo(p, "One reminder brings them back to their own half-filled form.");
   await tocar(p, fila.locator("button", { hasText: "Send a reminder" }), rapido);
   await pausa(700);
@@ -204,15 +211,15 @@ try {
   // ======================= 3. donde vive el formulario =====================
   await p.goto(`${APP}/popups`, { waitUntil: "networkidle" });
   await rotulo(p, "It can live in a pop-up — each one with its own code and its own numbers.");
-  await mover(p, 800, 210, { esperar: 2200 });
+  await mover(p, 800, 210, { esperar: 1800 });
 
   await p.goto(`${SITIO}/?w=clip=${clip.id}`, { waitUntil: "domcontentloaded" });
   await rotulo(p, "Or in a short video of the attorney, pinned to a corner.");
+  // Sin remate propio: que el clip abre el mismo formulario ya se vio con el
+  // pop-up, y el click se sigue viendo igual.
   await p.locator("video").waitFor({ timeout: 20000 });
-  await pausa(2200);
-  await tocar(p, p.locator("video"), { antes: 400, despues: 800 });
-  await rotulo(p, "It opens the same form.");
-  await pausa(900);
+  await pausa(2100);
+  await tocar(p, p.locator("video"), { antes: 400, despues: 1100 });
 
   // ======================= 4. de donde vino ================================
   await entrar();
@@ -221,21 +228,21 @@ try {
   await p.waitForURL("**/responses/**", { timeout: 15000 });
   await rotulo(p, "And every request says where it came from — down to the blog post.");
   await mover(p, 1090, 300, { esperar: 400 });
-  await mover(p, 1090, 445, { esperar: 2400 });
+  await mover(p, 1090, 445, { esperar: 2000 });
 
   await p.goto(`${APP}/analytics`, { waitUntil: "networkidle" });
   await mover(p, 720, 500, { esperar: 200 });
   await p.mouse.wheel(0, 700);
-  await pausa(400);
+  await pausa(250);
   await rotulo(p, "So you know which campaign brings cases, not clicks.");
-  await pausa(2300);
+  await pausa(1900);
   await rotulo(p, "");
 
   // ======================= cierre ==========================================
   await cerrarLocucion();
   anotarPlaca(99);
   await cartel("Right Lead", "Intake forms that don't lose the case");
-  await pausa(VOZ.length ? VOZ[VOZ.length - 1] * 1000 + 600 : 2600);
+  await pausa(VOZ.length ? VOZ[VOZ.length - 1] * 1000 + 600 : 1900);
 
   marcasFinales = marcas;
   video = await p.video().path();

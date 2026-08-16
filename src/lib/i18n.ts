@@ -177,7 +177,7 @@ const es = {
   widgets: {
     popups: "Pop-ups",
     popupsBajada:
-      "El formulario apareciendo sobre el sitio del estudio. Cada pop-up tiene su propio código y sus propias métricas, así podés comparar cuál funciona mejor.",
+      "Un aviso que aparece sobre el sitio del estudio e invita a consultar; el formulario se abre cuando lo tocan. Cada pop-up tiene su propio código y sus propias métricas, así podés comparar cuál funciona mejor.",
     clips: "Clips",
     clipsBajada:
       "Un video corto fijo en una esquina del sitio. Al tocarlo abre el formulario. Sirve para poner la cara del estudio antes de que la persona escriba nada.",
@@ -200,6 +200,9 @@ const es = {
     ejemploNombrePopup: "Home — salida",
     ejemploNombreClip: "Home — presentación",
     cuandoAparece: "Cuándo aparece",
+    tituloAviso: "Qué dice el aviso",
+    tituloAvisoAyuda:
+      "El pop-up es un aviso que invita a consultar; el formulario se abre cuando lo tocan. Este es el titular de ese aviso.",
     disparadores: {
       "delay:12": "A los 12 segundos",
       "delay:30": "A los 30 segundos",
@@ -282,6 +285,9 @@ const es = {
     cerrar: "Cerrar",
     tituloIframe: "Formulario de consulta",
     ctaDefecto: "Consultá tu caso",
+    avisoDefecto: "¿Podemos ayudarte con tu caso?",
+    avisoBajada: "Contanos qué te pasó y un abogado del estudio te responde.",
+    ahoraNo: "Ahora no",
     pausar: "Pausar",
     reproducir: "Reproducir",
     activarSonido: "Activar sonido",
@@ -839,7 +845,7 @@ const en: typeof es = {
   widgets: {
     popups: "Pop-ups",
     popupsBajada:
-      "The form appearing over the firm's site. Each pop-up has its own code and its own numbers, so you can compare which one works.",
+      "A notice over the firm's site inviting people to get in touch; the form opens when they tap it. Each pop-up has its own code and its own numbers, so you can compare which one works.",
     clips: "Clips",
     clipsBajada:
       "A short video pinned to a corner of the site. Tapping it opens the form. It puts a face to the firm before anyone types a word.",
@@ -861,6 +867,9 @@ const en: typeof es = {
     ejemploNombrePopup: "Home — exit",
     ejemploNombreClip: "Home — intro",
     cuandoAparece: "When it shows",
+    tituloAviso: "What the notice says",
+    tituloAvisoAyuda:
+      "The pop-up is a notice that invites people to get in touch; the form opens when they tap it. This is that notice's headline.",
     disparadores: {
       "delay:12": "After 12 seconds",
       "delay:30": "After 30 seconds",
@@ -937,6 +946,9 @@ const en: typeof es = {
     cerrar: "Close",
     tituloIframe: "Contact form",
     ctaDefecto: "Talk to an attorney",
+    avisoDefecto: "Can we help with your case?",
+    avisoBajada: "Tell us what happened and an attorney from the firm will get back to you.",
+    ahoraNo: "Not now",
     pausar: "Pause",
     reproducir: "Play",
     activarSonido: "Unmute",
