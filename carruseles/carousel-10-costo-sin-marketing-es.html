@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Click Derecho - Carousel 10 Costo Sin Marketing</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
+nav{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(0,0,0,.7);padding:7px 14px;border-radius:8px}
+nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;font-size:15px}
+.slide-counter{color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;min-width:48px;text-align:center}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
+.slide{width:1080px;height:1350px;display:none;flex-direction:column;justify-content:flex-end;position:absolute;top:0;left:0}
+.slide.active{display:flex}
+.slide-inner{padding:80px 80px 72px;display:flex;flex-direction:column;justify-content:flex-end;flex:1}
+.accent-bar{width:80px;height:9px;background:#d4621a;margin-bottom:40px}
+.tag{display:inline-block;background:#d4621a;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;padding:10px 22px;border-radius:4px;margin-bottom:32px;text-transform:uppercase;letter-spacing:1px}
+.headline{font-family:'Montserrat',sans-serif;font-weight:900;color:#fff;line-height:1.05;margin-bottom:32px}
+.headline.cover{font-size:88px}
+.headline.mid{font-size:72px}
+.headline.small{font-size:58px}
+.subtext{font-family:'DM Sans',sans-serif;font-weight:300;font-size:32px;line-height:1.55;color:rgba(255,255,255,.88);max-width:880px;margin-bottom:32px}
+.brand-tag{font-family:'Montserrat',sans-serif;font-weight:700;font-size:26px;color:#d4621a}
+.checklist{list-style:none;margin-bottom:24px}
+.checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:18px;padding-left:36px;position:relative}
+.checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700}
+.cta-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:#fff;display:block;margin-bottom:8px}
+.cta-handle{font-family:'DM Sans',sans-serif;font-weight:400;font-size:26px;color:#d4621a;display:block}
+.slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:20px;color:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+<nav>
+  <button onclick="prev()">&#8592;</button>
+  <span class="slide-counter" id="ctr">1 / 6</span>
+  <button onclick="next()">&#8594;</button>
+</nav>
+<div class="panel" id="panel">
+
+  <!-- Slide 1: COVER -->
+  <div class="slide active" style="background:linear-gradient(145deg,#0a0602 0%,#1a0a02 55%,#111 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h1 class="headline cover">Tu estudio es<br>invisible.<br>Y eso te cuesta<br>miles de dolares.</h1>
+      <p class="subtext">El costo de no tener marketing siempre supera al costo del marketing.</p>
+      <span class="brand-tag">Click Derecho</span>
+    </div>
+    <span class="slide-num">1 / 6</span>
+  </div>
+
+  <!-- Slide 2: PROBLEM -->
+  <div class="slide" style="background:linear-gradient(160deg,#111 0%,#0a0602 45%,#1a0a02 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">El 96% de los clientes busca abogados en Google antes de llamar.</h2>
+      <p class="subtext">Si tu estudio no aparece en los primeros resultados, ese cliente llama a otro. Cada dia sin visibilidad es dinero que se va directo a la competencia.</p>
+    </div>
+    <span class="slide-num">2 / 6</span>
+  </div>
+
+  <!-- Slide 3: KEY INSIGHT 1 -->
+  <div class="slide" style="background:linear-gradient(135deg,#1a0a02 0%,#0d0d0d 55%,#0a0602 100%);">
+    <div class="slide-inner">
+      <span class="tag">Calculo 1</span>
+      <h2 class="headline mid">Cada cliente nuevo vale entre $3.000 y $20.000 en honorarios.</h2>
+      <p class="subtext">En familia, inmigracion o lesiones personales, cada caso tiene un valor real. Calcula cuantos clientes perdiste este mes solo por no aparecer en Google.</p>
+    </div>
+    <span class="slide-num">3 / 6</span>
+  </div>
+
+  <!-- Slide 4: KEY INSIGHT 2 -->
+  <div class="slide" style="background:linear-gradient(150deg,#0d0d0d 0%,#1a0a02 50%,#111 100%);">
+    <div class="slide-inner">
+      <span class="tag">Calculo 2</span>
+      <h2 class="headline mid">6 meses sin clientes nuevos: entre $18.000 y $120.000 perdidos.</h2>
+      <p class="subtext">Ese es el costo real de la invisibilidad. El marketing no cuesta $1.500 al mes: te ahorra diez veces eso en oportunidades que se escapan.</p>
+    </div>
+    <span class="slide-num">4 / 6</span>
+  </div>
+
+  <!-- Slide 5: CHECKLIST -->
+  <div class="slide" style="background:linear-gradient(140deg,#0a0602 0%,#111 50%,#1a0a02 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">Tu estudio es invisible si:</h2>
+      <ul class="checklist">
+        <li>No apareces en Google cuando alguien busca tu area de practica</li>
+        <li>Tu ficha de Google Business tiene menos de 10 resenas</li>
+        <li>Tu sitio web no genera consultas por si solo</li>
+        <li>Todos tus clientes nuevos llegan solo por referidos</li>
+      </ul>
+    </div>
+    <span class="slide-num">5 / 6</span>
+  </div>
+
+  <!-- Slide 6: CTA -->
+  <div class="slide" style="background:linear-gradient(155deg,#1a0a02 0%,#0a0602 55%,#0d0d0d 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline cover">Auditamos tu<br>visibilidad.<br>Gratis. Sin<br>compromiso.</h2>
+      <p class="subtext">Sabe exactamente cuanto estas perdiendo y que hacer para recuperarlo desde el primer mes.</p>
+      <span class="cta-brand">Click Derecho</span>
+      <span class="cta-handle">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">6 / 6</span>
+  </div>
+
+</div>
+<script>
+let c=0;
+const sl=document.querySelectorAll('.slide');
+function show(n){sl.forEach((s,i)=>s.classList.toggle('active',i===n));document.getElementById('ctr').textContent=(n+1)+' / '+sl.length;}
+function next(){c=(c+1)%sl.length;show(c);}
+function prev(){c=(c-1+sl.length)%sl.length;show(c);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>
