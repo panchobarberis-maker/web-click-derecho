@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Click Derecho - Carousel 02</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
+nav{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(0,0,0,.7);padding:7px 14px;border-radius:8px}
+nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;font-size:15px}
+.slide-counter{color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;min-width:48px;text-align:center}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
+.slide{width:1080px;height:1350px;display:none;flex-direction:column;justify-content:flex-end;position:absolute;top:0;left:0}
+.slide.active{display:flex}
+.slide-inner{padding:80px 80px 72px;display:flex;flex-direction:column;justify-content:flex-end;flex:1}
+.accent-bar{width:80px;height:9px;background:#d4621a;margin-bottom:40px}
+.tag{display:inline-block;background:#d4621a;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;padding:10px 22px;border-radius:4px;margin-bottom:32px;text-transform:uppercase;letter-spacing:1px}
+.headline{font-family:'Montserrat',sans-serif;font-weight:900;color:#fff;line-height:1.05;margin-bottom:32px}
+.headline.cover{font-size:88px}
+.headline.mid{font-size:72px}
+.subtext{font-family:'DM Sans',sans-serif;font-weight:300;font-size:32px;line-height:1.55;color:rgba(255,255,255,.88);max-width:880px;margin-bottom:32px}
+.brand-tag{font-family:'Montserrat',sans-serif;font-weight:700;font-size:26px;color:#d4621a}
+.checklist{list-style:none;margin-bottom:24px}
+.checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:18px;padding-left:36px;position:relative}
+.checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700}
+.cta-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:#fff;display:block;margin-bottom:8px}
+.cta-handle{font-family:'DM Sans',sans-serif;font-weight:400;font-size:26px;color:#d4621a;display:block}
+.slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:20px;color:rgba(255,255,255,.35)}
+</style>
+</head>
+<body>
+<nav>
+  <button onclick="prev()">&#8592;</button>
+  <span class="slide-counter" id="ctr">1 / 6</span>
+  <button onclick="next()">&#8594;</button>
+</nav>
+<div class="panel" id="panel">
+  <div class="slide active" style="background:linear-gradient(145deg,#0a0602 0%,#1a0a02 55%,#111 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h1 class="headline cover">Estas en el<br>top 3 de Google.<br>El telefono<br>sigue sin sonar.</h1>
+      <p class="subtext">El problema no es tu SEO. Es lo que pasa despues del clic.</p>
+      <span class="brand-tag">Click Derecho</span>
+    </div>
+    <span class="slide-num">1 / 6</span>
+  </div>
+  <div class="slide" style="background:linear-gradient(160deg,#111 0%,#0a0602 45%,#0d0d0d 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">El 70% de los<br>visitantes abandona<br>una web juridica<br>en menos de 8 segundos.</h2>
+      <p class="subtext">Llegan a tu sitio, no entienden nada y cierran la pestana. No porque no te necesiten: porque no los convenciste a tiempo.</p>
+    </div>
+    <span class="slide-num">2 / 6</span>
+  </div>
+  <div class="slide" style="background:linear-gradient(135deg,#0d0d0d 0%,#1a0a02 65%,#111 100%);">
+    <div class="slide-inner">
+      <span class="tag">Error 1</span>
+      <h2 class="headline mid">Tu propuesta<br>de valor es<br>invisible.</h2>
+      <p class="subtext">El visitante llega y no sabe que haces, para quien ni por que elegirte a vos. Si tiene que descubrirlo solo, ya llamo a otro estudio.</p>
+    </div>
+    <span class="slide-num">3 / 6</span>
+  </div>
+  <div class="slide" style="background:linear-gradient(150deg,#1a0a02 0%,#0a0602 50%,#0d0d0d 100%);">
+    <div class="slide-inner">
+      <span class="tag">Error 2</span>
+      <h2 class="headline mid">Tu formulario<br>de contacto<br>esta escondido.</h2>
+      <p class="subtext">Un boton al fondo de la pagina no es una llamada a la accion: es un obstaculo. Si el visitante tiene que buscar como contactarte, no te contacta.</p>
+    </div>
+    <span class="slide-num">4 / 6</span>
+  </div>
+  <div class="slide" style="background:linear-gradient(140deg,#0a0602 0%,#111 55%,#1a0a02 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">4 cambios que<br>generan consultas<br>esta semana.</h2>
+      <ul class="checklist">
+        <li>H1 claro: area legal y ciudad en los primeros 5 palabras</li>
+        <li>Numero de telefono clickeable en el header, visible en movil</li>
+        <li>Formulario corto (3 campos) en la mitad superior de la pagina</li>
+        <li>Un testimonio real con nombre y resultado concreto</li>
+      </ul>
+    </div>
+    <span class="slide-num">5 / 6</span>
+  </div>
+  <div class="slide" style="background:linear-gradient(155deg,#111 0%,#0d0d0d 40%,#1a0a02 100%);">
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline cover">Auditamos tu web<br>y te decimos que<br>frena tus consultas.</h2>
+      <p class="subtext">Sin costo. Sin compromiso. Con pasos concretos que podes aplicar esta semana.</p>
+      <span class="cta-brand">Click Derecho</span>
+      <span class="cta-handle">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">6 / 6</span>
+  </div>
+</div>
+<script>
+let c=0;
+const sl=document.querySelectorAll('.slide');
+function show(n){sl.forEach((s,i)=>s.classList.toggle('active',i===n));document.getElementById('ctr').textContent=(n+1)+' / '+sl.length;}
+function next(){c=(c+1)%sl.length;show(c);}
+function prev(){c=(c-1+sl.length)%sl.length;show(c);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>
