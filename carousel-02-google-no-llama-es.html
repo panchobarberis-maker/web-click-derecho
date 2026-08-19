@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Click Derecho - Carousel 02 Google No Llama</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
+nav{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(0,0,0,.7);padding:7px 14px;border-radius:8px}
+nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;font-size:15px}
+.slide-counter{color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;min-width:48px;text-align:center}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
+.slide{width:1080px;height:1350px;display:none;flex-direction:column;justify-content:flex-end;position:absolute;top:0;left:0;overflow:hidden}
+.slide.active{display:flex}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:.30;z-index:0}
+.slide-overlay{position:absolute;inset:0;z-index:1}
+.slide-inner{padding:80px 80px 72px;display:flex;flex-direction:column;justify-content:flex-end;flex:1;position:relative;z-index:2}
+.accent-bar{width:80px;height:9px;background:#d4621a;margin-bottom:40px}
+.tag{display:inline-block;background:#d4621a;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;padding:10px 22px;border-radius:4px;margin-bottom:32px;text-transform:uppercase;letter-spacing:1px}
+.headline{font-family:'Montserrat',sans-serif;font-weight:900;color:#fff;line-height:1.05;margin-bottom:32px}
+.headline.cover{font-size:88px}
+.headline.mid{font-size:72px}
+.subtext{font-family:'DM Sans',sans-serif;font-weight:300;font-size:32px;line-height:1.55;color:rgba(255,255,255,.88);max-width:880px;margin-bottom:32px}
+.brand-tag{font-family:'Montserrat',sans-serif;font-weight:700;font-size:26px;color:#d4621a}
+.checklist{list-style:none;margin-bottom:24px}
+.checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:18px;padding-left:36px;position:relative}
+.checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700}
+.cta-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:#fff;display:block;margin-bottom:8px}
+.cta-handle{font-family:'DM Sans',sans-serif;font-weight:400;font-size:26px;color:#d4621a;display:block}
+.slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:20px;color:rgba(255,255,255,.35);z-index:3}
+</style>
+</head>
+<body>
+<nav>
+  <button onclick="prev()">&#8592;</button>
+  <span class="slide-counter" id="ctr">1 / 6</span>
+  <button onclick="next()">&#8594;</button>
+</nav>
+<div class="panel" id="panel">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide active">
+    <div class="slide-bg" style="background-image:url('img/img01.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(160deg,rgba(10,6,2,.82) 0%,rgba(26,10,2,.78) 60%,rgba(10,6,2,.85) 100%)"></div>
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h1 class="headline cover">Google recibe<br>la consulta.<br>Pero no te<br>llama a vos.</h1>
+      <p class="subtext">El 96% de los clientes busca abogados online antes de llamar a cualquiera. Si no apareces, no existes.</p>
+      <span class="brand-tag">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">1 / 6</span>
+  </div>
+
+  <!-- SLIDE 2: PROBLEM -->
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img08.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(150deg,rgba(10,6,2,.80) 0%,rgba(13,13,13,.78) 55%,rgba(10,6,2,.84) 100%)"></div>
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">Tu cliente ideal busco un abogado hoy. Y llamo a otro.</h2>
+      <p class="subtext">No porque el otro sea mejor. Porque apareció primero. Sin visibilidad online, esa consulta nunca llega a tu telefono. Nunca.</p>
+    </div>
+    <span class="slide-num">2 / 6</span>
+  </div>
+
+  <!-- SLIDE 3: KEY INSIGHT 1 -->
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img12.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(145deg,rgba(26,10,2,.82) 0%,rgba(10,6,2,.78) 50%,rgba(13,13,13,.84) 100%)"></div>
+    <div class="slide-inner">
+      <span class="tag">El problema</span>
+      <h2 class="headline mid">Un sitio web que no posiciona es un gasto, no una inversion.</h2>
+      <p class="subtext">Si tu web no aparece en Google cuando alguien busca "abogado de familia en [tu ciudad]", ese sitio no te genera ni un solo cliente nuevo.</p>
+    </div>
+    <span class="slide-num">3 / 6</span>
+  </div>
+
+  <!-- SLIDE 4: KEY INSIGHT 2 -->
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img15.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(10,6,2,.80) 0%,rgba(26,10,2,.76) 55%,rgba(10,6,2,.83) 100%)"></div>
+    <div class="slide-inner">
+      <span class="tag">La oportunidad</span>
+      <h2 class="headline mid">El 70% de los estudios de tu ciudad no tiene SEO. Ese es tu espacio.</h2>
+      <p class="subtext">La mayoria de los abogados tiene una web desactualizada y cero estrategia de contenido. Posicionarte bien hoy es mas facil y barato que en dos anos.</p>
+    </div>
+    <span class="slide-num">4 / 6</span>
+  </div>
+
+  <!-- SLIDE 5: CHECKLIST -->
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img18.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(140deg,rgba(26,10,2,.82) 0%,rgba(10,6,2,.80) 50%,rgba(13,13,13,.84) 100%)"></div>
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline mid">Tu estudio aparece en Google si:</h2>
+      <ul class="checklist">
+        <li>Tu web esta optimizada para las busquedas de tu area de practica y ciudad</li>
+        <li>Tu ficha de Google Business tiene resenas recientes y esta completa</li>
+        <li>Publicas contenido que responde las preguntas de tus clientes ideales</li>
+        <li>Tu sitio carga rapido y se ve bien en el celular</li>
+      </ul>
+    </div>
+    <span class="slide-num">5 / 6</span>
+  </div>
+
+  <!-- SLIDE 6: CTA -->
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img01.png');background-position:center center"></div>
+    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(26,10,2,.84) 0%,rgba(10,6,2,.80) 50%,rgba(13,13,13,.86) 100%)"></div>
+    <div class="slide-inner">
+      <div class="accent-bar"></div>
+      <h2 class="headline cover">Te ponemos<br>en el mapa.<br>Gratis<br>primero.</h2>
+      <p class="subtext">Auditamos tu presencia en Google sin costo. Te decimos exactamente que falta y como lo resolvemos.</p>
+      <span class="cta-brand">Click Derecho</span>
+      <span class="cta-handle">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">6 / 6</span>
+  </div>
+
+</div>
+<script>
+let c=0;
+const sl=document.querySelectorAll('.slide');
+function show(n){sl.forEach((s,i)=>s.classList.toggle('active',i===n));document.getElementById('ctr').textContent=(n+1)+' / '+sl.length;}
+function next(){c=(c+1)%sl.length;show(c);}
+function prev(){c=(c-1+sl.length)%sl.length;show(c);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>
