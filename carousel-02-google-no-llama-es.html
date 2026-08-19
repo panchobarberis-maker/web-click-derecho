@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Click Derecho - Carousel 02 Google No Llama</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,700&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
@@ -14,22 +14,35 @@ nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-famil
 .panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
 .slide{width:1080px;height:1350px;display:none;flex-direction:column;justify-content:flex-end;position:absolute;top:0;left:0;overflow:hidden}
 .slide.active{display:flex}
+
+/* ── DARK (foto) ── */
 .slide-bg{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:.70;z-index:0}
 .slide-overlay{position:absolute;inset:0;z-index:1}
 .slide-inner{padding:80px 80px 72px;display:flex;flex-direction:column;justify-content:flex-end;flex:1;position:relative;z-index:2}
-.accent-bar{width:80px;height:9px;background:#d4621a;margin-bottom:40px}
-.tag{display:inline-block;background:#d4621a;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;padding:10px 22px;border-radius:4px;margin-bottom:32px;text-transform:uppercase;letter-spacing:1px}
-.headline{font-family:'Montserrat',sans-serif;font-weight:900;color:#fff;line-height:1.05;margin-bottom:32px}
-.headline.cover{font-size:88px}
-.headline.mid{font-size:72px}
-.subtext{font-family:'DM Sans',sans-serif;font-weight:300;font-size:32px;line-height:1.55;color:rgba(255,255,255,.88);max-width:880px;margin-bottom:32px}
-.brand-tag{font-family:'Montserrat',sans-serif;font-weight:700;font-size:26px;color:#d4621a}
+.accent-bar{width:72px;height:8px;background:#d4621a;margin-bottom:44px}
+.tag{display:inline-block;background:#d4621a;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:20px;padding:9px 22px;border-radius:3px;margin-bottom:36px;text-transform:uppercase;letter-spacing:2px}
+.headline{font-family:'Montserrat',sans-serif;font-weight:900;color:#fff;line-height:1.03;margin-bottom:32px;letter-spacing:-1px}
+.headline.cover{font-size:92px}
+.headline.mid{font-size:74px}
+.subtext{font-family:'DM Sans',sans-serif;font-weight:300;font-size:31px;line-height:1.6;color:rgba(255,255,255,.85);max-width:860px;margin-bottom:28px}
+.brand-tag{font-family:'Montserrat',sans-serif;font-weight:700;font-size:24px;color:#d4621a;letter-spacing:.5px}
 .checklist{list-style:none;margin-bottom:24px}
-.checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:18px;padding-left:36px;position:relative}
+.checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:29px;color:rgba(255,255,255,.9);line-height:1.5;margin-bottom:20px;padding-left:38px;position:relative}
 .checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700}
-.cta-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:36px;color:#fff;display:block;margin-bottom:8px}
-.cta-handle{font-family:'DM Sans',sans-serif;font-weight:400;font-size:26px;color:#d4621a;display:block}
-.slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:20px;color:rgba(255,255,255,.35);z-index:3}
+.cta-brand{font-family:'Montserrat',sans-serif;font-weight:900;font-size:34px;color:#fff;display:block;margin-bottom:6px;letter-spacing:.5px}
+.cta-handle{font-family:'DM Sans',sans-serif;font-weight:300;font-size:26px;color:#d4621a;display:block;font-style:italic}
+.slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:19px;color:rgba(255,255,255,.30);z-index:3;letter-spacing:1px}
+
+/* ── CLEAN (crema) ── */
+.clean{background:#f5ede4}
+.clean .slide-inner{padding:80px 80px 72px;display:flex;flex-direction:column;justify-content:flex-start;flex:1;position:relative;z-index:2}
+.clean-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;color:#d4621a;letter-spacing:4px;text-transform:uppercase;margin-bottom:48px}
+.clean-stat{font-family:'Montserrat',sans-serif;font-weight:900;font-size:160px;color:#d4621a;line-height:1;margin-bottom:16px;letter-spacing:-4px}
+.clean-stat-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:32px;color:#1a0a02;line-height:1.2;margin-bottom:36px;max-width:820px}
+.clean-divider{width:56px;height:5px;background:#d4621a;margin-bottom:36px}
+.clean-body{font-family:'DM Sans',sans-serif;font-weight:300;font-size:28px;color:#5a3a28;line-height:1.65;max-width:860px;margin-bottom:20px}
+.clean-bold{font-family:'Montserrat',sans-serif;font-weight:700;font-size:28px;color:#1a0a02;line-height:1.4;max-width:860px}
+.clean-slide-num{position:absolute;bottom:28px;right:36px;font-family:'DM Sans',sans-serif;font-size:19px;color:rgba(90,58,40,.35);letter-spacing:1px}
 </style>
 </head>
 <body>
@@ -40,80 +53,82 @@ nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-famil
 </nav>
 <div class="panel" id="panel">
 
-  <!-- SLIDE 1: COVER -->
+  <!-- SLIDE 1: COVER — foto oscura -->
   <div class="slide active">
     <div class="slide-bg" style="background-image:url('img/img01.png')"></div>
-    <div class="slide-overlay" style="background:linear-gradient(160deg,rgba(10,6,2,.42) 0%,rgba(26,10,2,.40) 60%,rgba(10,6,2,.44) 100%)"></div>
+    <div class="slide-overlay" style="background:linear-gradient(160deg,rgba(10,6,2,.42) 0%,rgba(26,10,2,.40) 60%,rgba(10,6,2,.46) 100%)"></div>
     <div class="slide-inner">
       <div class="accent-bar"></div>
       <h1 class="headline cover">Google recibe<br>la consulta.<br>Pero no te<br>llama a vos.</h1>
-      <p class="subtext">El 96% de los clientes busca abogados online antes de llamar a cualquiera. Si no apareces, no existes.</p>
+      <p class="subtext">El 96% de los clientes busca abogados online antes de llamar. Si no apareces, no existes.</p>
       <span class="brand-tag">@clickderechomkt</span>
     </div>
     <span class="slide-num">1 / 6</span>
   </div>
 
-  <!-- SLIDE 2: PROBLEM -->
-  <div class="slide">
-    <div class="slide-bg" style="background-image:url('img/img08.png')"></div>
-    <div class="slide-overlay" style="background:linear-gradient(150deg,rgba(10,6,2,.42) 0%,rgba(13,13,13,.40) 55%,rgba(10,6,2,.43) 100%)"></div>
-    <div class="slide-inner">
-      <div class="accent-bar"></div>
-      <h2 class="headline mid">Tu cliente ideal busco un abogado hoy. Y llamo a otro.</h2>
-      <p class="subtext">No porque el otro sea mejor. Porque apareció primero. Sin visibilidad online, esa consulta nunca llega a tu telefono. Nunca.</p>
+  <!-- SLIDE 2: STAT — crema limpia -->
+  <div class="slide clean">
+    <div class="slide-inner" style="justify-content:flex-start;padding-top:100px">
+      <p class="clean-label">La realidad</p>
+      <div class="clean-stat">96%</div>
+      <p class="clean-stat-label">de los clientes busca abogados en Google antes de hacer una sola llamada.</p>
+      <div class="clean-divider"></div>
+      <p class="clean-body">Si tu estudio no aparece en los primeros resultados, ese cliente llama a otro. Sin dudarlo.</p>
+      <p class="clean-bold">El problema no es la competencia. Es la invisibilidad.</p>
     </div>
-    <span class="slide-num">2 / 6</span>
+    <span class="clean-slide-num">2 / 6</span>
   </div>
 
-  <!-- SLIDE 3: KEY INSIGHT 1 -->
+  <!-- SLIDE 3: INSIGHT 1 — foto oscura -->
   <div class="slide">
     <div class="slide-bg" style="background-image:url('img/img12.png')"></div>
-    <div class="slide-overlay" style="background:linear-gradient(145deg,rgba(26,10,2,.42) 0%,rgba(10,6,2,.40) 50%,rgba(13,13,13,.44) 100%)"></div>
+    <div class="slide-overlay" style="background:linear-gradient(145deg,rgba(26,10,2,.42) 0%,rgba(10,6,2,.40) 50%,rgba(13,13,13,.46) 100%)"></div>
     <div class="slide-inner">
       <span class="tag">El problema</span>
-      <h2 class="headline mid">Un sitio web que no posiciona es un gasto, no una inversion.</h2>
-      <p class="subtext">Si tu web no aparece en Google cuando alguien busca "abogado de familia en [tu ciudad]", ese sitio no te genera ni un solo cliente nuevo.</p>
+      <h2 class="headline mid">Una web sin SEO<br>es un gasto,<br>no una inversion.</h2>
+      <p class="subtext">Si tu sitio no aparece cuando alguien busca tu servicio en tu ciudad, no existe. No importa lo bien que se vea.</p>
     </div>
     <span class="slide-num">3 / 6</span>
   </div>
 
-  <!-- SLIDE 4: KEY INSIGHT 2 -->
-  <div class="slide">
-    <div class="slide-bg" style="background-image:url('img/img15.png')"></div>
-    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(10,6,2,.42) 0%,rgba(26,10,2,.45) 55%,rgba(10,6,2,.43) 100%)"></div>
-    <div class="slide-inner">
-      <span class="tag">La oportunidad</span>
-      <h2 class="headline mid">El 70% de los estudios de tu ciudad no tiene SEO. Ese es tu espacio.</h2>
-      <p class="subtext">La mayoria de los abogados tiene una web desactualizada y cero estrategia de contenido. Posicionarte bien hoy es mas facil y barato que en dos anos.</p>
+  <!-- SLIDE 4: INSIGHT 2 — crema limpia -->
+  <div class="slide clean">
+    <div class="slide-inner" style="justify-content:flex-start;padding-top:100px">
+      <p class="clean-label">La oportunidad</p>
+      <div class="clean-stat" style="font-size:130px">70%</div>
+      <p class="clean-stat-label">de los estudios juridicos en tu ciudad no tiene ninguna estrategia de SEO.</p>
+      <div class="clean-divider"></div>
+      <p class="clean-body">Ese es tu espacio. Posicionarte hoy es mas facil y barato que en dos anos, cuando todos lo intenten.</p>
+      <p class="clean-bold">El que llega primero, se queda.</p>
     </div>
-    <span class="slide-num">4 / 6</span>
+    <span class="clean-slide-num">4 / 6</span>
   </div>
 
-  <!-- SLIDE 5: CHECKLIST -->
+  <!-- SLIDE 5: CHECKLIST — foto oscura -->
   <div class="slide">
     <div class="slide-bg" style="background-image:url('img/img18.png')"></div>
-    <div class="slide-overlay" style="background:linear-gradient(140deg,rgba(26,10,2,.42) 0%,rgba(10,6,2,.42) 50%,rgba(13,13,13,.44) 100%)"></div>
+    <div class="slide-overlay" style="background:linear-gradient(140deg,rgba(26,10,2,.42) 0%,rgba(10,6,2,.40) 50%,rgba(13,13,13,.46) 100%)"></div>
     <div class="slide-inner">
       <div class="accent-bar"></div>
-      <h2 class="headline mid">Tu estudio aparece en Google si:</h2>
+      <h2 class="headline mid">Tu estudio<br>aparece en Google<br>si haces esto:</h2>
       <ul class="checklist">
-        <li>Tu web esta optimizada para las busquedas de tu area de practica y ciudad</li>
-        <li>Tu ficha de Google Business tiene resenas recientes y esta completa</li>
-        <li>Publicas contenido que responde las preguntas de tus clientes ideales</li>
-        <li>Tu sitio carga rapido y se ve bien en el celular</li>
+        <li>Web optimizada para las busquedas de tu area y ciudad</li>
+        <li>Ficha de Google Business con resenas recientes y completa</li>
+        <li>Contenido que responde las preguntas de tus clientes ideales</li>
+        <li>Sitio rapido y bien visto desde el celular</li>
       </ul>
     </div>
     <span class="slide-num">5 / 6</span>
   </div>
 
-  <!-- SLIDE 6: CTA -->
+  <!-- SLIDE 6: CTA — foto oscura -->
   <div class="slide">
-    <div class="slide-bg" style="background-image:url('img/img01.png');background-position:center center"></div>
-    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(26,10,2,.43) 0%,rgba(10,6,2,.42) 50%,rgba(13,13,13,.44) 100%)"></div>
+    <div class="slide-bg" style="background-image:url('img/img15.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(26,10,2,.44) 0%,rgba(10,6,2,.42) 50%,rgba(13,13,13,.46) 100%)"></div>
     <div class="slide-inner">
       <div class="accent-bar"></div>
       <h2 class="headline cover">Te ponemos<br>en el mapa.<br>Gratis<br>primero.</h2>
-      <p class="subtext">Auditamos tu presencia en Google sin costo. Te decimos exactamente que falta y como lo resolvemos.</p>
+      <p class="subtext">Auditamos tu visibilidad en Google sin costo. Te decimos exactamente que falta y como lo resolvemos.</p>
       <span class="cta-brand">Click Derecho</span>
       <span class="cta-handle">@clickderechomkt</span>
     </div>
