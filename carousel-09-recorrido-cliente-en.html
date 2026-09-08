@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RightLead - Carousel 09 recorrido-cliente</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Montserrat:wght@400;600;700;900&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
+nav{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(0,0,0,.7);padding:7px 14px;border-radius:8px}
+nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;font-size:15px}
+.slide-counter{color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;min-width:48px;text-align:center}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
+.slide{width:1080px;height:1350px;display:none;flex-direction:column;position:absolute;top:0;left:0;overflow:hidden}
+.slide.active{display:flex}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:.70;z-index:0}
+.slide-overlay{position:absolute;inset:0;z-index:1}
+.dark-inner{padding:90px 88px 80px;display:flex;flex-direction:column;justify-content:flex-end;flex:1;position:relative;z-index:2}
+.accent-line{width:64px;height:6px;background:#d4621a;margin-bottom:48px}
+.tag{display:inline-block;border:2px solid #d4621a;color:#d4621a;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;padding:8px 20px;margin-bottom:40px;text-transform:uppercase;letter-spacing:4px;width:fit-content}
+.d-headline{font-family:'Playfair Display',serif;font-weight:900;color:#fff;line-height:1.03;margin-bottom:36px;letter-spacing:-.5px}
+.d-headline.cover{font-size:96px}
+.d-headline.mid{font-size:78px}
+.d-sub{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;line-height:1.65;color:rgba(255,255,255,.82);max-width:840px;margin-bottom:32px}
+.d-brand{font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;color:#d4621a;letter-spacing:1.5px;text-transform:uppercase}
+.d-checklist{list-style:none;margin-bottom:28px}
+.d-checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:28px;color:rgba(255,255,255,.88);line-height:1.55;margin-bottom:22px;padding-left:40px;position:relative}
+.d-checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700;font-size:26px}
+.d-cta-brand{font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:40px;color:#fff;display:block;margin-bottom:6px}
+.d-cta-handle{font-family:'DM Sans',sans-serif;font-weight:300;font-size:24px;color:#d4621a;display:block;letter-spacing:1px}
+.slide-num{position:absolute;bottom:30px;right:40px;font-family:'DM Sans',sans-serif;font-size:18px;color:rgba(255,255,255,.28);z-index:3;letter-spacing:2px}
+.clean{background:#f5ede4;flex-direction:column}
+.clean-inner{padding:90px 88px 80px;display:flex;flex-direction:column;justify-content:flex-start;flex:1;position:relative}
+.c-eyebrow{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#d4621a;letter-spacing:5px;text-transform:uppercase;margin-bottom:60px}
+.c-stat{font-family:'Playfair Display',serif;font-weight:900;color:#d4621a;line-height:.9;letter-spacing:-4px;margin-bottom:16px}
+.c-stat-sm{font-size:130px}
+.c-stat-lg{font-size:180px}
+.c-stat-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:30px;color:#1a0a02;line-height:1.25;margin-bottom:40px;max-width:820px}
+.c-rule{width:52px;height:5px;background:#d4621a;margin-bottom:40px}
+.c-body{font-family:'DM Sans',sans-serif;font-weight:300;font-size:27px;color:#7a4a30;line-height:1.7;max-width:840px;margin-bottom:24px}
+.c-bold{font-family:'Montserrat',sans-serif;font-weight:700;font-size:27px;color:#1a0a02;line-height:1.45;max-width:840px;margin-top:8px}
+.clean-slide-num{position:absolute;bottom:30px;right:40px;font-family:'DM Sans',sans-serif;font-size:18px;color:rgba(180,100,50,.30);letter-spacing:2px}
+</style>
+</head>
+<body>
+<nav>
+  <button onclick="prev()">&#8592;</button>
+  <span class="slide-counter" id="ctr">1 / 6</span>
+  <button onclick="next()">&#8594;</button>
+</nav>
+<div class="panel" id="panel">
+
+  <div class="slide active">
+    <div class="slide-bg" style="background-image:url('img/img05.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(142deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h1 class="d-headline cover">Your client<br>made 7 decisions<br>before they<br>called you.</h1>
+      <p class="d-sub">At every single one they could have hired a competitor instead.</p>
+      <span class="d-brand">@rightleadmkt</span>
+    </div>
+    <span class="slide-num">1 / 6</span>
+  </div>
+  <div class="slide clean">
+    <div class="clean-inner">
+      <p class="c-eyebrow">The data</p>
+      <div class="c-stat c-stat-lg">80%</div>
+      <p class="c-stat-label">of legal clients compare at least 3 firms before hiring one.</p>
+      <div class="c-rule"></div>
+      <p class="c-body">The best lawyer does not always win. The firm with the strongest presence at each touchpoint does.</p>
+      <p class="c-bold">The battle is won<br>before they call.</p>
+    </div>
+    <span class="clean-slide-num">2 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img06.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(158deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="tag">Steps 1 and 2</div>
+      <h2 class="d-headline mid">Legal problem.<br>Then Google.<br>That is where<br>it starts.</h2>
+      <p class="d-sub">They do not call a friend first. They search Google. If your firm is not in the top 3 results, you do not exist to that client. Period.</p>
+    </div>
+    <span class="slide-num">3 / 6</span>
+  </div>
+  <div class="slide clean">
+    <div class="clean-inner">
+      <p class="c-eyebrow">Steps 3 to 5</p>
+      <div class="c-stat c-stat-sm">10m</div>
+      <p class="c-stat-label">is how long the client spends reviewing your site, social and reviews before calling.</p>
+      <div class="c-rule"></div>
+      <p class="c-body">In that time they decide if they trust you. Before ever speaking to you. Your digital presence is your first interview.</p>
+      <p class="c-bold">Lose those 10 minutes,<br>lose the client.</p>
+    </div>
+    <span class="clean-slide-num">4 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img07.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(148deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h2 class="d-headline mid">Where most firms<br>lose the client<br>for good:</h2>
+      <ul class="d-checklist">
+        <li>Slow or confusing website: prospect bounces in under 8 seconds</li>
+        <li>No recent Google reviews: instant credibility gap</li>
+        <li>Inactive social media: looks like the firm closed</li>
+        <li>Slow callback: they already hired whoever answered first</li>
+      </ul>
+    </div>
+    <span class="slide-num">5 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img08.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(155deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h2 class="d-headline cover">We audit your<br>presence at<br>every step<br>of the journey.</h2>
+      <p class="d-sub">Free. No commitment. Find out exactly where you are losing clients right now.</p>
+      <span class="d-cta-brand">RightLead</span>
+      <span class="d-cta-handle">@rightleadmkt</span>
+    </div>
+    <span class="slide-num">6 / 6</span>
+  </div>
+</div>
+<script>
+let c=0;
+const sl=document.querySelectorAll('.slide');
+function show(n){sl.forEach((s,i)=>s.classList.toggle('active',i===n));document.getElementById('ctr').textContent=(n+1)+' / '+sl.length;}
+function next(){c=(c+1)%sl.length;show(c);}
+function prev(){c=(c-1+sl.length)%sl.length;show(c);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>
