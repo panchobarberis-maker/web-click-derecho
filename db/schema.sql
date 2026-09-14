@@ -299,3 +299,13 @@ alter table clips  add column if not exists paginas text;
 -- Apagarlo muestra la portada con un boton de play, y ademas ahorra ancho de
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
+
+-- Ultima publicacion del clip en las paginas de Meta (Facebook/Instagram).
+--
+-- meta_post_ids guarda "pagina:id" separados por coma, una entrada por pagina
+-- donde se publico bien; meta_error queda con el detalle de la ultima
+-- publicacion si alguna pagina fallo, y se limpia sola la proxima vez que sale
+-- todo bien.
+alter table clips add column if not exists meta_published_at timestamptz;
+alter table clips add column if not exists meta_post_ids text;
+alter table clips add column if not exists meta_error text;

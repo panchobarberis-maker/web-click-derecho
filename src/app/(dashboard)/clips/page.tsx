@@ -7,8 +7,12 @@ import { RangePicker } from "@/components/RangePicker";
 import { Snippet } from "@/components/Snippet";
 import { SubirArchivo } from "@/components/Subir";
 import { almacenamientoListo, CLASES } from "@/lib/storage";
+import { metaListo, publicarClipEnMeta } from "@/lib/meta";
 
 export const dynamic = "force-dynamic";
+// Instagram no publica el video al toque: hay que esperar a que lo procese
+// antes de poder publicarlo, y esa espera puede llevar unos segundos.
+export const maxDuration = 60;
 
 const AYUDA_VIDEO =
   `Vertical, de 15 a 20 segundos, hasta ${CLASES.video.maxMb} MB. Cuanto más liviano, más rápido arranca en el sitio del estudio.`;
@@ -57,9 +61,51 @@ async function borrar(formData: FormData) {
   revalidatePath("/clips");
 }
 
+async function publicarMeta(formData: FormData) {
+  "use server";
+  const { firm } = await requireOwner();
+  if (!metaListo()) return;
+  const id = String(formData.get("id"));
+
+  const [clip] = await sql<{ name: string; video_url: string; poster_url: string | null; cta: string }[]>`
+    select name, video_url, poster_url, cta from clips where id = ${id} and firm_id = ${firm.id}`;
+  if (!clip) return;
+
+  let meta_published_at: Date | null = null;
+  let meta_post_ids: string | null = null;
+  let meta_error: string | null = null;
+
+  try {
+    const resultados = await publicarClipEnMeta(clip);
+    const publicadas = resultados.filter((r) => r.ok);
+    const fallidas = resultados.filter((r) => !r.ok);
+    if (publicadas.length > 0) {
+      meta_published_at = new Date();
+      meta_post_ids = publicadas.map((r) => `${r.destino}:${r.postId}`).join(", ");
+    }
+    if (fallidas.length > 0) {
+      meta_error = fallidas.map((r) => `${r.destino}: ${r.error}`).join("; ");
+    }
+  } catch (e) {
+    meta_error = e instanceof Error ? e.message : String(e);
+  }
+
+  // Si esta vez no se publico en ninguna pagina, no se pisa la fecha ni las
+  // paginas de la ultima vez que si funciono -- solo el error, que es lo
+  // nuevo. Asi el panel sigue mostrando cuando se publico de verdad.
+  await sql`
+    update clips set
+      meta_published_at = coalesce(${meta_published_at}, meta_published_at),
+      meta_post_ids      = coalesce(${meta_post_ids}, meta_post_ids),
+      meta_error         = ${meta_error}
+    where id = ${id} and firm_id = ${firm.id}`;
+  revalidatePath("/clips");
+}
+
 type Clip = {
   id: string; name: string; video_url: string; poster_url: string | null;
   cta: string; funnel_id: string | null; active: boolean; paginas: string | null; autoplay: boolean;
+  meta_published_at: string | null; meta_post_ids: string | null; meta_error: string | null;
 };
 
 export default async function Clips({ searchParams }: { searchParams: Promise<{ r?: string }> }) {
@@ -68,14 +114,16 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
   const puedeEditar = firm.role !== "member";
 
   const [clips, areas, stats] = await Promise.all([
-    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas, autoplay from clips
-                where firm_id = ${firm.id} order by created_at desc`,
+    sql<Clip[]>`select id, name, video_url, poster_url, cta, funnel_id, active, paginas, autoplay,
+                       meta_published_at, meta_post_ids, meta_error
+                from clips where firm_id = ${firm.id} order by created_at desc`,
     sql<{ id: string; name: string }[]>`select id, name from funnels where firm_id = ${firm.id} order by sort_order`,
     porWidget(firm.id, "clips", range),
   ]);
 
   const stat = new Map(stats.map((s) => [s.id, s]));
   const puedeSubir = almacenamientoListo();
+  const puedePublicarMeta = metaListo();
   const base = baseUrl();
 
   return (
@@ -121,6 +169,27 @@ export default async function Clips({ searchParams }: { searchParams: Promise<{ 
                    style={{ marginTop: ".9rem", padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
                   Ver cómo queda
                 </a>
+
+                {puedeEditar && puedePublicarMeta && (
+                  <form action={publicarMeta}
+                        style={{ marginTop: ".6rem", display: "flex", alignItems: "center", gap: ".7rem", flexWrap: "wrap" }}>
+                    <input type="hidden" name="id" value={c.id} />
+                    <button type="submit" className="btn ghost" style={{ padding: ".45rem 1.1rem", fontSize: ".84rem" }}>
+                      Publicar en Facebook/Instagram
+                    </button>
+                    {c.meta_published_at && (
+                      <span className="pill good">
+                        Publicado {new Date(c.meta_published_at).toLocaleString("es-AR")}
+                      </span>
+                    )}
+                    {c.meta_error && <span className="pill warn">Falló en alguna página</span>}
+                  </form>
+                )}
+                {c.meta_error && (
+                  <p className="muted" style={{ fontSize: ".78rem", marginTop: ".4rem", lineHeight: 1.5 }}>
+                    {c.meta_error}
+                  </p>
+                )}
 
                 {puedeEditar && (
                   <details className="ajuste">

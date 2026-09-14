@@ -224,6 +224,27 @@ conecta con el rol dueño de las tablas, que no queda sujeto a RLS. El control
 de acceso real lo hace la app filtrando por `firm_id` contra la membresía del
 usuario.
 
+### Publicar clips en Meta (Facebook/Instagram)
+
+Cada clip tiene un botón **Publicar en Facebook/Instagram** en el panel que
+sube el mismo video ya hospedado en Supabase Storage a las páginas de Meta
+configuradas, via Graph API. Sin las variables de entorno de abajo el botón
+no aparece — la app sigue andando igual.
+
+- `META_PAGE_ACCESS_TOKEN`: un token de página con permiso `pages_manage_posts`
+  (se genera en [developers.facebook.com](https://developers.facebook.com),
+  idealmente uno de larga duración de una app en modo *Live*).
+- `META_PAGE_IDS`: los ids de las páginas donde publicar, separados por coma.
+  Un solo token puede cubrir varias páginas si la cuenta que lo generó es
+  administradora de todas.
+
+Si la página de Facebook tiene una cuenta de Instagram profesional vinculada,
+el clip se publica también ahí, como Reel — Instagram necesita además el
+permiso `instagram_content_publish` en el token. A diferencia de Facebook,
+Instagram no publica el video al toque: primero lo procesa, así que el botón
+puede demorar unos segundos, y si Instagram tarda más de lo esperado el panel
+lo marca como error y alcanza con volver a tocar el botón.
+
 ### Sobre el aviso de `npm audit`
 
 `npm install` reporta tres vulnerabilidades altas en `postcss` y `sharp`. Las

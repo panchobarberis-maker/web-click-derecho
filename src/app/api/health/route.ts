@@ -3,6 +3,7 @@ import { dbConfigError, sql } from "@/lib/db";
 import { googleEnabled, redirectUri } from "@/lib/google";
 import { TABLAS, COLUMNAS } from "@/lib/estructura";
 import { almacenamientoListo } from "@/lib/storage";
+import { metaListo, paginasMeta } from "@/lib/meta";
 
 export const dynamic = "force-dynamic";
 
@@ -109,6 +110,9 @@ export async function GET() {
       mails: process.env.RESEND_API_KEY
         ? "configurado"
         : "falta RESEND_API_KEY: las consultas se guardan pero no se avisa por mail",
+      meta: metaListo()
+        ? `configurado (${paginasMeta().length} página${paginasMeta().length === 1 ? "" : "s"})`
+        : "falta META_PAGE_ACCESS_TOKEN y/o META_PAGE_IDS: los clips no se pueden publicar en Facebook/Instagram",
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

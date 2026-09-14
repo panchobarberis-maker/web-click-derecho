@@ -320,6 +320,16 @@ alter table clips  add column if not exists paginas text;
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
 
+-- Ultima publicacion del clip en las paginas de Meta (Facebook/Instagram).
+--
+-- meta_post_ids guarda "pagina:id" separados por coma, una entrada por pagina
+-- donde se publico bien; meta_error queda con el detalle de la ultima
+-- publicacion si alguna pagina fallo, y se limpia sola la proxima vez que sale
+-- todo bien.
+alter table clips add column if not exists meta_published_at timestamptz;
+alter table clips add column if not exists meta_post_ids text;
+alter table clips add column if not exists meta_error text;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -419,11 +429,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$bGEc4Rh75bzK567C8tcznQ==$WLrofKpPm5RzXVQLYaKgM/Eak3jTg8aZceEZXZfza8pN+lMMLQyoGTOMqsrBNYulO8eoMh0/RuKcu5JwN8uUgw==', true)
+values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$540l7IxRoAhY5/Le9W/ofQ==$OVXWN/PUNh3pcsGuMV0jW10yfzskFouG9QAXsnjoDvbOpAuSgxOTmLT4RR3o3Wg154274Du8/n1PJMu8OqsB3A==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$r4cp0zCWSsNiK8BMar7dAQ==$TdLWfQvz7hQQQ2FgIPZVniZx55ZikVL76EO6pjyCc+qpcr+4a5A6gvxFWRbSYpc8mU9n6Rr7QoZtW99q6xRbUQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$YQlp9hH+p1nSTWwNsLDYuQ==$IXmnD9TUCAwNQJJTHIqmoqoRo9sWmbo9WPxvc/VFIK3UDXlhG7Vge9x4VGJUJNcSFYtws1YABlFMEsuTgMRJVQ==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)
