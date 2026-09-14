@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tweet Card - SEO</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f5ede4;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:40px 8px;font-family:'Inter',sans-serif}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left;background:#f5ede4;display:flex;align-items:center;justify-content:center}
+
+.panel-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 65% 35%,rgba(212,98,26,.10) 0%,transparent 65%)}
+
+/* Tweet card — ocupa todo el 4:5 */
+.tweet{background:#000;border:none;border-radius:0;padding:90px 80px 0;width:1080px;min-height:1350px;position:relative;z-index:2;display:flex;flex-direction:column}
+
+/* Header */
+.tweet-header{display:flex;align-items:flex-start;gap:24px;margin-bottom:64px}
+.avatar{width:96px;height:96px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid #333}
+.avatar img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.user-info{flex:1}
+.display-name{display:flex;align-items:center;gap:8px;font-weight:700;font-size:30px;color:#e7e9ea;line-height:1.2}
+.verified{width:28px;height:28px;display:inline-block}
+.handle{font-size:24px;color:#71767b;font-weight:400;margin-top:6px}
+.x-logo{margin-left:auto;opacity:.45}
+
+/* Tweet body */
+.tweet-text{font-size:56px;color:#e7e9ea;line-height:1.6;margin-bottom:auto;font-weight:400;padding-bottom:60px}
+.tweet-text strong{font-weight:700;color:#fff}
+.tweet-text .orange{color:#d4621a;font-weight:700}
+
+/* Timestamp */
+.timestamp{font-size:24px;color:#71767b;padding:28px 0;border-top:1px solid #2f3336;border-bottom:1px solid #2f3336;margin-top:auto}
+.timestamp span{color:#e7e9ea;font-weight:500}
+
+/* Actions */
+.actions{display:flex;align-items:center;justify-content:space-between;padding:28px 12px 36px}
+.action{display:flex;align-items:center;gap:14px;color:#71767b;font-size:24px;font-weight:400}
+</style>
+</head>
+<body>
+<div class="panel" id="panel">
+  <div class="panel-bg"></div>
+
+  <div class="tweet">
+    <div class="tweet-header">
+      <div class="avatar">
+        <img src="img/img08.png" alt="avatar">
+      </div>
+      <div class="user-info">
+        <div class="display-name">
+          Click Derecho
+          <svg class="verified" viewBox="0 0 24 24" fill="#1d9bf0"><path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.477-1.048.407-1.684-.069-.636-.236-1.274-.507-1.87l-.009-.024z"/></svg>
+        </div>
+        <div class="handle">@clickderechomkt</div>
+      </div>
+      <div class="x-logo">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="#e7e9ea"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </div>
+    </div>
+
+    <div class="tweet-text">
+      Opinión impopular: <strong>ser un buen abogado ya no alcanza.</strong><br><br>
+      Si nadie te encuentra en Google, da igual qué tan bueno seas.<br><br>
+      El abogado que aparece <span class="orange">primero</span> gana el caso antes de que empiece.
+    </div>
+
+    <div class="timestamp">
+      10:32 AM · 7 sep 2026 · <span>48.2K</span> Vistas
+    </div>
+
+    <div class="actions">
+      <div class="action">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#71767b" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        84
+      </div>
+      <div class="action">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#71767b" stroke-width="1.8"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        312
+      </div>
+      <div class="action">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#71767b" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        1.4K
+      </div>
+      <div class="action">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#71767b" stroke-width="1.8"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>

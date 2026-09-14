@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Click Derecho - Carousel 03 frases-espantan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Montserrat:wght@400;600;700;900&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:56px 8px 32px;font-family:'Montserrat',sans-serif}
+nav{position:fixed;top:10px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;z-index:100;background:rgba(0,0,0,.7);padding:7px 14px;border-radius:8px}
+nav button{background:#d4621a;color:#fff;border:none;padding:6px 18px;font-family:'Montserrat',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;font-size:15px}
+.slide-counter{color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;min-width:48px;text-align:center}
+.panel{width:1080px;height:1350px;position:relative;transform-origin:top left}
+.slide{width:1080px;height:1350px;display:none;flex-direction:column;position:absolute;top:0;left:0;overflow:hidden}
+.slide.active{display:flex}
+.slide-bg{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:.70;z-index:0}
+.slide-overlay{position:absolute;inset:0;z-index:1}
+.dark-inner{padding:90px 88px 80px;display:flex;flex-direction:column;justify-content:flex-end;flex:1;position:relative;z-index:2}
+.accent-line{width:64px;height:6px;background:#d4621a;margin-bottom:48px}
+.tag{display:inline-block;border:2px solid #d4621a;color:#d4621a;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;padding:8px 20px;margin-bottom:40px;text-transform:uppercase;letter-spacing:4px;width:fit-content}
+.d-headline{font-family:'Playfair Display',serif;font-weight:900;color:#fff;line-height:1.03;margin-bottom:36px;letter-spacing:-.5px}
+.d-headline.cover{font-size:96px}
+.d-headline.mid{font-size:78px}
+.d-sub{font-family:'DM Sans',sans-serif;font-weight:300;font-size:30px;line-height:1.65;color:rgba(255,255,255,.82);max-width:840px;margin-bottom:32px}
+.d-brand{font-family:'Montserrat',sans-serif;font-weight:700;font-size:22px;color:#d4621a;letter-spacing:1.5px;text-transform:uppercase}
+.d-checklist{list-style:none;margin-bottom:28px}
+.d-checklist li{font-family:'DM Sans',sans-serif;font-weight:300;font-size:28px;color:rgba(255,255,255,.88);line-height:1.55;margin-bottom:22px;padding-left:40px;position:relative}
+.d-checklist li::before{content:"→";position:absolute;left:0;color:#d4621a;font-weight:700;font-size:26px}
+.d-cta-brand{font-family:'Playfair Display',serif;font-weight:700;font-style:italic;font-size:40px;color:#fff;display:block;margin-bottom:6px}
+.d-cta-handle{font-family:'DM Sans',sans-serif;font-weight:300;font-size:24px;color:#d4621a;display:block;letter-spacing:1px}
+.slide-num{position:absolute;bottom:30px;right:40px;font-family:'DM Sans',sans-serif;font-size:18px;color:rgba(255,255,255,.28);z-index:3;letter-spacing:2px}
+.clean{background:#f5ede4;flex-direction:column}
+.clean-inner{padding:90px 88px 80px;display:flex;flex-direction:column;justify-content:flex-start;flex:1;position:relative}
+.c-eyebrow{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;color:#d4621a;letter-spacing:5px;text-transform:uppercase;margin-bottom:60px}
+.c-stat{font-family:'Playfair Display',serif;font-weight:900;color:#d4621a;line-height:.9;letter-spacing:-4px;margin-bottom:16px}
+.c-stat-sm{font-size:130px}
+.c-stat-lg{font-size:180px}
+.c-stat-label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:30px;color:#1a0a02;line-height:1.25;margin-bottom:40px;max-width:820px}
+.c-rule{width:52px;height:5px;background:#d4621a;margin-bottom:40px}
+.c-body{font-family:'DM Sans',sans-serif;font-weight:300;font-size:27px;color:#7a4a30;line-height:1.7;max-width:840px;margin-bottom:24px}
+.c-bold{font-family:'Montserrat',sans-serif;font-weight:700;font-size:27px;color:#1a0a02;line-height:1.45;max-width:840px;margin-top:8px}
+.clean-slide-num{position:absolute;bottom:30px;right:40px;font-family:'DM Sans',sans-serif;font-size:18px;color:rgba(180,100,50,.30);letter-spacing:2px}
+</style>
+</head>
+<body>
+<nav>
+  <button onclick="prev()">&#8592;</button>
+  <span class="slide-counter" id="ctr">1 / 6</span>
+  <button onclick="next()">&#8594;</button>
+</nav>
+<div class="panel" id="panel">
+
+  <div class="slide active">
+    <div class="slide-bg" style="background-image:url('img/img02.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(148deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h1 class="d-headline cover">5 frases en tu<br>web que alejan<br>clientes antes<br>de que llamen.</h1>
+      <p class="d-sub">Cambia estas palabras y tu tasa de contacto sube en semanas.</p>
+      <span class="d-brand">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">1 / 6</span>
+  </div>
+  <div class="slide clean">
+    <div class="clean-inner">
+      <p class="c-eyebrow">El dato</p>
+      <div class="c-stat c-stat-sm">8s</div>
+      <p class="c-stat-label">tarda el cliente en decidir si te llama o cierra tu web.</p>
+      <div class="c-rule"></div>
+      <p class="c-body">En 8 segundos leen el titulo, evaluan si hablas de su problema y deciden. Si tu web dice "abogado con experiencia y dedicacion", ya los perdiste.</p>
+      <p class="c-bold">Las palabras importan<br>mas de lo que crees.</p>
+    </div>
+    <span class="clean-slide-num">2 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img03.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(138deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="tag">Frase a eliminar</div>
+      <h2 class="d-headline mid">"Abogado con<br>experiencia y<br>atencion<br>personalizada."</h2>
+      <p class="d-sub">Es la frase de 800 abogados en tu ciudad. El cliente no puede distinguirte. Especifica quien sos, a quien ayudas y como.</p>
+    </div>
+    <span class="slide-num">3 / 6</span>
+  </div>
+  <div class="slide clean">
+    <div class="clean-inner">
+      <p class="c-eyebrow">La alternativa</p>
+      <div class="c-stat c-stat-sm">3s</div>
+      <p class="c-stat-label">es todo lo que tenes para comunicar tu propuesta de valor.</p>
+      <div class="c-rule"></div>
+      <p class="c-body">"Defendemos a inmigrantes en casos de deportacion en Illinois" dice en un segundo mas que cualquier bio generica.</p>
+      <p class="c-bold">Especificidad es confianza.<br>Generalidad es olvido.</p>
+    </div>
+    <span class="clean-slide-num">4 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img04.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(143deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h2 class="d-headline mid">4 frases que<br>cambias hoy:</h2>
+      <ul class="d-checklist">
+        <li>"Abogado con experiencia" → "10 anos en divorcios complejos en Texas"</li>
+        <li>"Atencion personalizada" → "Te respondo en menos de 24 horas, siempre"</li>
+        <li>"Resultados comprobados" → "$2.3M recuperados en accidentes laborales en 2024"</li>
+        <li>"Consulta gratuita" → "Agenda hoy, sin costo, sin compromiso"</li>
+      </ul>
+    </div>
+    <span class="slide-num">5 / 6</span>
+  </div>
+  <div class="slide">
+    <div class="slide-bg" style="background-image:url('img/img05.png')"></div>
+    <div class="slide-overlay" style="background:linear-gradient(152deg,rgba(10,6,2,.44) 0%,rgba(26,10,2,.40) 55%,rgba(13,13,13,.48) 100%)"></div>
+    <div class="dark-inner">
+      <div class="accent-line"></div>
+      <h2 class="d-headline cover">Tu web te<br>diferencia.<br>O dice lo mismo<br>que todos.</h2>
+      <p class="d-sub">Reescribimos tu pagina principal para que cada cliente sepa en 3 segundos por que elegirte a vos.</p>
+      <span class="d-cta-brand">Click Derecho</span>
+      <span class="d-cta-handle">@clickderechomkt</span>
+    </div>
+    <span class="slide-num">6 / 6</span>
+  </div>
+</div>
+<script>
+let c=0;
+const sl=document.querySelectorAll('.slide');
+function show(n){sl.forEach((s,i)=>s.classList.toggle('active',i===n));document.getElementById('ctr').textContent=(n+1)+' / '+sl.length;}
+function next(){c=(c+1)%sl.length;show(c);}
+function prev(){c=(c-1+sl.length)%sl.length;show(c);}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')next();if(e.key==='ArrowLeft')prev();});
+function scale(){const p=document.getElementById('panel');const s=Math.min(1,(window.innerWidth-16)/1080);p.style.transform='scale('+s+')';p.style.marginBottom=((1350)*s-1350)+'px';}
+scale();window.addEventListener('resize',scale);
+</script>
+</body>
+</html>
