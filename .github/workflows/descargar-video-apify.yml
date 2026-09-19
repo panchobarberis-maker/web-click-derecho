@@ -1,0 +1,49 @@
+name: Descargar video de Instagram via Apify
+
+on:
+  workflow_dispatch:
+    inputs:
+      post_url:
+        description: 'URL del post/reel de Instagram'
+        required: true
+
+jobs:
+  descargar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar video via Apify
+        env:
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          POST_URL: ${{ inputs.post_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${APIFY_TOKEN:-}" ]; then
+            echo "Falta el secret APIFY_TOKEN en este repo (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+
+          echo "Corriendo el actor de Apify para $POST_URL ..."
+          curl -sS -X POST "https://api.apify.com/v2/acts/apify~instagram-scraper/run-sync-get-dataset-items?token=${APIFY_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"directUrls\": [\"${POST_URL}\"], \"resultsType\": \"posts\", \"resultsLimit\": 1, \"addParentData\": false}" \
+            -o /tmp/apify_result.json
+
+          echo "Primeros 2000 caracteres de la respuesta de Apify:"
+          head -c 2000 /tmp/apify_result.json; echo
+
+          VIDEO_URL=$(jq -r '.[0].videoUrl // .[0].video_url // .[0].videoUrlBackup // empty' /tmp/apify_result.json)
+          if [ -z "$VIDEO_URL" ]; then
+            echo "No se encontró videoUrl en la respuesta (¿el post no tiene video?)."
+            exit 1
+          fi
+
+          echo "Descargando video..."
+          curl -sS -L "$VIDEO_URL" -o video.mp4
+          ls -la video.mp4
+
+      - name: Subir video como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram-video
+          path: video.mp4
+          retention-days: 1
