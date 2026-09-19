@@ -13,12 +13,14 @@ jobs:
     steps:
       - name: Descargar video via Apify
         env:
-          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+          APIFY_TOKEN: ${{ secrets.APIFY_TOKEN || vars.APIFY_TOKEN }}
           POST_URL: ${{ inputs.post_url }}
         run: |
           set -euo pipefail
+          echo "Secret APIFY_TOKEN presente: $([ -n \"${APIFY_TOKEN:-}\" ] && echo si || echo no)"
+          echo "Largo del token: ${#APIFY_TOKEN}"
           if [ -z "${APIFY_TOKEN:-}" ]; then
-            echo "Falta el secret APIFY_TOKEN en este repo (Settings > Secrets and variables > Actions)."
+            echo "No se encontró ni secrets.APIFY_TOKEN ni vars.APIFY_TOKEN en este repo."
             exit 1
           fi
 
