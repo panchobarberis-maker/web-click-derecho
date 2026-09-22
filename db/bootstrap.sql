@@ -352,6 +352,44 @@ alter table firms add column if not exists lang text not null default 'es'
 -- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
 alter table popups add column if not exists titulo text;
 
+-- ---------------------------------------------------------------------------
+-- Triage y resumen diario
+--
+-- El estudio no necesita otra lista: necesita saber a quien llamar hoy. Cada
+-- consulta se lee una vez con Claude y queda guardado el resultado en la
+-- propia sesion, asi el panel y el mail leen lo mismo y no se vuelve a pagar
+-- por releer lo que no cambio.
+--
+-- triage_contexto es lo que hace que esto sirva: el estudio describe con sus
+-- palabras que casos quiere y cuales no ("tomamos accidentes laborales y
+-- despidos; no tomamos reclamos de menos de 10 mil; solo Ohio"). Sin eso el
+-- modelo puntua en el vacio, y con eso cada cliente de la agencia tiene su
+-- propio criterio sin tocar una linea de codigo.
+-- ---------------------------------------------------------------------------
+
+alter table firms add column if not exists triage_contexto text;
+
+-- El resumen sale a la hora local del estudio: uno en Ohio y uno en Buenos
+-- Aires comparten instalacion y no pueden compartir horario. El cron corre
+-- cada hora y cada estudio recibe el suyo cuando en su huso dan las digest_hora.
+alter table firms add column if not exists timezone text not null default 'UTC';
+alter table firms add column if not exists digest_hora int not null default 8
+  check (digest_hora between 0 and 23);
+-- Dias ISO separados por coma (1 = lunes). Por defecto, dias habiles.
+alter table firms add column if not exists digest_dias text not null default '1,2,3,4,5';
+alter table firms add column if not exists digest_at timestamptz;
+
+-- El veredicto del modelo, tal como vino. Se guarda entero y no en columnas
+-- sueltas porque la forma va a cambiar y no queremos una migracion por campo.
+alter table sessions add column if not exists triage    jsonb;
+alter table sessions add column if not exists triage_at timestamptz;
+
+-- Para juntar los pendientes sin leer: el indice parcial cubre justo la
+-- consulta del resumen.
+create index if not exists idx_sessions_pendientes
+  on sessions (firm_id, created_at desc)
+  where read_at is null;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -451,11 +489,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$bDrZvotZaud3pdThzDrv2g==$xwXImJgHwcFd1b3orvdqWoTtUs/IbVGdOgnHPhLUU0T5shNVxU3o/g/uOzGHn88Y2+gKMmmxY7EM41Eppwq6jg==', true)
+values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$8Kh0x+jE71xj6vdeuOwcvA==$Ku6yfFTrgEMXkI4Ui0gNkRwDziCNqONA4svmjsEm8/sx3Vvug+rSrd97LCyvQqn8UH+BjeKDZ3DrGR+4kXcSow==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$hCKrRhwYdM3ESJpcb/YU7A==$V991usYxJtuIzgdscJ61v8YSV3nTVirVGyHxPTRtzX0yRLgpPUXxPELhp5QJuxRGdm42fZuPeDZhsYOjARdwHQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$MnkMRNBmM5D2JPuaprRWrg==$oMJFPiPpGWMwvUAlZ6qfOa7xGMIV5BneShbOMP0hrcrULya0RS7jM+2cVgc9mt+W7KfJ/NVDvrgc3i64mQ10hg==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

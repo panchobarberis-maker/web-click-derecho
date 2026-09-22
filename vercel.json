@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/recover",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/digest",
+      "schedule": "0 11 * * *"
     }
   ]
 }

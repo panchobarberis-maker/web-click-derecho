@@ -325,6 +325,22 @@ const es = {
       `Empezaste una consulta por ${area} y quedó sin terminar. Podés retomarla donde la dejaste, no hace falta volver a escribir nada.`,
     recuperarBoton: "Retomar mi consulta",
     recuperarResponder: "Si preferís, respondé este mail y te contactamos nosotros.",
+    // resumen diario al estudio
+    digestAsunto: (n: number) => `${n} consulta${n === 1 ? "" : "s"} para mirar hoy`,
+    digestTitulo: "A quién llamar hoy",
+    digestBajada: (total: number) =>
+      total === 1
+        ? "Tenés 1 consulta sin abrir. Esta es la que conviene mirar primero."
+        : `Tenés ${total} consultas sin abrir. Estas son las que conviene mirar primero.`,
+    digestSinPuntaje: "Sin analizar",
+    digestPreguntar: "Para preguntar",
+    digestVer: "Ver la consulta",
+    digestTodas: (n: number) => `Ver las ${n} consultas pendientes`,
+    digestNoEncaja: "Fuera de las áreas del estudio",
+    // El aviso importa tanto como la lista: un orden sugerido que se lee como
+    // un filtro hace que lo de abajo no se mire nunca.
+    digestAclaracion:
+      "Este es un orden sugerido para no dejar a nadie esperando, no una evaluación de los casos. Está hecho con lo que cada persona escribió en el formulario y puede equivocarse: las consultas que no aparecen acá siguen estando en el panel y hay que mirarlas igual.",
     pieEstudio:
       "Recibís este mail porque dejaste tus datos en nuestro formulario de consulta. Si fue un error, ignoralo y no volvemos a escribirte.",
   },
@@ -983,6 +999,19 @@ const en: typeof es = {
       `You started a request about ${area} and didn't finish it. You can pick up right where you left off — nothing to retype.`,
     recuperarBoton: "Finish my request",
     recuperarResponder: "If you'd rather, just reply to this email and we'll reach out.",
+    digestAsunto: (n) => `${n} request${n === 1 ? "" : "s"} worth a look today`,
+    digestTitulo: "Who to call today",
+    digestBajada: (total) =>
+      total === 1
+        ? "You have 1 unopened request. This is the one worth looking at first."
+        : `You have ${total} unopened requests. These are the ones worth looking at first.`,
+    digestSinPuntaje: "Not analysed",
+    digestPreguntar: "Worth asking",
+    digestVer: "Open the request",
+    digestTodas: (n) => `See all ${n} pending requests`,
+    digestNoEncaja: "Outside the firm's practice areas",
+    digestAclaracion:
+      "This is a suggested order so nobody is left waiting, not an assessment of the cases. It is based on what each person wrote in the form and it can be wrong: the requests that don't appear here are still in the panel and still need looking at.",
     pieEstudio:
       "You're getting this email because you left your details in our contact form. If that wasn't you, ignore it and we won't write again.",
   },

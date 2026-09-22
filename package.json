@@ -11,6 +11,7 @@
     "docker:up": "docker compose up -d --wait"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.127.0",
     "next": "16.2.12",
     "postgres": "^3.4.5",
     "react": "^19.2.0",

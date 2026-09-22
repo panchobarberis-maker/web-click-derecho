@@ -331,3 +331,41 @@ alter table firms add column if not exists lang text not null default 'es'
 -- El pop-up es un aviso que invita a consultar, no el formulario en si: el
 -- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
 alter table popups add column if not exists titulo text;
+
+-- ---------------------------------------------------------------------------
+-- Triage y resumen diario
+--
+-- El estudio no necesita otra lista: necesita saber a quien llamar hoy. Cada
+-- consulta se lee una vez con Claude y queda guardado el resultado en la
+-- propia sesion, asi el panel y el mail leen lo mismo y no se vuelve a pagar
+-- por releer lo que no cambio.
+--
+-- triage_contexto es lo que hace que esto sirva: el estudio describe con sus
+-- palabras que casos quiere y cuales no ("tomamos accidentes laborales y
+-- despidos; no tomamos reclamos de menos de 10 mil; solo Ohio"). Sin eso el
+-- modelo puntua en el vacio, y con eso cada cliente de la agencia tiene su
+-- propio criterio sin tocar una linea de codigo.
+-- ---------------------------------------------------------------------------
+
+alter table firms add column if not exists triage_contexto text;
+
+-- El resumen sale a la hora local del estudio: uno en Ohio y uno en Buenos
+-- Aires comparten instalacion y no pueden compartir horario. El cron corre
+-- cada hora y cada estudio recibe el suyo cuando en su huso dan las digest_hora.
+alter table firms add column if not exists timezone text not null default 'UTC';
+alter table firms add column if not exists digest_hora int not null default 8
+  check (digest_hora between 0 and 23);
+-- Dias ISO separados por coma (1 = lunes). Por defecto, dias habiles.
+alter table firms add column if not exists digest_dias text not null default '1,2,3,4,5';
+alter table firms add column if not exists digest_at timestamptz;
+
+-- El veredicto del modelo, tal como vino. Se guarda entero y no en columnas
+-- sueltas porque la forma va a cambiar y no queremos una migracion por campo.
+alter table sessions add column if not exists triage    jsonb;
+alter table sessions add column if not exists triage_at timestamptz;
+
+-- Para juntar los pendientes sin leer: el indice parcial cubre justo la
+-- consulta del resumen.
+create index if not exists idx_sessions_pendientes
+  on sessions (firm_id, created_at desc)
+  where read_at is null;

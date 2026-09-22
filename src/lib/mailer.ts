@@ -168,3 +168,91 @@ export function leadEmail(o: {
     ),
   };
 }
+
+/**
+ * El resumen diario: a quien llamar hoy.
+ *
+ * El orden lo pone el triage, pero el mail esta escrito para que no se lea
+ * como un filtro. Por eso el total de pendientes va arriba y en grande, el
+ * boton al panel dice cuantas quedan, y la aclaracion esta antes del pie y no
+ * escondida en letra chica: lo que no aparece aca sigue estando y hay que
+ * mirarlo. Un correo que diga "estos son los buenos" hace que el resto no se
+ * abra nunca, y en un estudio eso puede ser un caso perdido.
+ */
+export function digestEmail(o: {
+  firm: string;
+  accent: string;
+  total: number;                      // pendientes sin abrir, todos
+  urlPanel: string;
+  casos: {
+    nombre: string;
+    contacto: string;                 // mail o telefono, lo que haya
+    area: string;
+    url: string;
+    triage: {
+      puntaje: number; titular: string; motivo: string;
+      alerta: string | null; preguntar: string[]; encaja: boolean;
+    } | null;
+  }[];
+  lang?: Lang;
+}) {
+  const m = t(o.lang ?? "es").mail;
+
+  const tarjeta = (c: (typeof o.casos)[number]) => {
+    const tr = c.triage;
+    const marca = tr
+      ? `<span style="background:${o.accent};color:#fff;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px">${tr.puntaje}</span>`
+      : `<span style="background:#e8e5ee;color:#6b6478;font-size:12px;padding:3px 9px;border-radius:99px">${esc(m.digestSinPuntaje)}</span>`;
+
+    const alerta = tr?.alerta
+      ? `<p style="margin:.6rem 0 0;padding:9px 12px;background:#fff6e5;border-left:3px solid #d98b00;font-size:13px">${esc(tr.alerta)}</p>`
+      : "";
+
+    const fuera = tr && !tr.encaja
+      ? `<p style="margin:.6rem 0 0;font-size:12px;color:#6b6478">${esc(m.digestNoEncaja)}</p>`
+      : "";
+
+    const preguntas = tr?.preguntar.length
+      ? `<p style="margin:.7rem 0 .2rem;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b6478;font-weight:600">${esc(m.digestPreguntar)}</p>
+         <ul style="margin:0;padding-left:1.1rem;font-size:13px;color:#4a4458">
+           ${tr.preguntar.map((q) => `<li>${esc(q)}</li>`).join("")}
+         </ul>`
+      : "";
+
+    return `
+<div style="border:1px solid #e8e5ee;border-radius:12px;padding:16px 18px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:.35rem">
+    ${marca}
+    <strong style="font-size:15px">${esc(c.nombre)}</strong>
+  </div>
+  <p style="margin:0;font-size:14px;font-weight:500">${esc(tr?.titular || c.area)}</p>
+  ${tr?.motivo ? `<p style="margin:.35rem 0 0;font-size:13px;color:#4a4458">${esc(tr.motivo)}</p>` : ""}
+  ${alerta}
+  ${fuera}
+  ${preguntas}
+  <p style="margin:.85rem 0 0;font-size:13px;color:#6b6478">${esc(c.contacto)}</p>
+  <p style="margin:.6rem 0 0">
+    <a href="${c.url}" style="color:${o.accent};font-size:13px;font-weight:500;text-decoration:none">${esc(m.digestVer)} →</a>
+  </p>
+</div>`;
+  };
+
+  return {
+    subject: m.digestAsunto(o.casos.length),
+    html: wrap(
+      `<h2 style="font-size:24px;margin:0 0 .35rem">${esc(m.digestTitulo)}</h2>
+       <p style="color:#6b6478;margin:0 0 1.5rem">${esc(m.digestBajada(o.total))}</p>
+
+       ${o.casos.map(tarjeta).join("")}
+
+       <p style="margin:1.5rem 0 0">
+         <a href="${o.urlPanel}" style="background:${o.accent};color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;display:inline-block;font-weight:500">
+           ${esc(m.digestTodas(o.total))}
+         </a>
+       </p>
+
+       <p style="margin:1.75rem 0 0;font-size:12px;color:#6b6478;line-height:1.5">${esc(m.digestAclaracion)}</p>`,
+      PIE_ESTUDIO,
+    ),
+  };
+}

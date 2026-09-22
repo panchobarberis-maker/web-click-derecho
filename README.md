@@ -348,6 +348,7 @@ Entra en el plan gratuito. Es todo por navegador: no hace falta terminal.
    | `RESEND_API_KEY` | De [resend.com](https://resend.com) | No, sin esto no salen mails |
    | `RESEND_FROM` | `Consultas <consultas@tudominio.com>` | Solo con Resend |
    | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | De Google Cloud | Solo para login con Google |
+   | `ANTHROPIC_API_KEY` | De [console.anthropic.com](https://console.anthropic.com) | No, sin esto el resumen diario sale sin analizar |
 
    `NEXT_PUBLIC_APP_URL` **no hace falta**: la app deduce su dominio del
    entorno de Vercel. Solo se setea cuando hay dominio propio.
