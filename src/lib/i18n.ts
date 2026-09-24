@@ -99,6 +99,21 @@ const es = {
     seFueEn: "Se fue en",
     anonimo: "Anónimo",
     leida: "Leída",
+
+    // lectura del caso
+    triageTitulo: "Lectura del caso",
+    triagePrioridad: "Prioridad",
+    triageSinAnalizar: "Sin analizar",
+    triageAlerta: "Atención",
+    triagePreguntar: "Para preguntar en la llamada",
+    triageNoEncaja: "Fuera de lo que el estudio dijo que toma",
+    triageAclaracion:
+      "Es una lectura automática de lo que la persona escribió, para ordenar a quién llamar primero. No evalúa el caso ni reemplaza mirarlo.",
+    triageFalta:
+      "Todavía no se analizó. Se analizan solas cada hora; también podés cargar el criterio del estudio en Ajustes.",
+    ordenar: "Ordenar por",
+    ordenPrioridad: "Prioridad",
+    ordenFecha: "Fecha",
     nueva: "Nueva",
     pasoN: (n: number) => `Paso ${n}`,
     recordatorioEnviado: "Recordatorio enviado",
@@ -384,6 +399,28 @@ const es = {
       "Cómo se ve el formulario y a dónde llegan las consultas. Todo esto lo ve la persona antes de escribir: es lo que hace que el formulario parezca del estudio y no de una app cualquiera.",
     verPublica: "Ver página pública",
     guardado: "Guardado",
+
+    // resumen diario y lectura de casos
+    resumenTitulo: "Resumen diario",
+    resumenBajada:
+      "Un correo por día con a quién conviene llamar primero, y la lectura de cada consulta dentro del panel.",
+    criterio: "Qué casos busca el estudio",
+    criterioAyuda:
+      "Escribilo con tus palabras, como se lo explicarías a alguien que empieza mañana. Es contra esto que se ordenan las consultas: sin este texto el orden sale genérico.",
+    criterioEjemplo:
+      "Tomamos despidos, accidentes laborales y sucesiones. No tomamos casos penales ni reclamos de menos de 500 mil. Solo provincia de Buenos Aires.",
+    zona: "Zona horaria",
+    horaResumen: "Hora del resumen",
+    diasResumen: "Días",
+    dias: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"],
+    sinDias: "Sin días marcados no sale ningún resumen.",
+    guardarResumen: "Guardar el resumen",
+    resumenVaA: (mail: string) => `Sale a ${mail}.`,
+    resumenSinDestino: "Falta cargar a dónde llegan las consultas, arriba: sin eso no sale el resumen.",
+    faltaClave:
+      "Falta configurar la clave de Anthropic en el servidor. Mientras tanto el resumen sale igual, con las consultas sin analizar.",
+    resumenAclaracion:
+      "El resumen sugiere un orden para no dejar a nadie esperando; no descarta consultas ni evalúa casos. Las que no aparecen siguen en el panel.",
     identidad: "Identidad",
     nombreEstudio: "Nombre del estudio",
     direccionPublica: "Dirección pública",
@@ -786,6 +823,20 @@ const en: typeof es = {
     seFueEn: "Left at",
     anonimo: "Anonymous",
     leida: "Read",
+
+    triageTitulo: "Case read",
+    triagePrioridad: "Priority",
+    triageSinAnalizar: "Not analysed",
+    triageAlerta: "Heads up",
+    triagePreguntar: "Worth asking on the call",
+    triageNoEncaja: "Outside what the firm said it takes",
+    triageAclaracion:
+      "This is an automatic read of what the person wrote, to help decide who to call first. It does not assess the case and does not replace looking at it.",
+    triageFalta:
+      "Not analysed yet. They get analysed hourly; you can also set the firm's criteria in Settings.",
+    ordenar: "Sort by",
+    ordenPrioridad: "Priority",
+    ordenFecha: "Date",
     nueva: "New",
     pasoN: (n) => `Step ${n}`,
     recordatorioEnviado: "Reminder sent",
@@ -1054,6 +1105,27 @@ const en: typeof es = {
       "How the form looks and where the requests land. People see all of this before they type a word: it's what makes the form feel like the firm's and not like some app.",
     verPublica: "See the public page",
     guardado: "Saved",
+
+    resumenTitulo: "Daily summary",
+    resumenBajada:
+      "One email a day with who to call first, plus a read of every request inside the panel.",
+    criterio: "What cases the firm is after",
+    criterioAyuda:
+      "Write it in your own words, the way you'd explain it to someone starting tomorrow. Requests are ranked against this: without it the ranking is generic.",
+    criterioEjemplo:
+      "We take workplace injury, wrongful termination and wage claims. We don't take criminal matters or anything under $10k. Ohio only.",
+    zona: "Time zone",
+    horaResumen: "Summary time",
+    diasResumen: "Days",
+    dias: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    sinDias: "With no days ticked no summary goes out.",
+    guardarResumen: "Save the summary",
+    resumenVaA: (mail) => `Goes to ${mail}.`,
+    resumenSinDestino: "Set where requests land, above: without that the summary can't go out.",
+    faltaClave:
+      "The Anthropic key isn't set on the server yet. The summary still goes out meanwhile, with requests left unanalysed.",
+    resumenAclaracion:
+      "The summary suggests an order so nobody is left waiting; it does not discard requests or assess cases. The ones that don't appear are still in the panel.",
     identidad: "Identity",
     nombreEstudio: "Firm name",
     direccionPublica: "Public address",

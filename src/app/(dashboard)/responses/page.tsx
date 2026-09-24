@@ -6,6 +6,7 @@ import { fmtLong, hace } from "@/lib/format";
 import { t as textos } from "@/lib/i18n";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
 import { linkParaRetomar } from "@/lib/base-url";
+import type { Triage } from "@/lib/triage";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ type Row = {
   updated_at: Date;
   funnel: string;
   workflow: string;
+  triage: Triage | null;
 };
 
 /** Manda el mail de recuperacion a mano desde el panel. */
@@ -57,8 +59,12 @@ async function recuperar(formData: FormData) {
   revalidatePath("/responses");
 }
 
-export default async function Responses({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const tab = (await searchParams).tab === "abandonadas" ? "abandonadas" : "enviadas";
+export default async function Responses({ searchParams }: { searchParams: Promise<{ tab?: string; orden?: string }> }) {
+  const q = await searchParams;
+  const tab = q.tab === "abandonadas" ? "abandonadas" : "enviadas";
+  // Por prioridad no es el orden por defecto: la pantalla tambien sirve para
+  // ver que entro hoy, y cambiarle el orden a alguien sin que lo pida molesta.
+  const porPrioridad = q.orden === "prioridad";
   const { firm } = await activeFirm();
 
   // Las dos consultas no dependen entre si: encadenadas eran dos latencias
@@ -70,7 +76,7 @@ export default async function Responses({ searchParams }: { searchParams: Promis
     sql<Row[]>`
     select s.id, s.full_name, s.email, s.max_step, s.submitted_at, s.read_at,
            s.recovery_sent_at, s.created_at, s.updated_at,
-           coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow
+           coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow, s.triage
     from sessions s
     left join funnels f on f.id = s.funnel_id
     left join workflows w on w.id = s.workflow_id
@@ -78,7 +84,10 @@ export default async function Responses({ searchParams }: { searchParams: Promis
       ${tab === "enviadas"
         ? sql`and s.submitted_at is not null`
         : sql`and s.submitted_at is null and s.email is not null and s.email <> ''`}
-    order by ${tab === "enviadas" ? sql`s.submitted_at` : sql`s.updated_at`} desc
+    order by ${porPrioridad
+      // Las que todavia no se analizaron van al final, no arriba.
+      ? sql`coalesce((s.triage->>'puntaje')::int, -1) desc, s.created_at desc`
+      : tab === "enviadas" ? sql`s.submitted_at desc` : sql`s.updated_at desc`}
     limit 200`,
 
     sql<{ enviadas: number; abandonadas: number; sin_leer: number }[]>`
@@ -107,6 +116,15 @@ export default async function Responses({ searchParams }: { searchParams: Promis
         </Link>
       </div>
 
+      <p className="muted" style={{ fontSize: ".84rem", margin: "0 0 .8rem" }}>
+        {x.ordenar}:{" "}
+        <Link href={`/responses?tab=${tab}`}
+              style={{ fontWeight: porPrioridad ? 400 : 700 }}>{x.ordenFecha}</Link>
+        {" · "}
+        <Link href={`/responses?tab=${tab}&orden=prioridad`}
+              style={{ fontWeight: porPrioridad ? 700 : 400 }}>{x.ordenPrioridad}</Link>
+      </p>
+
       <div className="card scroll-x">
         {rows.length === 0 ? (
           <p className="empty">{x.nadaAca}</p>
@@ -114,6 +132,7 @@ export default async function Responses({ searchParams }: { searchParams: Promis
           <table>
             <thead>
               <tr>
+                <th style={{ width: "1%" }}>{x.triagePrioridad}</th>
                 <th>{x.persona}</th>
                 <th>{x.area}</th>
                 <th>{x.caso}</th>
@@ -125,11 +144,18 @@ export default async function Responses({ searchParams }: { searchParams: Promis
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
+                  <td className="num">
+                    {r.triage
+                      ? <span className="pill good" title={r.triage.titular}>{r.triage.puntaje}</span>
+                      : <span className="muted" style={{ fontSize: ".8rem" }}>—</span>}
+                  </td>
                   <td>
                     <Link href={`/responses/${r.id}`} style={{ fontWeight: r.read_at || tab === "abandonadas" ? 400 : 700, textDecoration: "none" }}>
                       {r.full_name ?? r.email ?? x.anonimo}
                     </Link>
-                    <div className="muted" style={{ fontSize: ".8rem" }}>{r.email}</div>
+                    <div className="muted" style={{ fontSize: ".8rem" }}>
+                      {r.triage?.titular ?? r.email}
+                    </div>
                   </td>
                   <td>{r.funnel}</td>
                   <td>{r.workflow}</td>

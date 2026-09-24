@@ -4,6 +4,7 @@ import { sql, type Workflow } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace, sourceLabel } from "@/lib/format";
 import { t as textos } from "@/lib/i18n";
+import type { Triage } from "@/lib/triage";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,11 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
       data: Record<string, string>; max_step: number; submitted_at: Date | null; created_at: Date;
       source: string | null; surface: string; consent: boolean; landing_page: string | null;
       utm: Record<string, string>; funnel: string; workflow: string; steps: Workflow["steps"] | null;
+      triage: Triage | null; triage_at: Date | null;
     }[]
   >`
     select s.id, s.full_name, s.email, s.phone, s.data, s.max_step, s.submitted_at, s.created_at,
-           s.source, s.surface, s.consent, s.landing_page, s.utm,
+           s.source, s.surface, s.consent, s.landing_page, s.utm, s.triage, s.triage_at,
            coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow, w.steps
     from sessions s
     left join funnels f on f.id = s.funnel_id
@@ -60,6 +62,52 @@ export default async function ResponseDetail({ params }: { params: Promise<{ id:
         {s.submitted_at
           ? <span className="pill good">{x.completa}</span>
           : <span className="pill warn">{x.incompleta}</span>}
+      </div>
+
+      {/* Arriba de las respuestas a proposito: es lo que se mira antes de
+          decidir si se levanta el telefono. */}
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: ".7rem", flexWrap: "wrap" }}>
+          <h3 style={{ margin: 0 }}>{x.triageTitulo}</h3>
+          {s.triage
+            ? <span className="pill good">{x.triagePrioridad} {s.triage.puntaje}</span>
+            : <span className="pill">{x.triageSinAnalizar}</span>}
+        </div>
+
+        {s.triage ? (
+          <>
+            <p style={{ fontWeight: 600, margin: ".8rem 0 .2rem" }}>{s.triage.titular}</p>
+            {s.triage.motivo && <p style={{ margin: 0 }}>{s.triage.motivo}</p>}
+
+            {s.triage.alerta && (
+              <p style={{ margin: ".9rem 0 0", padding: ".7rem .9rem", background: "#fff6e5",
+                          borderLeft: "3px solid #d98b00", borderRadius: "0 6px 6px 0", lineHeight: 1.5 }}>
+                <strong>{x.triageAlerta}: </strong>{s.triage.alerta}
+              </p>
+            )}
+
+            {!s.triage.encaja && (
+              <p className="pill warn" style={{ display: "inline-block", marginTop: ".9rem" }}>
+                {x.triageNoEncaja}
+              </p>
+            )}
+
+            {s.triage.preguntar.length > 0 && (
+              <>
+                <p className="lbl" style={{ marginTop: "1.1rem" }}>{x.triagePreguntar}</p>
+                <ul style={{ margin: 0, paddingLeft: "1.1rem", lineHeight: 1.7 }}>
+                  {s.triage.preguntar.map((q) => <li key={q}>{q}</li>)}
+                </ul>
+              </>
+            )}
+
+            <p className="muted" style={{ fontSize: ".78rem", marginTop: "1.1rem", lineHeight: 1.5 }}>
+              {x.triageAclaracion}
+            </p>
+          </>
+        ) : (
+          <p className="muted" style={{ marginTop: ".7rem" }}>{x.triageFalta}</p>
+        )}
       </div>
 
       <div className="grid cols-2-1">
