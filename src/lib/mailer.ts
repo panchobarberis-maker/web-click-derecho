@@ -1,3 +1,4 @@
+import { t, type Lang } from "./i18n";
 // Envio via Resend. Sin RESEND_API_KEY los mails se loguean en consola,
 // asi el flujo completo se puede probar en local sin cuenta.
 
@@ -47,43 +48,49 @@ const PIE_VISITANTE =
 
 const PIE_ESTUDIO = "Aviso automático de tu formulario de consultas.";
 
-/** Al que dejo el mail y no termino el form. */
-export function recoveryEmail(o: { name: string | null; firm: string; accent: string; url: string; area: string }) {
+/**
+ * Al que dejo el mail y no termino el form.
+ *
+ * Va en el idioma del estudio: lo recibe su cliente, no el abogado.
+ */
+export function recoveryEmail(o: {
+  name: string | null; firm: string; accent: string; url: string; area: string; lang?: Lang;
+}) {
+  const m = t(o.lang ?? "es").mail;
+  const nombre = o.name ? o.name.split(" ")[0] : "";
   return {
-    subject: `Dejaste una consulta a medias en ${o.firm}`,
+    subject: m.recuperarAsunto(o.firm),
     html: wrap(
-      `<p>Hola${o.name ? ` ${o.name.split(" ")[0]}` : ""},</p>
-       <p>Vimos que empezaste una consulta sobre <strong>${o.area}</strong> y no llegaste a terminarla.
-       Quedó guardada: podés retomarla donde la dejaste, son dos minutos.</p>
+      `<p>${esc(m.recuperarHola(nombre))}</p>
+       <p>${esc(m.recuperarCuerpo(o.area))}</p>
        <p style="margin:1.75rem 0">
          <a href="${o.url}" style="background:${o.accent};color:#fff;padding:12px 26px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
-           Retomar mi consulta
+           ${esc(m.recuperarBoton)}
          </a>
        </p>
-       <p>Si preferís, respondé este mail y te contactamos nosotros.</p>
-       <p style="margin-top:1.5rem">— ${o.firm}</p>`,
-      PIE_VISITANTE,
+       <p>${esc(m.recuperarResponder)}</p>
+       <p style="margin-top:1.5rem">— ${esc(o.firm)}</p>`,
+      m.pieEstudio,
     ),
   };
 }
 
 /** Link para elegir una contraseña nueva. Al panel, no a un estudio. */
-export function resetEmail(o: { name: string | null; url: string }) {
+export function resetEmail(o: { name: string | null; url: string }, lang: Lang = "es") {
+  const x = t(lang).auth;
   return {
-    subject: "Recuperar el acceso al panel",
+    subject: x.resetAsunto,
     html: wrap(
-      `<p>Hola${o.name ? ` ${o.name.split(" ")[0]}` : ""},</p>
-       <p>Pediste volver a entrar al panel. Este link te deja elegir una contraseña nueva
-       y <strong>vence en una hora</strong>.</p>
+      `<p>${x.resetHola(o.name ? o.name.split(" ")[0] : "")}</p>
+       <p>${x.resetCuerpo}</p>
        <p style="margin:1.75rem 0">
          <a href="${o.url}" style="background:#2d0a4e;color:#fff;padding:12px 26px;border-radius:99px;text-decoration:none;font-weight:500;display:inline-block">
-           Elegir una contraseña nueva
+           ${x.resetBoton}
          </a>
        </p>
-       <p>Si no lo pediste vos, no hace falta que hagas nada: tu contraseña actual sigue
-       funcionando y este link se vence solo.</p>
-       <p style="margin-top:1.5rem">— Click Derecho</p>`,
-      "Si no pediste recuperar el acceso, ignorá este mail.",
+       <p>${x.resetNoFuiste}</p>
+       <p style="margin-top:1.5rem">— Right Lead</p>`,
+      x.resetPie,
     ),
   };
 }
@@ -115,37 +122,38 @@ export function leadEmail(o: {
   source: string;
   answers: [string, string][];
   url: string;
+  lang?: Lang;
 }) {
-  const nombre = [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || "Consulta sin nombre";
+  const m = t(o.lang ?? "es").mail;
+  const c = m.campos;
+  const nombre = [o.firstName, o.lastName].filter(Boolean).join(" ") || o.email || m.sinNombre;
 
   const contacto = [
-    fila("Nombre", o.firstName),
-    fila("Apellido", o.lastName),
-    fila("Email", o.email),
-    fila("Teléfono", o.phone),
-    fila("¿Aceptó que lo contacten?", o.consent ? "Sí" : "No"),
-    fila("Área", o.funnel),
-    fila("Tipo de caso", o.service),
-    fila("Origen", o.source),
+    fila(c.nombre, o.firstName),
+    fila(c.apellido, o.lastName),
+    fila(c.email, o.email),
+    fila(c.telefono, o.phone),
+    fila(c.consent, o.consent ? c.si : c.no),
+    fila(c.area, o.funnel),
+    fila(c.caso, o.service),
+    fila(c.origen, o.source),
   ].join("");
 
   const resto = o.answers.length
     ? `<h3 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b6478;font-weight:600;margin:2rem 0 .5rem">
-         Respuestas del formulario
+         ${esc(m.leadRespuestas)}
        </h3>
        <table style="border-collapse:collapse;width:100%">${o.answers.map(([k, v]) => fila(k, v)).join("")}</table>`
     : "";
 
   return {
-    subject: `Nueva consulta: ${o.funnel} — ${nombre}`,
+    subject: m.leadAsunto(o.funnel, nombre),
     html: wrap(
-      `<h2 style="font-size:24px;margin:0 0 .35rem">Tenés una consulta nueva</h2>
-       <p style="color:#6b6478;margin-bottom:1.75rem">
-         Entró una consulta por ${esc(o.funnel)}. Los datos de contacto están abajo.
-       </p>
+      `<h2 style="font-size:24px;margin:0 0 .35rem">${esc(m.leadTitulo)}</h2>
+       <p style="color:#6b6478;margin-bottom:1.75rem">${esc(m.leadBajada(o.funnel))}</p>
 
        <h3 style="font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:#6b6478;font-weight:600;margin:0 0 .5rem">
-         Datos de contacto
+         ${esc(m.leadContacto)}
        </h3>
        <table style="border-collapse:collapse;width:100%">${contacto}</table>
 
@@ -153,9 +161,97 @@ export function leadEmail(o: {
 
        <p style="margin:2rem 0 0">
          <a href="${o.url}" style="background:#2d0a4e;color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;display:inline-block;font-weight:500">
-           Ver la consulta
+           ${esc(m.leadVer)}
          </a>
        </p>`,
+      PIE_ESTUDIO,
+    ),
+  };
+}
+
+/**
+ * El resumen diario: a quien llamar hoy.
+ *
+ * El orden lo pone el triage, pero el mail esta escrito para que no se lea
+ * como un filtro. Por eso el total de pendientes va arriba y en grande, el
+ * boton al panel dice cuantas quedan, y la aclaracion esta antes del pie y no
+ * escondida en letra chica: lo que no aparece aca sigue estando y hay que
+ * mirarlo. Un correo que diga "estos son los buenos" hace que el resto no se
+ * abra nunca, y en un estudio eso puede ser un caso perdido.
+ */
+export function digestEmail(o: {
+  firm: string;
+  accent: string;
+  total: number;                      // pendientes sin abrir, todos
+  urlPanel: string;
+  casos: {
+    nombre: string;
+    contacto: string;                 // mail o telefono, lo que haya
+    area: string;
+    url: string;
+    triage: {
+      puntaje: number; titular: string; motivo: string;
+      alerta: string | null; preguntar: string[]; encaja: boolean;
+    } | null;
+  }[];
+  lang?: Lang;
+}) {
+  const m = t(o.lang ?? "es").mail;
+
+  const tarjeta = (c: (typeof o.casos)[number]) => {
+    const tr = c.triage;
+    const marca = tr
+      ? `<span style="background:${o.accent};color:#fff;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px">${tr.puntaje}</span>`
+      : `<span style="background:#e8e5ee;color:#6b6478;font-size:12px;padding:3px 9px;border-radius:99px">${esc(m.digestSinPuntaje)}</span>`;
+
+    const alerta = tr?.alerta
+      ? `<p style="margin:.6rem 0 0;padding:9px 12px;background:#fff6e5;border-left:3px solid #d98b00;font-size:13px">${esc(tr.alerta)}</p>`
+      : "";
+
+    const fuera = tr && !tr.encaja
+      ? `<p style="margin:.6rem 0 0;font-size:12px;color:#6b6478">${esc(m.digestNoEncaja)}</p>`
+      : "";
+
+    const preguntas = tr?.preguntar.length
+      ? `<p style="margin:.7rem 0 .2rem;font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#6b6478;font-weight:600">${esc(m.digestPreguntar)}</p>
+         <ul style="margin:0;padding-left:1.1rem;font-size:13px;color:#4a4458">
+           ${tr.preguntar.map((q) => `<li>${esc(q)}</li>`).join("")}
+         </ul>`
+      : "";
+
+    return `
+<div style="border:1px solid #e8e5ee;border-radius:12px;padding:16px 18px;margin-bottom:12px">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:.35rem">
+    ${marca}
+    <strong style="font-size:15px">${esc(c.nombre)}</strong>
+  </div>
+  <p style="margin:0;font-size:14px;font-weight:500">${esc(tr?.titular || c.area)}</p>
+  ${tr?.motivo ? `<p style="margin:.35rem 0 0;font-size:13px;color:#4a4458">${esc(tr.motivo)}</p>` : ""}
+  ${alerta}
+  ${fuera}
+  ${preguntas}
+  <p style="margin:.85rem 0 0;font-size:13px;color:#6b6478">${esc(c.contacto)}</p>
+  <p style="margin:.6rem 0 0">
+    <a href="${c.url}" style="color:${o.accent};font-size:13px;font-weight:500;text-decoration:none">${esc(m.digestVer)} →</a>
+  </p>
+</div>`;
+  };
+
+  return {
+    subject: m.digestAsunto(o.casos.length),
+    html: wrap(
+      `<h2 style="font-size:24px;margin:0 0 .35rem">${esc(m.digestTitulo)}</h2>
+       <p style="color:#6b6478;margin:0 0 1.5rem">${esc(m.digestBajada(o.total))}</p>
+
+       ${o.casos.map(tarjeta).join("")}
+
+       <p style="margin:1.5rem 0 0">
+         <a href="${o.urlPanel}" style="background:${o.accent};color:#fff;padding:12px 28px;border-radius:99px;text-decoration:none;display:inline-block;font-weight:500">
+           ${esc(m.digestTodas(o.total))}
+         </a>
+       </p>
+
+       <p style="margin:1.75rem 0 0;font-size:12px;color:#6b6478;line-height:1.5">${esc(m.digestAclaracion)}</p>`,
       PIE_ESTUDIO,
     ),
   };

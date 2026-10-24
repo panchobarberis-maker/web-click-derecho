@@ -1,25 +1,14 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import { t as textos, type Lang } from "@/lib/i18n";
 
 type Estado = { fase: "quieto" | "subiendo" | "listo" | "error"; pct?: number; msg?: string };
 type Clase = "video" | "imagen";
 
-const TEXTOS: Record<Clase, { boton: string; hecho: string; pegar: string; solo: string; accept: string }> = {
-  video: {
-    boton: "Subir un video",
-    hecho: "Video subido.",
-    pegar: "…o pegá la dirección de un video",
-    solo: "Dirección del video (mp4)",
-    accept: "video/mp4,video/webm,video/quicktime",
-  },
-  imagen: {
-    boton: "Subir una imagen",
-    hecho: "Imagen subida.",
-    pegar: "…o pegá la dirección de una imagen",
-    solo: "Dirección de la imagen",
-    accept: "image/png,image/jpeg,image/webp,image/svg+xml",
-  },
+const ACCEPT: Record<Clase, string> = {
+  video: "video/mp4,video/webm,video/quicktime",
+  imagen: "image/png,image/jpeg,image/webp,image/svg+xml",
 };
 
 /**
@@ -42,6 +31,7 @@ export function SubirArchivo({
   maxMb,
   ayuda,
   vistaPrevia,
+  lang = "es",
 }: {
   name: string;
   clase: Clase;
@@ -54,11 +44,12 @@ export function SubirArchivo({
   ayuda?: string;
   /** Muestra lo cargado. Solo para imagenes: un logo mal pegado se ve enseguida. */
   vistaPrevia?: boolean;
+  lang?: Lang;
 }) {
   const [url, setUrl] = useState(defaultValue);
   const [estado, setEstado] = useState<Estado>({ fase: "quieto" });
   const input = useRef<HTMLInputElement>(null);
-  const t = TEXTOS[clase];
+  const x = textos(lang).comp;
   const id = useId();
 
   async function elegido(archivo: File) {
@@ -71,7 +62,7 @@ export function SubirArchivo({
     });
 
     const datos = await permiso.json().catch(() => ({}));
-    if (!permiso.ok) return setEstado({ fase: "error", msg: datos.error ?? "No se pudo empezar la subida." });
+    if (!permiso.ok) return setEstado({ fase: "error", msg: datos.error ?? x.noEmpezo });
 
     try {
       await new Promise<void>((listo, falla) => {
@@ -81,12 +72,12 @@ export function SubirArchivo({
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) setEstado({ fase: "subiendo", pct: Math.round((e.loaded / e.total) * 100) });
         };
-        xhr.onload = () => (xhr.status < 300 ? listo() : falla(new Error(`Supabase respondió ${xhr.status}`)));
-        xhr.onerror = () => falla(new Error("Se cortó la conexión durante la subida."));
+        xhr.onload = () => (xhr.status < 300 ? listo() : falla(new Error(x.respondio(xhr.status))));
+        xhr.onerror = () => falla(new Error(x.seCorto));
         xhr.send(archivo);
       });
     } catch (e) {
-      return setEstado({ fase: "error", msg: e instanceof Error ? e.message : "No se pudo subir." });
+      return setEstado({ fase: "error", msg: e instanceof Error ? e.message : x.noSubio });
     }
 
     setUrl(datos.publica);
@@ -102,7 +93,7 @@ export function SubirArchivo({
           <input
             ref={input}
             type="file"
-            accept={t.accept}
+            accept={ACCEPT[clase]}
             style={{ display: "none" }}
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -112,7 +103,9 @@ export function SubirArchivo({
           />
           <button type="button" className="agregar" onClick={() => input.current?.click()}
                   disabled={estado.fase === "subiendo"}>
-            {estado.fase === "subiendo" ? `Subiendo… ${estado.pct ?? 0}%` : t.boton}
+            {estado.fase === "subiendo"
+              ? x.subiendo(estado.pct ?? 0)
+              : clase === "video" ? x.subirVideo : x.subirImagen}
           </button>
 
           {estado.fase === "subiendo" && (
@@ -120,7 +113,9 @@ export function SubirArchivo({
               <span style={{ width: `${estado.pct ?? 0}%` }} />
             </div>
           )}
-          {estado.fase === "listo" && <p className="subir-ok">{t.hecho}</p>}
+          {estado.fase === "listo" && (
+            <p className="subir-ok">{clase === "video" ? x.videoSubido : x.imagenSubida}</p>
+          )}
           {estado.fase === "error" && <p className="subir-error">{estado.msg}</p>}
         </>
       )}
@@ -130,7 +125,9 @@ export function SubirArchivo({
           pagina termine de cargar. La subida lo unico que hace es completarlo. */}
       {/* Con la subida disponible este campo es la alternativa, y lo dice; sin
           ella es el campo principal y ya lo etiqueta el titulo de arriba. */}
-      {habilitado && <label className="lbl" htmlFor={id}>{t.pegar}</label>}
+      {habilitado && (
+        <label className="lbl" htmlFor={id}>{clase === "video" ? x.pegarVideo : x.pegarImagen}</label>
+      )}
       <input id={id} name={name} value={url}
              onChange={(e) => setUrl(e.target.value)}
              placeholder={clase === "video" ? "https://…/clip.mp4" : "https://…/logo.png"} />
@@ -139,7 +136,7 @@ export function SubirArchivo({
           y un logo roto en el formulario del estudio sin que nadie se entere. */}
       {/* La ayuda va siempre, no solo cuando se puede subir: quien tiene que
           pegar una direccion es el que mas necesita saber que va ahi. */}
-      <p className="muted subir-ayuda">{ayuda ?? `Hasta ${maxMb} MB.`}</p>
+      <p className="muted subir-ayuda">{ayuda ?? x.hastaMb(maxMb)}</p>
 
       {vistaPrevia && url ? (
         // eslint-disable-next-line @next/next/no-img-element

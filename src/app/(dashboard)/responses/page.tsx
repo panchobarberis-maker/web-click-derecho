@@ -3,8 +3,10 @@ import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
 import { fmtLong, hace } from "@/lib/format";
+import { t as textos } from "@/lib/i18n";
 import { recoveryEmail, sendMail } from "@/lib/mailer";
-import { baseUrl } from "@/lib/base-url";
+import { linkParaRetomar } from "@/lib/base-url";
+import type { Triage } from "@/lib/triage";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,7 @@ type Row = {
   updated_at: Date;
   funnel: string;
   workflow: string;
+  triage: Triage | null;
 };
 
 /** Manda el mail de recuperacion a mano desde el panel. */
@@ -28,19 +31,27 @@ async function recuperar(formData: FormData) {
   const id = String(formData.get("id"));
   const { firm } = await activeFirm();
 
-  const [s] = await sql<{ email: string; full_name: string | null; funnel: string; slug: string }[]>`
-    select s.email, s.full_name, coalesce(f.name, 'tu consulta') as funnel, ${firm.slug} as slug
-    from sessions s left join funnels f on f.id = s.funnel_id
+  const [s] = await sql<{
+    email: string; full_name: string | null; funnel: string;
+    funnel_slug: string | null; workflow_slug: string | null;
+  }[]>`
+    select s.email, s.full_name, coalesce(f.name, 'tu consulta') as funnel,
+           f.slug as funnel_slug, w.slug as workflow_slug
+    from sessions s
+    left join funnels f on f.id = s.funnel_id
+    left join workflows w on w.id = s.workflow_id
     where s.id = ${id} and s.firm_id = ${firm.id} and s.email is not null`;
   if (!s) return;
 
-  const base = baseUrl();
   const mail = recoveryEmail({
     name: s.full_name,
     firm: firm.name,
     accent: firm.accent,
     area: s.funnel,
-    url: `${base}/f/${firm.slug}?retomar=${id}`,
+    url: linkParaRetomar({
+      firmSlug: firm.slug, funnelSlug: s.funnel_slug, workflowSlug: s.workflow_slug, sessionId: id,
+    }),
+    lang: firm.lang,
   });
 
   const ok = await sendMail({ to: s.email, ...mail, replyTo: firm.notify_email ?? undefined });
@@ -48,17 +59,24 @@ async function recuperar(formData: FormData) {
   revalidatePath("/responses");
 }
 
-export default async function Responses({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
-  const tab = (await searchParams).tab === "abandonadas" ? "abandonadas" : "enviadas";
+export default async function Responses({ searchParams }: { searchParams: Promise<{ tab?: string; orden?: string }> }) {
+  const q = await searchParams;
+  const tab = q.tab === "abandonadas" ? "abandonadas" : "enviadas";
+  // Por prioridad no es el orden por defecto: la pantalla tambien sirve para
+  // ver que entro hoy, y cambiarle el orden a alguien sin que lo pida molesta.
+  const porPrioridad = q.orden === "prioridad";
   const { firm } = await activeFirm();
 
   // Las dos consultas no dependen entre si: encadenadas eran dos latencias
   // contra Supabase por una pantalla que solo lista y cuenta.
+  const x = textos(firm.lang).panel;
+  const lang = firm.lang;
+
   const [rows, [counts]] = await Promise.all([
     sql<Row[]>`
     select s.id, s.full_name, s.email, s.max_step, s.submitted_at, s.read_at,
            s.recovery_sent_at, s.created_at, s.updated_at,
-           coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow
+           coalesce(f.name, '—') as funnel, coalesce(w.name, '—') as workflow, s.triage
     from sessions s
     left join funnels f on f.id = s.funnel_id
     left join workflows w on w.id = s.workflow_id
@@ -66,7 +84,10 @@ export default async function Responses({ searchParams }: { searchParams: Promis
       ${tab === "enviadas"
         ? sql`and s.submitted_at is not null`
         : sql`and s.submitted_at is null and s.email is not null and s.email <> ''`}
-    order by ${tab === "enviadas" ? sql`s.submitted_at` : sql`s.updated_at`} desc
+    order by ${porPrioridad
+      // Las que todavia no se analizaron van al final, no arriba.
+      ? sql`coalesce((s.triage->>'puntaje')::int, -1) desc, s.created_at desc`
+      : tab === "enviadas" ? sql`s.submitted_at desc` : sql`s.updated_at desc`}
     limit 200`,
 
     sql<{ enviadas: number; abandonadas: number; sin_leer: number }[]>`
@@ -81,65 +102,80 @@ export default async function Responses({ searchParams }: { searchParams: Promis
     <>
       <div className="head">
         <div>
-          <h1>Consultas</h1>
-          <p>
-            {Number(counts.sin_leer)} sin leer · {Number(counts.abandonadas)} formularios abandonados con mail.
-          </p>
+          <h1>{x.consultas}</h1>
+          <p>{x.resumenConsultas(Number(counts.sin_leer), Number(counts.abandonadas))}</p>
         </div>
       </div>
 
       <div className="tabs">
         <Link href="/responses" aria-current={tab === "enviadas" ? "page" : undefined}>
-          Enviadas ({Number(counts.enviadas)})
+          {x.enviadas} ({Number(counts.enviadas)})
         </Link>
         <Link href="/responses?tab=abandonadas" aria-current={tab === "abandonadas" ? "page" : undefined}>
-          Abandonadas ({Number(counts.abandonadas)})
+          {x.abandonadas} ({Number(counts.abandonadas)})
         </Link>
       </div>
 
+      <p className="muted" style={{ fontSize: ".84rem", margin: "0 0 .8rem" }}>
+        {x.ordenar}:{" "}
+        <Link href={`/responses?tab=${tab}`}
+              style={{ fontWeight: porPrioridad ? 400 : 700 }}>{x.ordenFecha}</Link>
+        {" · "}
+        <Link href={`/responses?tab=${tab}&orden=prioridad`}
+              style={{ fontWeight: porPrioridad ? 700 : 400 }}>{x.ordenPrioridad}</Link>
+      </p>
+
       <div className="card scroll-x">
         {rows.length === 0 ? (
-          <p className="empty">Todavía no hay nada acá.</p>
+          <p className="empty">{x.nadaAca}</p>
         ) : (
           <table>
             <thead>
               <tr>
-                <th>Persona</th>
-                <th>Área</th>
-                <th>Caso</th>
-                <th>{tab === "enviadas" ? "Enviada" : "Última actividad"}</th>
-                <th>{tab === "enviadas" ? "Estado" : "Se fue en"}</th>
+                <th style={{ width: "1%" }}>{x.triagePrioridad}</th>
+                <th>{x.persona}</th>
+                <th>{x.area}</th>
+                <th>{x.caso}</th>
+                <th>{tab === "enviadas" ? x.enviada : x.ultimaActividad}</th>
+                <th>{tab === "enviadas" ? x.estado : x.seFueEn}</th>
                 {tab === "abandonadas" && <th />}
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.id}>
+                  <td className="num">
+                    {r.triage
+                      ? <span className="pill good" title={r.triage.titular}>{r.triage.puntaje}</span>
+                      : <span className="muted" style={{ fontSize: ".8rem" }}>—</span>}
+                  </td>
                   <td>
                     <Link href={`/responses/${r.id}`} style={{ fontWeight: r.read_at || tab === "abandonadas" ? 400 : 700, textDecoration: "none" }}>
-                      {r.full_name ?? r.email ?? "Anónimo"}
+                      {r.full_name ?? r.email ?? x.anonimo}
                     </Link>
-                    <div className="muted" style={{ fontSize: ".8rem" }}>{r.email}</div>
+                    <div className="muted" style={{ fontSize: ".8rem" }}>
+                      {r.triage?.titular ?? r.email}
+                    </div>
                   </td>
                   <td>{r.funnel}</td>
                   <td>{r.workflow}</td>
-                  <td title={fmtLong(r.submitted_at ?? r.updated_at)}>{hace(r.submitted_at ?? r.updated_at)}</td>
+                  <td title={fmtLong(r.submitted_at ?? r.updated_at, lang)}>{hace(r.submitted_at ?? r.updated_at, lang)}</td>
                   <td>
                     {tab === "enviadas" ? (
-                      r.read_at ? <span className="pill">Leída</span> : <span className="pill good">Nueva</span>
+                      r.read_at ? <span className="pill">{x.leida}</span> : <span className="pill good">{x.nueva}</span>
                     ) : (
-                      <span className="pill warn">Paso {r.max_step}</span>
+                      <span className="pill warn">{x.pasoN(r.max_step)}</span>
                     )}
                   </td>
                   {tab === "abandonadas" && (
                     <td className="num">
                       {r.recovery_sent_at ? (
-                        <span className="muted" style={{ fontSize: ".8rem" }}>Recordatorio enviado</span>
+                        <span className="muted" style={{ fontSize: ".8rem" }}>{x.recordatorioEnviado}</span>
                       ) : (
                         <form action={recuperar}>
                           <input type="hidden" name="id" value={r.id} />
                           <button type="submit" className="btn ghost" style={{ padding: ".4rem 1rem", fontSize: ".82rem" }}>
-                            Enviar recordatorio
+                            {x.enviarRecordatorio}
                           </button>
                         </form>
                       )}

@@ -20,7 +20,7 @@ const sans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Intake | Click Derecho",
+  title: "Right Lead",
   description: "Formularios de consulta y analytics para estudios jurídicos",
 };
 

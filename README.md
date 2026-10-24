@@ -37,7 +37,7 @@ un cuestionario único para todos.
 
 | | Quién la ve | Qué es |
 |---|---|---|
-| `/` | Cualquiera | La home de Click Derecho: qué es, cómo funciona, y el botón de ingresar |
+| `/` | Cualquiera | La home de Right Lead: qué es, cómo funciona, y el botón de ingresar |
 | `/f/<estudio>` | Cualquiera | El formulario de consultas de cada estudio, con su marca |
 | `/panel` y el resto | Con sesión | El panel del estudio |
 
@@ -186,8 +186,8 @@ alcanza con `npm run dev`. Para volver a empezar de cero:
 `npm run db:setup -- --reset --demo`.
 
 - Panel: http://localhost:3000 — el seed crea dos cuentas con la contraseña
-  `clickderecho2026` (cambiable con `SEED_PASSWORD`):
-  - `hola@clickderecho.com` — la agencia, ve todos los estudios
+  `rightlead2026` (cambiable con `SEED_PASSWORD`):
+  - `hola@rightlead.com` — la agencia, ve todos los estudios
   - `consultas@alzogarayserrano.com.ar` — dueño del estudio de ejemplo
 - Formulario público: http://localhost:3000/f/alzogaray-serrano
 
@@ -348,6 +348,7 @@ Entra en el plan gratuito. Es todo por navegador: no hace falta terminal.
    | `RESEND_API_KEY` | De [resend.com](https://resend.com) | No, sin esto no salen mails |
    | `RESEND_FROM` | `Consultas <consultas@tudominio.com>` | Solo con Resend |
    | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | De Google Cloud | Solo para login con Google |
+   | `ANTHROPIC_API_KEY` | De [console.anthropic.com](https://console.anthropic.com) | No, sin esto el resumen diario sale sin analizar |
 
    `NEXT_PUBLIC_APP_URL` **no hace falta**: la app deduce su dominio del
    entorno de Vercel. Solo se setea cuando hay dominio propio.

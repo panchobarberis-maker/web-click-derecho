@@ -5,7 +5,7 @@ import "./home.css";
 export const dynamic = "force-dynamic";
 
 /**
- * Home publica de Click Derecho.
+ * Home publica de Right Lead.
  *
  * Los nombres de la cinta salen de la tabla de estudios, no de una lista
  * escrita a mano: poner nombres inventados en una pagina de venta es decir que
@@ -83,7 +83,7 @@ export default async function Home() {
   return (
     <div className="home">
       <header className="home-top">
-        <Link href="/" className="home-marca">Click Derecho</Link>
+        <Link href="/" className="home-marca">Right Lead</Link>
 
         <nav className="home-links">
           <a href="#como">Cómo funciona</a>
@@ -93,7 +93,7 @@ export default async function Home() {
 
         <div className="home-acceso">
           <Link href="/login" className="home-btn claro">Ingresar</Link>
-          <a href="mailto:hola@clickderecho.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
+          <a href="mailto:hola@rightlead.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
             Pedir una demo
           </a>
         </div>
@@ -104,10 +104,10 @@ export default async function Home() {
         <p className="bajada">
           Tu pauta trae gente a tu web. Un formulario de contacto común pierde a casi todos: los que no
           lo terminan no dejan rastro, y de los que sí, nunca sabés de qué campaña vinieron.
-          Click Derecho arregla las dos cosas.
+          Right Lead arregla las dos cosas.
         </p>
         <div className="home-cta">
-          <a href="mailto:hola@clickderecho.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
+          <a href="mailto:hola@rightlead.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
             Pedir una demo
           </a>
           <a href="#como" className="home-btn claro">Ver cómo funciona</a>
@@ -195,16 +195,16 @@ export default async function Home() {
           recuperar antes de que contrates nada.
         </p>
         <div className="home-cta">
-          <a href="mailto:hola@clickderecho.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
+          <a href="mailto:hola@rightlead.com?subject=Quiero%20ver%20una%20demo" className="home-btn">
             Pedir una demo
           </a>
         </div>
       </section>
 
       <footer className="home-pie">
-        <span>© {new Date().getFullYear()} Click Derecho</span>
+        <span>© {new Date().getFullYear()} Right Lead</span>
         <span>
-          <a href="mailto:hola@clickderecho.com">hola@clickderecho.com</a> · <Link href="/login">Ingresar</Link>
+          <a href="mailto:hola@rightlead.com">hola@rightlead.com</a> · <Link href="/login">Ingresar</Link>
         </span>
       </footer>
     </div>
@@ -227,7 +227,7 @@ function Cinta({ nombres }: { nombres: string[] }) {
 
   return (
     <section className="home-cinta">
-      <p className="rotulo">Estudios que ya trabajan con Click Derecho</p>
+      <p className="rotulo">Estudios que ya trabajan con Right Lead</p>
       <div className="cinta-marco">
         <div className="cinta-pista">
           {[0, 1].map((copia) => (

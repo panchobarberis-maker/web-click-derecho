@@ -4,6 +4,7 @@ import { sql, type Firm, type Funnel, type Workflow } from "@/lib/db";
 import { FormRunner } from "@/components/FormRunner";
 import { ViewTracker } from "@/components/ViewTracker";
 import { sobreElColor } from "@/lib/color";
+import { t } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +129,7 @@ export default async function PublicForm({
   // Sin surface es la pagina suelta que abre la gente por su cuenta; con
   // surface viene dentro de un pop-up, un clip o un bloque embebido.
   const embebido = Boolean(qs.surface) && qs.surface !== "page";
+  const x = t(firm.lang).form;
 
   // Nivel 1: elegir area de practica.
   if (!funnelSlug) {
@@ -142,8 +144,8 @@ export default async function PublicForm({
         <Landing firm={firm} embebido={embebido}>
           {/* El nombre del estudio ya lo dice la banda cuando esta embebido. */}
           {!embebido && <p className="land-marca">{firm.name}</p>}
-          <h1 className="land-title">¿Cómo podemos ayudarte?</h1>
-          <p className="land-ask">Contanos tu caso. Tocá la opción que mejor lo describa:</p>
+          <h1 className="land-title">{x.comoAyudar}</h1>
+          <p className="land-ask">{x.contanos}</p>
           <div className="land-pills">
             {funnels.map((f) => (
               <Link key={f.id} className="pill-btn" href={conParams(`/f/${firm.slug}/${f.slug}`, qs)}>
@@ -185,13 +187,13 @@ export default async function PublicForm({
           embebido={embebido}
           back={
             <Link className="fback" href={conParams(`/f/${firm.slug}`, qs)}>
-              ← Volver
+              {x.volver}
             </Link>
           }
         >
           <p className="land-eyebrow">{funnel.name}</p>
-          <h1 className="land-title sm">¿Cuál es tu situación?</h1>
-          <p className="land-ask">Elegí la opción más parecida a tu caso. Así te preguntamos solo lo que hace falta.</p>
+          <h1 className="land-title sm">{x.cualSituacion}</h1>
+          <p className="land-ask">{x.elegiParecida}</p>
           <div className="land-pills">
             {workflows.map((w) => (
               <Link key={w.id} className="pill-btn" href={conParams(`/f/${firm.slug}/${funnel.slug}/${w.slug}`, qs)}>

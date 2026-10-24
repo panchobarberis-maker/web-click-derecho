@@ -1,4 +1,5 @@
 import { sql } from "./db";
+import { t, type Lang } from "./i18n";
 
 export type Range = "7d" | "30d" | "90d" | "all";
 
@@ -147,7 +148,7 @@ export async function bySurface(firmId: string, range: Range) {
  * Con workflowId en null toma el primero del estudio, que es lo que la
  * pantalla muestra por defecto.
  */
-export async function dropoff(firmId: string, workflowId: string | null, range: Range) {
+export async function dropoff(firmId: string, workflowId: string | null, range: Range, lang: Lang = "es") {
   const s = since(range);
 
   const filas = await sql<
@@ -172,6 +173,7 @@ export async function dropoff(firmId: string, workflowId: string | null, range: 
     order by gs.step`;
 
   if (filas.length === 0) return null;
+  const tx = t(lang).stats;
 
   const titulos = filas[0].steps?.steps ?? [];
   const top = Number(filas[0].reached ?? 0);
@@ -179,7 +181,7 @@ export async function dropoff(firmId: string, workflowId: string | null, range: 
     name: filas[0].name,
     steps: filas.map((r) => ({
       step: r.step,
-      title: r.step === 0 ? "Abrió el formulario" : titulos[r.step - 1]?.title ?? `Paso ${r.step}`,
+      title: r.step === 0 ? tx.abrioFormulario : titulos[r.step - 1]?.title ?? tx.pasoN(r.step),
       reached: Number(r.reached),
       pct: top ? Math.round((Number(r.reached) / top) * 100) : 0,
     })),
@@ -203,21 +205,49 @@ export async function abandoned(firmId: string, limit = 100) {
 }
 
 /** Rendimiento de cada pop-up o clip. Clicks = abrieron el formulario. */
+/**
+ * El embudo de cada pop-up o clip: mostrado, abierto, enviado.
+ *
+ * Las dos mitades se cuentan por separado y despues se juntan. Con un solo
+ * left join a dos tablas, cada impresion multiplicaria a cada sesion y los
+ * numeros saldrian inflados sin que se note.
+ */
 export async function porWidget(firmId: string, tipo: "popups" | "clips", range: Range) {
   const s = since(range);
   const surface = tipo === "popups" ? "popup" : "clip";
 
-  return sql<{ id: string; name: string; active: boolean; clicks: number; responses: number; conversion: number }[]>`
+  return sql<{
+    id: string; name: string; active: boolean;
+    impresiones: number; clicks: number; responses: number;
+    apertura: number; conversion: number;
+  }[]>`
+    with vistas as (
+      select surface_id, count(*)::int as n
+      from events
+      where firm_id = ${firmId} and type = 'impression' and surface = ${surface}
+        ${s ? sql`and created_at > now() - ${s}::interval` : sql``}
+      group by surface_id
+    ),
+    aperturas as (
+      select surface_id,
+             count(*)::int                                     as n,
+             count(*) filter (where submitted_at is not null)::int as enviadas
+      from sessions
+      where firm_id = ${firmId} and surface = ${surface} and surface_id is not null
+        ${s ? sql`and created_at > now() - ${s}::interval` : sql``}
+      group by surface_id
+    )
     select w.id, w.name, w.active,
-      count(se.id)::int                                           as clicks,
-      count(se.id) filter (where se.submitted_at is not null)::int as responses,
-      coalesce(round(100.0 * count(se.id) filter (where se.submitted_at is not null)
-              / nullif(count(se.id), 0)), 0)::int                  as conversion
+      coalesce(v.n, 0)         as impresiones,
+      coalesce(a.n, 0)         as clicks,
+      coalesce(a.enviadas, 0)  as responses,
+      -- cuantos de los que lo vieron lo abrieron
+      coalesce(round(100.0 * coalesce(a.n, 0) / nullif(v.n, 0)), 0)::int        as apertura,
+      -- y cuantos de los que lo abrieron terminaron mandando la consulta
+      coalesce(round(100.0 * coalesce(a.enviadas, 0) / nullif(a.n, 0)), 0)::int as conversion
     from ${sql(tipo)} w
-    left join sessions se
-      on se.surface_id = w.id and se.surface = ${surface}
-      ${s ? sql`and se.created_at > now() - ${s}::interval` : sql``}
+    left join vistas v    on v.surface_id = w.id
+    left join aperturas a on a.surface_id = w.id
     where w.firm_id = ${firmId}
-    group by w.id, w.name, w.active, w.created_at
     order by w.created_at desc`;
 }

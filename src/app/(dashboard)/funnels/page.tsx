@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
 import { activeFirm, requireOwner } from "@/lib/tenancy";
 import { slugUrl } from "@/lib/forms";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,7 @@ type Row = {
 export default async function Funnels() {
   const { firm } = await activeFirm();
   const puedeEditar = firm.role !== "member";
+  const x = textos(firm.lang).areas;
 
   const rows = await sql<Row[]>`
     select f.id, f.name, f.slug, f.color, f.active,
@@ -61,23 +63,19 @@ export default async function Funnels() {
     <>
       <div className="head">
         <div>
-          <h1>Áreas y formularios</h1>
+          <h1>{x.titulo}</h1>
           <p>
-            Cada <strong>área de práctica</strong> agrupa los casos que atiende el estudio, y cada caso tiene su
-            propio formulario. La persona elige su área, después su caso, y responde solo las preguntas de ese caso.
+            {x.bajada1} <strong>{x.bajada2}</strong> {x.bajada3}
           </p>
         </div>
         <Link href={`/f/${firm.slug}`} className="btn ghost" target="_blank">
-          Ver página pública
+          {x.verPublica}
         </Link>
       </div>
 
       {rows.length === 0 && (
         <div className="card" style={{ marginBottom: "1rem" }}>
-          <p className="muted">
-            Todavía no hay áreas cargadas. Empezá por una: &ldquo;Derecho Laboral&rdquo;, &ldquo;Familia&rdquo;, lo
-            que atienda el estudio.
-          </p>
+          <p className="muted">{x.sinAreas}</p>
         </div>
       )}
 
@@ -86,18 +84,18 @@ export default async function Funnels() {
           <Link className="card area" key={f.id} href={`/funnels/${f.slug}`}>
             <span className="pill" style={{ background: `${f.color}1f`, color: f.color }}>{f.name}</span>
             <div className="area-datos">
-              <span>{f.formularios} {f.formularios === 1 ? "caso" : "casos"}</span>
-              <span>{f.consultas} {f.consultas === 1 ? "consulta" : "consultas"}</span>
+              <span>{f.formularios} {f.formularios === 1 ? x.unCaso : x.variosCasos}</span>
+              <span>{f.consultas} {f.consultas === 1 ? x.unaConsulta : x.variasConsultas}</span>
             </div>
-            {!f.active && <span className="muted" style={{ fontSize: ".8rem" }}>Desactivada</span>}
+            {!f.active && <span className="muted" style={{ fontSize: ".8rem" }}>{x.desactivada}</span>}
           </Link>
         ))}
 
         {puedeEditar && (
           <form action={crearArea} className="card nueva">
-            <label htmlFor="name" className="lbl">Área nueva</label>
-            <input id="name" name="name" placeholder="Derecho Laboral" required />
-            <button type="submit" className="btn" style={{ marginTop: ".75rem" }}>Crear área</button>
+            <label htmlFor="name" className="lbl">{x.areaNueva}</label>
+            <input id="name" name="name" placeholder={x.ejemploArea} required />
+            <button type="submit" className="btn" style={{ marginTop: ".75rem" }}>{x.crearArea}</button>
           </form>
         )}
       </div>

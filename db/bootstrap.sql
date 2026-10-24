@@ -9,9 +9,9 @@
 --
 -- Se puede correr más de una vez sin romper nada.
 --
---   hola@clickderecho.com               (agencia: ve todos los estudios)
+--   hola@rightlead.com               (agencia: ve todos los estudios)
 --   consultas@alzogarayserrano.com.ar  (dueño del estudio de ejemplo)
---   contraseña: clickderecho2026
+--   contraseña: rightlead2026
 --
 -- CAMBIÁ ESA CONTRASEÑA apenas entres, desde Perfil: está publicada en el
 -- repositorio, así que cualquiera que encuentre tu URL la conoce.
@@ -320,6 +320,76 @@ alter table clips  add column if not exists paginas text;
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
 
+-- Cuantas veces se mostro cada pop-up y cada clip.
+--
+-- Hasta ahora se medía desde que se abría el formulario, o sea el escalón de
+-- abajo del embudo. Sin las impresiones no se puede decir "el clip se mostró
+-- 4.000 veces y trajo 30 consultas", que es el número con el que la agencia
+-- justifica el trabajo, ni distinguir un widget que nadie ve de uno que se ve
+-- mucho y no convierte: dos problemas opuestos que hoy se ven iguales.
+--
+-- Van en events, con el mismo surface_id que ya usan las sesiones, así el
+-- embudo entero —mostrado, abierto, enviado— sale de dos tablas y no de tres.
+-- Es la fila que más va a crecer: una por vista de página con el widget
+-- puesto, de ahí el índice propio.
+alter table events add column if not exists surface_id uuid;
+create index if not exists idx_events_surface
+  on events (firm_id, surface, surface_id, created_at desc)
+  where surface_id is not null;
+
+-- En que idioma habla cada estudio.
+--
+-- Un estudio argentino y uno de Estados Unidos usan la misma instalacion: el
+-- idioma no puede ser global. Vive en el estudio y no en el usuario porque lo
+-- que manda es a quien le habla el formulario —el cliente del estudio— y no
+-- quien administra el panel.
+--
+-- Arranca en castellano para no cambiarle nada a los que ya estan.
+alter table firms add column if not exists lang text not null default 'es'
+  check (lang in ('es', 'en'));
+
+-- El pop-up es un aviso que invita a consultar, no el formulario en si: el
+-- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
+alter table popups add column if not exists titulo text;
+
+-- ---------------------------------------------------------------------------
+-- Triage y resumen diario
+--
+-- El estudio no necesita otra lista: necesita saber a quien llamar hoy. Cada
+-- consulta se lee una vez con Claude y queda guardado el resultado en la
+-- propia sesion, asi el panel y el mail leen lo mismo y no se vuelve a pagar
+-- por releer lo que no cambio.
+--
+-- triage_contexto es lo que hace que esto sirva: el estudio describe con sus
+-- palabras que casos quiere y cuales no ("tomamos accidentes laborales y
+-- despidos; no tomamos reclamos de menos de 10 mil; solo Ohio"). Sin eso el
+-- modelo puntua en el vacio, y con eso cada cliente de la agencia tiene su
+-- propio criterio sin tocar una linea de codigo.
+-- ---------------------------------------------------------------------------
+
+alter table firms add column if not exists triage_contexto text;
+
+-- El resumen sale a la hora local del estudio: uno en Ohio y uno en Buenos
+-- Aires comparten instalacion y no pueden compartir horario. El cron corre
+-- cada hora y cada estudio recibe el suyo cuando en su huso dan las digest_hora.
+alter table firms add column if not exists timezone text not null default 'UTC';
+alter table firms add column if not exists digest_hora int not null default 8
+  check (digest_hora between 0 and 23);
+-- Dias ISO separados por coma (1 = lunes). Por defecto, dias habiles.
+alter table firms add column if not exists digest_dias text not null default '1,2,3,4,5';
+alter table firms add column if not exists digest_at timestamptz;
+
+-- El veredicto del modelo, tal como vino. Se guarda entero y no en columnas
+-- sueltas porque la forma va a cambiar y no queremos una migracion por campo.
+alter table sessions add column if not exists triage    jsonb;
+alter table sessions add column if not exists triage_at timestamptz;
+
+-- Para juntar los pendientes sin leer: el indice parcial cubre justo la
+-- consulta del resumen.
+create index if not exists idx_sessions_pendientes
+  on sessions (firm_id, created_at desc)
+  where read_at is null;
+
 
 -- ----- estudio de ejemplo, areas y formularios -----
 
@@ -419,11 +489,11 @@ on conflict (funnel_id, slug) do update set name = excluded.name, steps = exclud
 -- ----- cuentas -----
 
 insert into users (email, name, password_hash, is_staff)
-values ('hola@clickderecho.com', 'Click Derecho', 'scrypt$32768$8$1$bGEc4Rh75bzK567C8tcznQ==$WLrofKpPm5RzXVQLYaKgM/Eak3jTg8aZceEZXZfza8pN+lMMLQyoGTOMqsrBNYulO8eoMh0/RuKcu5JwN8uUgw==', true)
+values ('hola@rightlead.com', 'Right Lead', 'scrypt$32768$8$1$8Kh0x+jE71xj6vdeuOwcvA==$Ku6yfFTrgEMXkI4Ui0gNkRwDziCNqONA4svmjsEm8/sx3Vvug+rSrd97LCyvQqn8UH+BjeKDZ3DrGR+4kXcSow==', true)
 on conflict (lower(email)) do update set name = excluded.name, is_staff = excluded.is_staff;
 
 insert into users (email, name, password_hash, is_staff)
-values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$r4cp0zCWSsNiK8BMar7dAQ==$TdLWfQvz7hQQQ2FgIPZVniZx55ZikVL76EO6pjyCc+qpcr+4a5A6gvxFWRbSYpc8mU9n6Rr7QoZtW99q6xRbUQ==', false)
+values ('consultas@alzogarayserrano.com.ar', 'Mariano Alzogaray', 'scrypt$32768$8$1$MnkMRNBmM5D2JPuaprRWrg==$oMJFPiPpGWMwvUAlZ6qfOa7xGMIV5BneShbOMP0hrcrULya0RS7jM+2cVgc9mt+W7KfJ/NVDvrgc3i64mQ10hg==', false)
 on conflict (lower(email)) do update set name = excluded.name;
 
 insert into memberships (user_id, firm_id, role)

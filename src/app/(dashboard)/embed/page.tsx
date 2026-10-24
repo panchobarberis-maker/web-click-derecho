@@ -1,11 +1,13 @@
 import { sql } from "@/lib/db";
 import { activeFirm } from "@/lib/tenancy";
 import { baseUrl } from "@/lib/base-url";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
 export default async function Embed() {
   const { firm } = await activeFirm();
+  const x = textos(firm.lang).embed;
   const base = baseUrl();
 
   const funnels = await sql<{ name: string; slug: string }[]>`
@@ -13,25 +15,25 @@ export default async function Embed() {
 
   const snippets = [
     {
-      title: "Pop-up automático",
-      desc: "Aparece solo, a los 12 segundos. También podés usar data-trigger=\"scroll:50\" (a la mitad de la página) o \"exit\" (cuando el mouse se va a cerrar la pestaña).",
+      title: x.popupTitulo,
+      desc: x.popupDesc,
       code: `<script src="${base}/w.js"
         data-firm="${firm.slug}"
         data-mode="popup"
         data-trigger="delay:12"></script>`,
     },
     {
-      title: "Botón flotante",
-      desc: "Un botón fijo abajo a la derecha en todas las páginas. El menos invasivo de los tres.",
+      title: x.botonTitulo,
+      desc: x.botonDesc,
       code: `<script src="${base}/w.js"
         data-firm="${firm.slug}"
         data-mode="button"
-        data-cta="Consultá tu caso"
+        data-cta="${textos(firm.lang).widgets.ctaPopupDefecto}"
         data-accent="${firm.accent}"></script>`,
     },
     {
-      title: "Formulario embebido",
-      desc: "El formulario dentro de una sección de la página. Poné un <div id=\"consulta\"></div> donde lo quieras.",
+      title: x.inlineTitulo,
+      desc: x.inlineDesc,
       code: `<div id="consulta"></div>
 <script src="${base}/w.js"
         data-firm="${firm.slug}"
@@ -39,19 +41,19 @@ export default async function Embed() {
         data-target="#consulta"></script>`,
     },
     {
-      title: "Clip de video",
-      desc: "Un video corto fijo en una esquina que abre el formulario al tocarlo. Subí el mp4 donde quieras y pasá la URL.",
+      title: x.clipTitulo,
+      desc: x.clipDesc,
       code: `<script src="${base}/w.js"
         data-firm="${firm.slug}"
         data-mode="clip"
         data-video="https://tu-cdn.com/clip.mp4"
         data-poster="https://tu-cdn.com/clip.jpg"
-        data-cta="Empezar"
+        data-cta="${textos(firm.lang).widgets.ctaClipDefecto}"
         data-accent="${firm.accent}"></script>`,
     },
     {
-      title: "Directo a un área",
-      desc: "Para poner en la página de una práctica específica: saltea el menú y abre ese formulario.",
+      title: x.areaTitulo,
+      desc: x.areaDesc,
       code: `<script src="${base}/w.js"
         data-firm="${firm.slug}"
         data-mode="popup"
@@ -64,11 +66,8 @@ export default async function Embed() {
     <>
       <div className="head">
         <div>
-          <h1>Instalación</h1>
-          <p>
-            Una sola línea en el sitio del estudio. El formulario va dentro de un iframe, así que no hereda ni rompe
-            los estilos de la página.
-          </p>
+          <h1>{x.titulo}</h1>
+          <p>{x.bajada}</p>
         </div>
       </div>
 
@@ -83,25 +82,21 @@ export default async function Embed() {
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
-        <h3>Atribución del origen</h3>
+        <h3>{x.atribucion}</h3>
         <p className="muted" style={{ fontSize: ".88rem", lineHeight: 1.6 }}>
-          El widget lee los <code>utm_*</code> y el referrer <strong>de la página del estudio</strong> y se los pasa al
-          formulario. Desde adentro del iframe el referrer sería el sitio del estudio, así que sin esto todas las
-          consultas figurarían como &ldquo;referral&rdquo;. Se guarda en el primer aterrizaje: si alguien llega desde
-          Instagram, navega tres páginas y recién ahí abre el formulario, el origen sigue siendo Instagram.
+          {x.atribucion1} <code>utm_*</code> {x.atribucion2}
         </p>
       </div>
 
       <div className="card" style={{ marginTop: "1rem" }}>
-        <h3>Links directos</h3>
+        <h3>{x.links}</h3>
         <p className="muted" style={{ fontSize: ".88rem", marginBottom: "1rem" }}>
-          Para mandar por WhatsApp, poner en el bio de Instagram o usar como destino de una campaña. Agregá{" "}
-          <code>?utm_source=instagram</code> y aparece separado en Analytics.
+          {x.linksAyuda1} <code>?utm_source=instagram</code> {x.linksAyuda2}
         </p>
         <table>
           <tbody>
             <tr>
-              <td>Todas las áreas</td>
+              <td>{x.todasLasAreas}</td>
               <td><code>{base}/f/{firm.slug}</code></td>
             </tr>
             {funnels.map((f) => (

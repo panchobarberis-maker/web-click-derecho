@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useRef, useState } from "react";
+import { t as textos, type Lang } from "@/lib/i18n";
 
 const S1 = "#1a6fa8"; // visitas
 const S2 = "#b3701a"; // consultas
@@ -22,14 +23,15 @@ export type Point = { label: string; visits: number; responses: number };
  * Visitas vs consultas en el tiempo. Un solo eje y: las dos series se cuentan
  * en la misma unidad (personas), asi que comparten escala.
  */
-export function LineChart({ data }: { data: Point[] }) {
+export function LineChart({ data, lang = "es" }: { data: Point[]; lang?: Lang }) {
+  const x2 = textos(lang).stats;
   const [hover, setHover] = useState<number | null>(null);
   const box = useRef<HTMLDivElement>(null);
   // Los degradados van por id; con dos graficos en la misma pagina, un id fijo
   // hace que el segundo pinte con el del primero.
   const gid = useId();
 
-  if (data.length < 2) return <p className="empty">Todavía no hay suficientes datos para el gráfico.</p>;
+  if (data.length < 2) return <p className="empty">{x2.sinDatos}</p>;
 
   const W = 820, H = 240, PL = 44, PR = 16, PT = 16, PB = 28;
   const max = Math.max(4, ...data.map((d) => Math.max(d.visits, d.responses)));
@@ -57,12 +59,12 @@ export function LineChart({ data }: { data: Point[] }) {
   return (
     <div>
       <div className="legend" style={{ marginBottom: ".75rem" }}>
-        <span><i className="dot" style={{ background: S1 }} />Visitas</span>
-        <span><i className="dot" style={{ background: S2 }} />Consultas enviadas</span>
+        <span><i className="dot" style={{ background: S1 }} />{x2.visitas}</span>
+        <span><i className="dot" style={{ background: S2 }} />{x2.consultasEnviadas}</span>
       </div>
 
       <div ref={box} style={{ position: "relative" }} onMouseMove={move} onMouseLeave={() => setHover(null)}>
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label="Visitas y consultas en el tiempo">
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" role="img" aria-label={x2.grafico}>
           <defs>
             <linearGradient id={`${gid}-v`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={S1} stopOpacity="0.16" />
@@ -125,8 +127,8 @@ export function LineChart({ data }: { data: Point[] }) {
             }}
           >
             <strong style={{ display: "block", marginBottom: ".3rem" }}>{h.label}</strong>
-            <div><i className="dot" style={{ background: S1 }} />Visitas: {h.visits}</div>
-            <div><i className="dot" style={{ background: S2 }} />Consultas: {h.responses}</div>
+            <div><i className="dot" style={{ background: S1 }} />{x2.visitas}: {h.visits}</div>
+            <div><i className="dot" style={{ background: S2 }} />{x2.consultas}: {h.responses}</div>
           </div>
         )}
       </div>

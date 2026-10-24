@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import type { Lang } from "./i18n";
 import { pgConfig } from "../../db/pg-options.mjs";
 
 // En dev Next recarga los modulos en cada cambio; sin el cache global se abren
@@ -48,6 +49,8 @@ export type Firm = {
   intro: string | null;
   /** Si figura en la cinta de estudios de la home publica. */
   show_on_home: boolean;
+  /** En que idioma le habla el formulario a los clientes de este estudio. */
+  lang: Lang;
 };
 
 export type Funnel = {

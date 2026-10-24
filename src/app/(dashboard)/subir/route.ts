@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireOwner } from "@/lib/tenancy";
 import { almacenamientoListo, nombreSeguro, permisoDeSubida, CLASES, esClase, type Clase } from "@/lib/storage";
+import { t as textos } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 
@@ -17,12 +18,10 @@ export const dynamic = "force-dynamic";
  */
 export async function POST(req: Request) {
   const { firm } = await requireOwner();
+  const x = textos(firm.lang).comp;
 
   if (!almacenamientoListo()) {
-    return NextResponse.json(
-      { error: "La subida de archivos no está configurada en este servidor. Podés pegar la dirección de un archivo hospedado en otro lado." },
-      { status: 503 },
-    );
+    return NextResponse.json({ error: x.subidaNoConfigurada }, { status: 503 });
   }
 
   const b = await req.json().catch(() => null);
@@ -33,18 +32,14 @@ export async function POST(req: Request) {
   const clase: Clase = esClase(b?.clase) ? b.clase : "video";
   const regla = CLASES[clase];
 
-  if (!nombre) return NextResponse.json({ error: "Falta el nombre del archivo." }, { status: 400 });
+  if (!nombre) return NextResponse.json({ error: x.faltaNombre }, { status: 400 });
   if (!(regla.tipos as readonly string[]).includes(tipo)) {
-    return NextResponse.json({ error: `Tiene que ser ${regla.que}.` }, { status: 400 });
+    const que = clase === "video" ? x.queVideo : x.queImagen;
+    return NextResponse.json({ error: x.tieneQueSer(que) }, { status: 400 });
   }
   if (!(bytes > 0) || bytes > regla.maxMb * 1024 * 1024) {
-    const comoAdelgazar = clase === "video"
-      ? "Bajale la calidad o recortalo: 15 a 20 segundos alcanzan."
-      : "Achicala antes de subirla: 1600 píxeles de ancho sobran para cualquier pantalla.";
-    return NextResponse.json(
-      { error: `El archivo no puede pesar más de ${regla.maxMb} MB. ${comoAdelgazar}` },
-      { status: 400 },
-    );
+    const como = clase === "video" ? x.adelgazarVideo : x.adelgazarImagen;
+    return NextResponse.json({ error: x.pesaDemasiado(regla.maxMb, como) }, { status: 400 });
   }
 
   try {

@@ -299,3 +299,73 @@ alter table clips  add column if not exists paginas text;
 -- Apagarlo muestra la portada con un boton de play, y ademas ahorra ancho de
 -- banda: solo se descarga el video de quien lo toca.
 alter table clips add column if not exists autoplay boolean not null default true;
+
+-- Cuantas veces se mostro cada pop-up y cada clip.
+--
+-- Hasta ahora se medía desde que se abría el formulario, o sea el escalón de
+-- abajo del embudo. Sin las impresiones no se puede decir "el clip se mostró
+-- 4.000 veces y trajo 30 consultas", que es el número con el que la agencia
+-- justifica el trabajo, ni distinguir un widget que nadie ve de uno que se ve
+-- mucho y no convierte: dos problemas opuestos que hoy se ven iguales.
+--
+-- Van en events, con el mismo surface_id que ya usan las sesiones, así el
+-- embudo entero —mostrado, abierto, enviado— sale de dos tablas y no de tres.
+-- Es la fila que más va a crecer: una por vista de página con el widget
+-- puesto, de ahí el índice propio.
+alter table events add column if not exists surface_id uuid;
+create index if not exists idx_events_surface
+  on events (firm_id, surface, surface_id, created_at desc)
+  where surface_id is not null;
+
+-- En que idioma habla cada estudio.
+--
+-- Un estudio argentino y uno de Estados Unidos usan la misma instalacion: el
+-- idioma no puede ser global. Vive en el estudio y no en el usuario porque lo
+-- que manda es a quien le habla el formulario —el cliente del estudio— y no
+-- quien administra el panel.
+--
+-- Arranca en castellano para no cambiarle nada a los que ya estan.
+alter table firms add column if not exists lang text not null default 'es'
+  check (lang in ('es', 'en'));
+
+-- El pop-up es un aviso que invita a consultar, no el formulario en si: el
+-- formulario se abre cuando lo tocan. Este es el titular de ese aviso.
+alter table popups add column if not exists titulo text;
+
+-- ---------------------------------------------------------------------------
+-- Triage y resumen diario
+--
+-- El estudio no necesita otra lista: necesita saber a quien llamar hoy. Cada
+-- consulta se lee una vez con Claude y queda guardado el resultado en la
+-- propia sesion, asi el panel y el mail leen lo mismo y no se vuelve a pagar
+-- por releer lo que no cambio.
+--
+-- triage_contexto es lo que hace que esto sirva: el estudio describe con sus
+-- palabras que casos quiere y cuales no ("tomamos accidentes laborales y
+-- despidos; no tomamos reclamos de menos de 10 mil; solo Ohio"). Sin eso el
+-- modelo puntua en el vacio, y con eso cada cliente de la agencia tiene su
+-- propio criterio sin tocar una linea de codigo.
+-- ---------------------------------------------------------------------------
+
+alter table firms add column if not exists triage_contexto text;
+
+-- El resumen sale a la hora local del estudio: uno en Ohio y uno en Buenos
+-- Aires comparten instalacion y no pueden compartir horario. El cron corre
+-- cada hora y cada estudio recibe el suyo cuando en su huso dan las digest_hora.
+alter table firms add column if not exists timezone text not null default 'UTC';
+alter table firms add column if not exists digest_hora int not null default 8
+  check (digest_hora between 0 and 23);
+-- Dias ISO separados por coma (1 = lunes). Por defecto, dias habiles.
+alter table firms add column if not exists digest_dias text not null default '1,2,3,4,5';
+alter table firms add column if not exists digest_at timestamptz;
+
+-- El veredicto del modelo, tal como vino. Se guarda entero y no en columnas
+-- sueltas porque la forma va a cambiar y no queremos una migracion por campo.
+alter table sessions add column if not exists triage    jsonb;
+alter table sessions add column if not exists triage_at timestamptz;
+
+-- Para juntar los pendientes sin leer: el indice parcial cubre justo la
+-- consulta del resumen.
+create index if not exists idx_sessions_pendientes
+  on sessions (firm_id, created_at desc)
+  where read_at is null;
